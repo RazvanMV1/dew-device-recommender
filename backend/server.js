@@ -32,11 +32,49 @@ const server = http.createServer((req, res) => {
             serveStaticFile(res, path.join(__dirname, '../frontend/stats.html'), 'text/html');
         } else if (parsedUrl.pathname === '/admin') {
             serveStaticFile(res, path.join(__dirname, '../frontend/dashboard.html'), 'text/html');
+        } else if (parsedUrl.pathname === '/api/products') {
+            // 🚀 Returnăm lista de produse (hardcodate pentru început)
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                products: [
+                    { name: "Telefon XYZ", price: 1000, brand: "Brand1" },
+                    { name: "Tabletă ABC", price: 1500, brand: "Brand2" }
+                ]
+            }));
         } else {
             res.writeHead(404, { 'Content-Type': 'text/plain' });
             res.end('404 - Not Found');
         }
-    } else {
+    }
+    else if (method === 'POST') {
+        if (parsedUrl.pathname === '/api/login') {
+            // 🚀 Procesăm login-ul admin
+            let body = '';
+            req.on('data', chunk => {
+                body += chunk;
+            });
+            req.on('end', () => {
+                try {
+                    const credentials = JSON.parse(body);
+
+                    if (credentials.username === 'admin' && credentials.password === 'admin123') {
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ success: true, message: 'Autentificare reușită' }));
+                    } else {
+                        res.writeHead(401, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ success: false, message: 'Autentificare eșuată' }));
+                    }
+                } catch (err) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: false, message: 'Date invalide' }));
+                }
+            });
+        } else {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end('404 - Not Found');
+        }
+    }
+    else {
         res.writeHead(405, { 'Content-Type': 'text/plain' });
         res.end('405 - Method Not Allowed');
     }
