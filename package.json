@@ -7,5 +7,18 @@
     "start": "node backend/server.js"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RazvanMV1/dew-device-recommender.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/RazvanMV1/dew-device-recommender/issues"
+  },
+  "homepage": "https://github.com/RazvanMV1/dew-device-recommender#readme",
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "mongoose": "^8.14.0"
+  }
 }
