@@ -1,24 +1,21 @@
 {
-  "name": "dew-device-recommender",
+  "name": "electro-recommender-backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "backend/server.js",
+  "description": "Backend pentru aplicația de recomandare dispozitive electronice",
+  "main": "server.js",
   "scripts": {
-    "start": "node backend/server.js"
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "create-admin": "node snpmcripts/create-admin.js"
   },
-  "author": "",
-  "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/RazvanMV1/dew-device-recommender.git"
-  },
-  "keywords": [],
-  "bugs": {
-    "url": "https://github.com/RazvanMV1/dew-device-recommender/issues"
-  },
-  "homepage": "https://github.com/RazvanMV1/dew-device-recommender#readme",
   "dependencies": {
-    "dotenv": "^16.5.0",
-    "mongoose": "^8.14.0"
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.3.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.6.3",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
