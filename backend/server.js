@@ -5,15 +5,18 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 const querystring = require('querystring');
+const mongoose = require('mongoose');
 const connectDB = require('./db');
 const config = require('./config/config');
 const Product = require('./models/Product');
+const Source = require('./models/Source');
 const User = require('./models/User');
 const { verifyToken, isAdmin } = require('./middleware/auth');
 const { securityHeaders } = require('./middleware/security');
 const { rateLimiter } = require('./middleware/rateLimiter');
 const { validateProduct, sanitizeText } = require('./utils/validator');
 const authService = require('./services/authService');
+const sourceService = require('./services/sourceService');
 
 // Conectare la baza de date MongoDB
 connectDB();
@@ -89,7 +92,9 @@ const server = http.createServer(async (req, res) => {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/stats.html'), 'text/html');
                 } else if (pathName === '/admin') {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/dashboard.html'), 'text/html');
-                } else if (pathName === '/api/products') {
+                }
+                // ========== API ROUTES FOR PRODUCTS ==========
+                else if (pathName === '/api/products') {
                     // Aplică headers de securitate
                     securityHeaders(req, res, async () => {
                         try {
@@ -163,7 +168,122 @@ const server = http.createServer(async (req, res) => {
                             }));
                         }
                     });
-                } else if (pathName.match(/\.(css|js|png|jpg|jpeg|gif|svg)$/)) {
+                }
+                // ========== API ROUTES FOR SOURCES ==========
+                else if (pathName === '/api/sources') {
+                    // Listează toate sursele
+                    securityHeaders(req, res, async () => {
+                        try {
+                            // Parametri de filtrare și paginare
+                            const { type, active, sort, limit = 20, page = 1 } = parsedUrl.query;
+
+                            // Construiește filtre
+                            const filters = {};
+                            if (type) filters.type = type;
+                            if (active !== undefined) filters.active = active === 'true';
+
+                            // Opțiuni
+                            const options = {
+                                limit: parseInt(limit),
+                                page: parseInt(page)
+                            };
+
+                            // Sortare
+                            if (sort) {
+                                const [field, order] = sort.split(':');
+                                options.sort = { [field]: order === 'desc' ? -1 : 1 };
+                            }
+
+                            const sources = await sourceService.getSources(filters, options);
+                            const totalSources = await Source.countDocuments(filters);
+
+                            res.writeHead(200, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({
+                                success: true,
+                                total: totalSources,
+                                page: parseInt(page),
+                                limit: parseInt(limit),
+                                totalPages: Math.ceil(totalSources / parseInt(limit)),
+                                sources
+                            }));
+                        } catch (error) {
+                            console.error('Eroare la preluarea surselor:', error);
+                            res.writeHead(500, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({
+                                success: false,
+                                message: 'Eroare la preluarea surselor',
+                                error: error.message
+                            }));
+                        }
+                    });
+                } else if (pathName.match(/^\/api\/sources\/[a-zA-Z0-9]+$/)) {
+                    // Obține detaliile unei surse
+                    securityHeaders(req, res, async () => {
+                        try {
+                            const id = pathName.split('/')[3];
+                            const source = await sourceService.getSourceById(id);
+
+                            if (!source) {
+                                res.writeHead(404, { 'Content-Type': 'application/json' });
+                                res.end(JSON.stringify({
+                                    success: false,
+                                    message: 'Sursa nu a fost găsită'
+                                }));
+                                return;
+                            }
+
+                            res.writeHead(200, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({
+                                success: true,
+                                source
+                            }));
+                        } catch (error) {
+                            console.error('Eroare la preluarea sursei:', error);
+                            res.writeHead(500, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({
+                                success: false,
+                                message: 'Eroare la preluarea sursei',
+                                error: error.message
+                            }));
+                        }
+                    });
+                } else if (pathName.match(/^\/api\/sources\/by-type\/[a-zA-Z]+$/)) {
+                    // Obține surse după tip
+                    securityHeaders(req, res, async () => {
+                        try {
+                            const type = pathName.split('/')[4];
+
+                            // Validare tip
+                            const validTypes = ['rss', 'api', 'scraping', 'manual'];
+                            if (!validTypes.includes(type)) {
+                                res.writeHead(400, { 'Content-Type': 'application/json' });
+                                res.end(JSON.stringify({
+                                    success: false,
+                                    message: 'Tip de sursă invalid'
+                                }));
+                                return;
+                            }
+
+                            const sources = await sourceService.getSourcesByType(type);
+
+                            res.writeHead(200, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({
+                                success: true,
+                                sources
+                            }));
+                        } catch (error) {
+                            console.error(`Eroare la preluarea surselor de tip ${type}:`, error);
+                            res.writeHead(500, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({
+                                success: false,
+                                message: 'Eroare la preluarea surselor',
+                                error: error.message
+                            }));
+                        }
+                    });
+                }
+                // Fișiere statice
+                else if (pathName.match(/\.(css|js|png|jpg|jpeg|gif|svg)$/)) {
                     // Servire fișiere statice (CSS, JS, imagini)
                     const extname = path.extname(pathName);
                     let contentType = 'text/html';
@@ -341,180 +461,390 @@ const server = http.createServer(async (req, res) => {
                             }));
                         }
                     });
+                } else if (pathName === '/api/sources') {
+                    // Creează o sursă nouă (necesită autentificare)
+                    securityHeaders(req, res, async () => {
+                        try {
+                            verifyToken(req, res, async () => {
+                                isAdmin(req, res, async () => {
+                                    try {
+                                        const sourceData = await parseRequestBody(req);
+
+                                        // Validare date de bază
+                                        if (!sourceData.name || !sourceData.type || !sourceData.url) {
+                                            res.writeHead(400, { 'Content-Type': 'application/json' });
+                                            res.end(JSON.stringify({
+                                                success: false,
+                                                message: 'Câmpurile name, type și url sunt obligatorii'
+                                            }));
+                                            return;
+                                        }
+
+                                        const newSource = await sourceService.createSource(sourceData);
+
+                                        res.writeHead(201, { 'Content-Type': 'application/json' });
+                                        res.end(JSON.stringify({
+                                            success: true,
+                                            message: 'Sursă creată cu succes',
+                                            source: newSource
+                                        }));
+                                    } catch (error) {
+                                        console.error('Eroare la crearea sursei:', error);
+                                        res.writeHead(500, { 'Content-Type': 'application/json' });
+                                        res.end(JSON.stringify({
+                                            success: false,
+                                            message: 'Eroare la crearea sursei',
+                                            error: error.message
+                                        }));
+                                    }
+                                });
+                            });
+                        } catch (error) {
+                            console.error('Eroare middleware autentificare:', error);
+                            res.writeHead(500, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({
+                                success: false,
+                                message: 'Eroare internă server'
+                            }));
+                        }
+                    });
                 } else {
                     securityHeaders(req, res, () => {
                         res.writeHead(404, { 'Content-Type': 'text/plain' });
                         res.end('404 - Not Found');
                     });
                 }
-            } else if (method === 'PUT' && pathName.startsWith('/api/products/')) {
-                // Rută protejată pentru actualizarea produselor
-                securityHeaders(req, res, async () => {
-                    try {
-                        // Verifică autentificarea și rolul
-                        verifyToken(req, res, async () => {
-                            isAdmin(req, res, async () => {
-                                try {
-                                    const id = pathName.split('/')[3];
-                                    const updates = await parseRequestBody(req);
+            } else if (method === 'PUT') {
+                if (pathName.startsWith('/api/products/')) {
+                    // Rută protejată pentru actualizarea produselor
+                    securityHeaders(req, res, async () => {
+                        try {
+                            // Verifică autentificarea și rolul
+                            verifyToken(req, res, async () => {
+                                isAdmin(req, res, async () => {
+                                    try {
+                                        const id = pathName.split('/')[3];
+                                        const updates = await parseRequestBody(req);
 
-                                    // Validare și sanitizare date
-                                    const validationResult = validateProduct(updates);
+                                        // Validare și sanitizare date
+                                        const validationResult = validateProduct(updates);
 
-                                    if (!validationResult.isValid) {
-                                        res.writeHead(400, { 'Content-Type': 'application/json' });
+                                        if (!validationResult.isValid) {
+                                            res.writeHead(400, { 'Content-Type': 'application/json' });
+                                            res.end(JSON.stringify({
+                                                success: false,
+                                                message: 'Date produs invalide',
+                                                errors: validationResult.errors
+                                            }));
+                                            return;
+                                        }
+
+                                        // Sanitizare câmpuri text
+                                        const sanitizedUpdates = {
+                                            ...updates,
+                                            name: updates.name ? sanitizeText(updates.name) : undefined,
+                                            brand: updates.brand ? sanitizeText(updates.brand) : undefined,
+                                            model: updates.model ? sanitizeText(updates.model) : undefined,
+                                            color: updates.color ? sanitizeText(updates.color) : undefined,
+                                            category: updates.category ? sanitizeText(updates.category) : undefined,
+                                            features: updates.features?.map(feature => sanitizeText(feature))
+                                        };
+
+                                        // Actualizează produsul
+                                        const product = await Product.findByIdAndUpdate(id, sanitizedUpdates, {
+                                            new: true,
+                                            runValidators: true
+                                        });
+
+                                        if (!product) {
+                                            res.writeHead(404, { 'Content-Type': 'application/json' });
+                                            res.end(JSON.stringify({
+                                                success: false,
+                                                message: 'Produsul nu a fost găsit'
+                                            }));
+                                            return;
+                                        }
+
+                                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                                        res.end(JSON.stringify({
+                                            success: true,
+                                            message: 'Produs actualizat cu succes',
+                                            product
+                                        }));
+                                    } catch (error) {
+                                        console.error('Eroare la actualizarea produsului:', error);
+                                        res.writeHead(500, { 'Content-Type': 'application/json' });
                                         res.end(JSON.stringify({
                                             success: false,
-                                            message: 'Date produs invalide',
-                                            errors: validationResult.errors
+                                            message: 'Eroare la actualizarea produsului',
+                                            error: error.message
                                         }));
-                                        return;
                                     }
+                                });
+                            });
+                        } catch (error) {
+                            console.error('Eroare middleware autentificare:', error);
+                            res.writeHead(500, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({
+                                success: false,
+                                message: 'Eroare internă server'
+                            }));
+                        }
+                    });
+                } else if (pathName.match(/^\/api\/sources\/[a-zA-Z0-9]+$/)) {
+                    // Actualizează o sursă (necesită autentificare)
+                    securityHeaders(req, res, async () => {
+                        try {
+                            verifyToken(req, res, async () => {
+                                isAdmin(req, res, async () => {
+                                    try {
+                                        const id = pathName.split('/')[3];
+                                        const updateData = await parseRequestBody(req);
 
-                                    // Sanitizare câmpuri text
-                                    const sanitizedUpdates = {
-                                        ...updates,
-                                        name: updates.name ? sanitizeText(updates.name) : undefined,
-                                        brand: updates.brand ? sanitizeText(updates.brand) : undefined,
-                                        model: updates.model ? sanitizeText(updates.model) : undefined,
-                                        color: updates.color ? sanitizeText(updates.color) : undefined,
-                                        category: updates.category ? sanitizeText(updates.category) : undefined,
-                                        features: updates.features?.map(feature => sanitizeText(feature))
-                                    };
+                                        const updatedSource = await sourceService.updateSource(id, updateData);
 
-                                    // Actualizează produsul
-                                    const product = await Product.findByIdAndUpdate(id, sanitizedUpdates, {
-                                        new: true,
-                                        runValidators: true
-                                    });
+                                        if (!updatedSource) {
+                                            res.writeHead(404, { 'Content-Type': 'application/json' });
+                                            res.end(JSON.stringify({
+                                                success: false,
+                                                message: 'Sursa nu a fost găsită'
+                                            }));
+                                            return;
+                                        }
 
-                                    if (!product) {
-                                        res.writeHead(404, { 'Content-Type': 'application/json' });
+                                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                                        res.end(JSON.stringify({
+                                            success: true,
+                                            message: 'Sursă actualizată cu succes',
+                                            source: updatedSource
+                                        }));
+                                    } catch (error) {
+                                        console.error('Eroare la actualizarea sursei:', error);
+                                        res.writeHead(500, { 'Content-Type': 'application/json' });
                                         res.end(JSON.stringify({
                                             success: false,
-                                            message: 'Produsul nu a fost găsit'
+                                            message: 'Eroare la actualizarea sursei',
+                                            error: error.message
                                         }));
-                                        return;
                                     }
+                                });
+                            });
+                        } catch (error) {
+                            console.error('Eroare middleware autentificare:', error);
+                            res.writeHead(500, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({
+                                success: false,
+                                message: 'Eroare internă server'
+                            }));
+                        }
+                    });
+                }
+            } else if (method === 'PATCH') {
+                if (pathName.match(/^\/api\/sources\/[a-zA-Z0-9]+\/toggle-active$/)) {
+                    // Activează/dezactivează o sursă (necesită autentificare)
+                    securityHeaders(req, res, async () => {
+                        try {
+                            verifyToken(req, res, async () => {
+                                isAdmin(req, res, async () => {
+                                    try {
+                                        const id = pathName.split('/')[3];
+                                        const { active } = await parseRequestBody(req);
 
-                                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                                                                        res.end(JSON.stringify({
-                                                                            success: true,
-                                                                            message: 'Produs actualizat cu succes',
-                                                                            product
-                                                                        }));
-                                                                    } catch (error) {
-                                                                        console.error('Eroare la actualizarea produsului:', error);
-                                                                        res.writeHead(500, { 'Content-Type': 'application/json' });
-                                                                        res.end(JSON.stringify({
-                                                                            success: false,
-                                                                            message: 'Eroare la actualizarea produsului',
-                                                                            error: error.message
-                                                                        }));
-                                                                    }
-                                                                });
+                                        if (active === undefined) {
+                                            res.writeHead(400, { 'Content-Type': 'application/json' });
+                                            res.end(JSON.stringify({
+                                                success: false,
+                                                message: 'Câmpul active este obligatoriu'
+                                            }));
+                                            return;
+                                        }
+
+                                        const updatedSource = await sourceService.toggleSourceActive(id, active);
+
+                                        if (!updatedSource) {
+                                            res.writeHead(404, { 'Content-Type': 'application/json' });
+                                            res.end(JSON.stringify({
+                                                success: false,
+                                                message: 'Sursa nu a fost găsită'
+                                            }));
+                                            return;
+                                        }
+
+                                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                                        res.end(JSON.stringify({
+                                            success: true,
+                                            message: `Sursă ${active ? 'activată' : 'dezactivată'} cu succes`,
+                                            source: updatedSource
+                                        }));
+                                    } catch (error) {
+                                        console.error('Eroare la activarea/dezactivarea sursei:', error);
+                                        res.writeHead(500, { 'Content-Type': 'application/json' });
+                                        res.end(JSON.stringify({
+                                            success: false,
+                                            message: 'Eroare la activarea/dezactivarea sursei',
+                                            error: error.message
+                                        }));
+                                    }
+                                });
+                            });
+                        } catch (error) {
+                            console.error('Eroare middleware autentificare:', error);
+                            res.writeHead(500, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({
+                                success: false,
+                                message: 'Eroare internă server'
+                            }));
+                        }
+                    });
+                }
+            } else if (method === 'DELETE') {
+                if (pathName.startsWith('/api/products/')) {
+                    // Rută protejată pentru ștergerea produselor
+                    securityHeaders(req, res, async () => {
+                        try {
+                            // Verifică autentificarea și rolul
+                            verifyToken(req, res, async () => {
+                                isAdmin(req, res, async () => {
+                                    try {
+                                        const id = pathName.split('/')[3];
+
+                                        // Șterge produsul
+                                        const product = await Product.findByIdAndDelete(id);
+
+                                        if (!product) {
+                                            res.writeHead(404, { 'Content-Type': 'application/json' });
+                                            res.end(JSON.stringify({
+                                                success: false,
+                                                message: 'Produsul nu a fost găsit'
+                                            }));
+                                            return;
+                                        }
+
+                                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                                                                                res.end(JSON.stringify({
+                                                                                    success: true,
+                                                                                    message: 'Produs șters cu succes'
+                                                                                }));
+                                                                            } catch (error) {
+                                                                                console.error('Eroare la ștergerea produsului:', error);
+                                                                                res.writeHead(500, { 'Content-Type': 'application/json' });
+                                                                                res.end(JSON.stringify({
+                                                                                    success: false,
+                                                                                    message: 'Eroare la ștergerea produsului',
+                                                                                    error: error.message
+                                                                                }));
+                                                                            }
+                                                                        });
+                                                                    });
+                                                                } catch (error) {
+                                                                    console.error('Eroare middleware autentificare:', error);
+                                                                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                                                                    res.end(JSON.stringify({
+                                                                        success: false,
+                                                                        message: 'Eroare internă server'
+                                                                    }));
+                                                                }
                                                             });
-                                                        } catch (error) {
-                                                            console.error('Eroare middleware autentificare:', error);
-                                                            res.writeHead(500, { 'Content-Type': 'application/json' });
-                                                            res.end(JSON.stringify({
-                                                                success: false,
-                                                                message: 'Eroare internă server'
-                                                            }));
-                                                        }
-                                                    });
-                                                } else if (method === 'DELETE' && pathName.startsWith('/api/products/')) {
-                                                    // Rută protejată pentru ștergerea produselor
-                                                    securityHeaders(req, res, async () => {
-                                                        try {
-                                                            // Verifică autentificarea și rolul
-                                                            verifyToken(req, res, async () => {
-                                                                isAdmin(req, res, async () => {
-                                                                    try {
-                                                                        const id = pathName.split('/')[3];
+                                                        } else if (pathName.match(/^\/api\/sources\/[a-zA-Z0-9]+$/)) {
+                                                            // Șterge o sursă (necesită autentificare)
+                                                            securityHeaders(req, res, async () => {
+                                                                try {
+                                                                    verifyToken(req, res, async () => {
+                                                                        isAdmin(req, res, async () => {
+                                                                            try {
+                                                                                const id = pathName.split('/')[3];
 
-                                                                        // Șterge produsul
-                                                                        const product = await Product.findByIdAndDelete(id);
+                                                                                const deletedSource = await sourceService.deleteSource(id);
 
-                                                                        if (!product) {
-                                                                            res.writeHead(404, { 'Content-Type': 'application/json' });
-                                                                            res.end(JSON.stringify({
-                                                                                success: false,
-                                                                                message: 'Produsul nu a fost găsit'
-                                                                            }));
-                                                                            return;
-                                                                        }
+                                                                                if (!deletedSource) {
+                                                                                    res.writeHead(404, { 'Content-Type': 'application/json' });
+                                                                                    res.end(JSON.stringify({
+                                                                                        success: false,
+                                                                                        message: 'Sursa nu a fost găsită'
+                                                                                    }));
+                                                                                    return;
+                                                                                }
 
-                                                                        res.writeHead(200, { 'Content-Type': 'application/json' });
-                                                                        res.end(JSON.stringify({
-                                                                            success: true,
-                                                                            message: 'Produs șters cu succes'
-                                                                        }));
-                                                                    } catch (error) {
-                                                                        console.error('Eroare la ștergerea produsului:', error);
-                                                                        res.writeHead(500, { 'Content-Type': 'application/json' });
-                                                                        res.end(JSON.stringify({
-                                                                            success: false,
-                                                                            message: 'Eroare la ștergerea produsului',
-                                                                            error: error.message
-                                                                        }));
-                                                                    }
-                                                                });
+                                                                                res.writeHead(200, { 'Content-Type': 'application/json' });
+                                                                                res.end(JSON.stringify({
+                                                                                    success: true,
+                                                                                    message: 'Sursă ștearsă cu succes'
+                                                                                }));
+                                                                            } catch (error) {
+                                                                                console.error('Eroare la ștergerea sursei:', error);
+                                                                                res.writeHead(500, { 'Content-Type': 'application/json' });
+                                                                                res.end(JSON.stringify({
+                                                                                    success: false,
+                                                                                    message: 'Eroare la ștergerea sursei',
+                                                                                    error: error.message
+                                                                                }));
+                                                                            }
+                                                                        });
+                                                                    });
+                                                                } catch (error) {
+                                                                    console.error('Eroare middleware autentificare:', error);
+                                                                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                                                                    res.end(JSON.stringify({
+                                                                        success: false,
+                                                                        message: 'Eroare internă server'
+                                                                    }));
+                                                                }
                                                             });
-                                                        } catch (error) {
-                                                            console.error('Eroare middleware autentificare:', error);
-                                                            res.writeHead(500, { 'Content-Type': 'application/json' });
-                                                            res.end(JSON.stringify({
-                                                                success: false,
-                                                                message: 'Eroare internă server'
-                                                            }));
                                                         }
-                                                    });
-                                                } else if (method === 'OPTIONS') {
-                                                    // Tratează pre-flight CORS requests
-                                                    securityHeaders(req, res, () => {
-                                                        res.writeHead(204, {
-                                                            'Access-Control-Allow-Origin': '*',
-                                                            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-                                                            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-                                                            'Access-Control-Max-Age': '86400' // 24 ore
+                                                    } else if (method === 'OPTIONS') {
+                                                        // Tratează pre-flight CORS requests
+                                                        securityHeaders(req, res, () => {
+                                                            res.writeHead(204, {
+                                                                'Access-Control-Allow-Origin': '*',
+                                                                'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+                                                                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                                                                'Access-Control-Max-Age': '86400' // 24 ore
+                                                            });
+                                                            res.end();
                                                         });
-                                                        res.end();
-                                                    });
-                                                } else {
+                                                    } else {
+                                                        securityHeaders(req, res, () => {
+                                                            res.writeHead(405, { 'Content-Type': 'text/plain' });
+                                                            res.end('405 - Method Not Allowed');
+                                                        });
+                                                    }
+                                                } catch (error) {
+                                                    console.error('Eroare generală server:', error);
                                                     securityHeaders(req, res, () => {
-                                                        res.writeHead(405, { 'Content-Type': 'text/plain' });
-                                                        res.end('405 - Method Not Allowed');
+                                                        res.writeHead(500, { 'Content-Type': 'text/plain' });
+                                                        res.end('500 - Internal Server Error');
                                                     });
                                                 }
-                                            } catch (error) {
-                                                console.error('Eroare generală server:', error);
-                                                securityHeaders(req, res, () => {
-                                                    res.writeHead(500, { 'Content-Type': 'text/plain' });
-                                                    res.end('500 - Internal Server Error');
-                                                });
-                                            }
-                                        });
-                                    });
-
-                                    // Handler pentru erori neașteptate la nivel de server
-                                    server.on('error', (err) => {
-                                        console.error('Eroare server:', err);
-                                    });
-
-                                    // Pornim serverul
-                                    server.listen(config.PORT, () => {
-                                        console.log(`📡 Serverul rulează la http://localhost:${config.PORT}`);
-                                    });
-
-                                    // Gestionare închidere gracioasă
-                                    process.on('SIGINT', () => {
-                                        console.log('Închidere server...');
-                                        server.close(() => {
-                                            console.log('Server oprit.');
-                                            mongoose.connection.close(false, () => {
-                                                console.log('Conexiune MongoDB închisă.');
-                                                process.exit(0);
                                             });
                                         });
-                                    });
+
+                                        // Handler pentru erori neașteptate la nivel de server
+                                        server.on('error', (err) => {
+                                            console.error('Eroare server:', err);
+                                        });
+
+                                        // Pornim serverul
+                                        server.listen(config.PORT, () => {
+                                            console.log(`📡 Serverul rulează la http://localhost:${config.PORT}`);
+                                            console.log(`🧪 Rutele API disponibile pentru surse:
+                                            - GET    /api/sources                    - Listează toate sursele
+                                            - GET    /api/sources/:id                - Detalii sursă
+                                            - GET    /api/sources/by-type/:type      - Surse după tip (rss/api/scraping/manual)
+                                            - POST   /api/sources                    - Creează sursă nouă (necesită autentificare)
+                                            - PUT    /api/sources/:id                - Actualizează sursă (necesită autentificare)
+                                            - PATCH  /api/sources/:id/toggle-active  - Activează/dezactivează sursă (necesită autentificare)
+                                            - DELETE /api/sources/:id                - Șterge sursă (necesită autentificare)
+                                            `);
+                                        });
+
+                                        // Gestionare închidere gracioasă
+                                        process.on('SIGINT', () => {
+                                            console.log('Închidere server...');
+                                            server.close(() => {
+                                                console.log('Server oprit.');
+                                                mongoose.connection.close(false, () => {
+                                                    console.log('Conexiune MongoDB închisă.');
+                                                    process.exit(0);
+                                                });
+                                            });
+                                        });
