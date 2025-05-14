@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node backend/server.js",
     "dev": "nodemon backend/server.js",
-    "create-admin": "node snpmcripts/create-admin.js"
+    "create-admin": "node snpmcripts/create-admin.js",
+    "populate-sources": "node backend/scripts/populate-sources.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
