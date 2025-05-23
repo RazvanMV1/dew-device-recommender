@@ -1,0 +1,430 @@
+/* Resetare CSS de bază */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+:root {
+    /* Schemă de culori modernă */
+    --primary-color: #4361ee;
+    --primary-dark: #3a0ca3;
+    --primary-light: #7209b7;
+    --secondary-color: #4cc9f0;
+    --accent-color: #f72585;
+    --success-color: #06d6a0;
+    --warning-color: #ffd166;
+    --danger-color: #ef476f;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    --white: #ffffff;
+    --gray-100: #f8f9fa;
+    --gray-200: #e9ecef;
+    --gray-300: #dee2e6;
+    --gray-400: #ced4da;
+    --gray-500: #adb5bd;
+    --gray-600: #6c757d;
+    --gray-700: #495057;
+    --gray-800: #343a40;
+    --gray-900: #212529;
+
+    /* Efecte */
+    --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    --transition: all 0.3s ease;
+
+    /* Gradienți */
+    --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    --gradient-accent: linear-gradient(135deg, var(--accent-color), var(--primary-light));
+}
+
+/* Stiluri pentru fonturi și elemente de bază */
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    color: var(--gray-800);
+    line-height: 1.7;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Container autentificare */
+.auth-container {
+    width: 100%;
+    max-width: 1200px;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.auth-card {
+    background-color: var(--white);
+    border-radius: 16px;
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    width: 100%;
+    max-width: 450px;
+    position: relative;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Stiluri pentru header */
+.card-header {
+    background: var(--gradient-primary);
+    padding: 2.5rem 2.5rem 1.5rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.1);
+    transform: rotate(-30deg);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.2rem;
+    position: relative;
+}
+
+.logo i {
+    font-size: 2.2rem;
+    margin-right: 0.8rem;
+    color: var(--white);
+}
+
+.logo span {
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--white);
+}
+
+.subtitle {
+    font-size: 1rem;
+    font-weight: 400;
+    opacity: 0.9;
+    margin-bottom: 0;
+}
+
+/* Card body */
+.card-body {
+    padding: 2.5rem;
+}
+
+/* Mesaje alerte */
+.alert {
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert i {
+    font-size: 1.2rem;
+}
+
+.alert-success {
+    background-color: rgba(6, 214, 160, 0.1);
+    border-left: 4px solid var(--success-color);
+    color: var(--success-color);
+}
+
+.alert-error {
+    background-color: rgba(239, 71, 111, 0.1);
+    border-left: 4px solid var(--danger-color);
+    color: var(--danger-color);
+}
+
+.alert-info {
+    background-color: rgba(76, 201, 240, 0.1);
+    border-left: 4px solid var(--secondary-color);
+    color: var(--secondary-color);
+}
+
+/* Formulare */
+.form-group {
+    margin-bottom: 1.8rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.7rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    font-size: 0.95rem;
+}
+
+.input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-group i {
+    position: absolute;
+    left: 16px;
+    color: var(--gray-500);
+    transition: var(--transition);
+}
+
+.input-group input:focus ~ i {
+    color: var(--primary-color);
+}
+
+.input-group .toggle-password {
+    position: absolute;
+    right: 16px;
+    cursor: pointer;
+    color: var(--gray-500);
+    transition: var(--transition);
+}
+
+.input-group .toggle-password:hover {
+    color: var(--primary-color);
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.85rem 0.85rem 0.85rem 3rem;
+    border: 2px solid var(--gray-300);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: var(--transition);
+    background-color: var(--gray-100);
+}
+
+.input-group input:focus {
+    border-color: var(--primary-color);
+    background-color: var(--white);
+    box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15);
+    outline: none;
+}
+
+.input-hint {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--gray-600);
+}
+
+/* Butoane */
+.btn {
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.85rem 1.5rem;
+    border-radius: 8px;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+}
+
+.btn-primary {
+    width: 100%;
+    background: var(--gradient-primary);
+    color: var(--white);
+    padding: 1rem;
+    box-shadow: 0 4px 14px 0 rgba(67, 97, 238, 0.4);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 6px 20px rgba(67, 97, 238, 0.6);
+    transform: translateY(-2px);
+}
+
+.btn-primary:focus {
+    box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.3);
+    outline: none;
+}
+
+.btn-primary i {
+    margin-right: 0.5rem;
+    font-size: 1.1rem;
+}
+
+/* Footer */
+.auth-footer {
+    margin-top: 2.5rem;
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--gray-600);
+}
+
+.auth-footer p {
+    margin-bottom: 0.5rem;
+}
+
+.auth-footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.auth-footer a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--gray-300);
+}
+
+.divider span {
+    padding: 0 1rem;
+    color: var(--gray-500);
+    font-size: 0.9rem;
+}
+
+/* Stiluri pentru dispozitive mobile */
+@media (max-width: 576px) {
+    .auth-card {
+        border-radius: 12px;
+    }
+
+    .card-header {
+        padding: 2rem 1.5rem 1rem;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    .logo i {
+        font-size: 1.8rem;
+    }
+
+    .logo span {
+        font-size: 1.5rem;
+    }
+}
+
+/* Animații pentru interacțiuni */
+.input-group input,
+.btn,
+.auth-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.auth-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Stiluri pentru link-uri potențiale de social media */
+.social-login {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.social-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    transition: var(--transition);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.social-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.google {
+    background-color: #DB4437;
+}
+
+.facebook {
+    background-color: #4267B2;
+}
+
+.twitter {
+    background-color: #1DA1F2;
+}
+
+/* Clasa pentru highlight pe input */
+.input-highlight {
+    position: relative;
+    overflow: hidden;
+}
+
+.input-highlight::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.input-highlight input:focus ~ .input-highlight::after {
+    transform: scaleX(1);
+}
