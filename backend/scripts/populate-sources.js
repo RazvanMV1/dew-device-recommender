@@ -1,49 +1,54 @@
-// scripts/populate-sources.js
-
+// backend/scripts/populate-sources.js
 require('dotenv').config({ path: '../.env' });
 const mongoose = require('mongoose');
 const connectDB = require('../db');
 const Source = require('../models/Source');
 
-const initialSources = [
+const predefinedSources = [
     {
-        name: 'The Verge - Gadgets RSS',
+        name: 'Gadget News',
         type: 'rss',
-        url: 'https://www.theverge.com/rss/gadgets-all',
-        description: 'Știri despre cele mai recente gadget-uri de la The Verge',
-        updateFrequency: 30, // minute
-        active: true,
-        tags: ['news', 'gadgets', 'tech']
+        url: 'https://www.gadget.ro/feed/',
+        description: 'Noutăți despre tehnologie și gadgeturi',
+        updateFrequency: 60,  // minute
+        tags: ['tech', 'gadgets', 'reviews'],
+        active: true
     },
     {
-        name: 'CNET - Mobile Reviews',
+        name: 'Go4IT',
         type: 'rss',
-        url: 'https://www.cnet.com/rss/reviews/mobile/',
-        description: 'Recenzii produse mobile de la CNET',
-        updateFrequency: 60, // minute
-        active: true,
-        tags: ['reviews', 'mobile', 'smartphones']
+        url: 'https://www.go4it.ro/rss/',
+        description: 'Știri despre IT, gadgeturi și jocuri',
+        updateFrequency: 90,  // minute
+        tags: ['tech', 'games', 'IT'],
+        active: true
     },
     {
-        name: 'GSMArena',
-        type: 'scraping',
-        url: 'https://www.gsmarena.com',
-        description: 'Specificații detaliate pentru telefoane și tablete',
+        name: 'StartupCafe',
+        type: 'rss',
+        url: 'https://www.startupcafe.ro/rss',
+        description: 'Știri despre startup-uri și antreprenoriat',
         updateFrequency: 120, // minute
-        active: true,
-        tags: ['specs', 'phones', 'tablets']
+        tags: ['business', 'startups'],
+        active: true
     },
     {
-        name: 'eMAG API',
-        type: 'api',
-        url: 'https://api.emag.ro/product-feed',
-        description: 'Feed de produse de la eMAG',
-        updateFrequency: 360, // minute
-        active: false, // inactiv implicit
-        credentials: {
-            apiKey: 'dummy_key_replace_with_real'
-        },
-        tags: ['ecommerce', 'prices']
+        name: 'Playtech',
+        type: 'rss',
+        url: 'https://playtech.ro/feed',
+        description: 'Știri despre tehnologie și recenzii',
+        updateFrequency: 60,  // minute
+        tags: ['tech', 'reviews'],
+        active: true
+    },
+    {
+        name: 'Arena IT',
+        type: 'rss',
+        url: 'https://arena.ro/feed/',
+        description: 'Noutăți din lumea IT și tehnologie',
+        updateFrequency: 90,  // minute
+        tags: ['tech', 'IT'],
+        active: true
     }
 ];
 
@@ -52,32 +57,31 @@ async function populateSources() {
         await connectDB();
         console.log('✅ Conectat la baza de date');
 
-        // Verifică dacă avem deja surse în baza de date
-        const existingCount = await Source.countDocuments();
+        let created = 0;
+        let skipped = 0;
 
-        if (existingCount > 0) {
-            console.log(`⚠️ Baza de date conține deja ${existingCount} surse. Dorești să adaugi surse noi? (da/nu)`);
+        for (const source of predefinedSources) {
+            try {
+                // Verifică dacă sursa există deja
+                const existingSource = await Source.findOne({ url: source.url });
 
-            // Aici ar fi mai bine să folosim readline pentru input de la utilizator
-            // Dar pentru simplitate, vom adăuga direct surse noi
-            console.log('Adăugăm surse noi...');
-        }
-
-        // Adaugă surse inițiale
-        for (const sourceData of initialSources) {
-            // Verifică dacă sursa există deja (după URL)
-            const existingSource = await Source.findOne({ url: sourceData.url });
-
-            if (existingSource) {
-                console.log(`⚠️ Sursa cu URL ${sourceData.url} există deja.`);
-            } else {
-                const newSource = new Source(sourceData);
-                await newSource.save();
-                console.log(`✅ Sursa "${sourceData.name}" adăugată cu succes.`);
+                if (existingSource) {
+                    console.log(`⚠️ Sursa ${source.name} există deja, se sare peste.`);
+                    skipped++;
+                } else {
+                    // Creează sursa nouă
+                    await Source.create(source);
+                    console.log(`✅ Sursa "${source.name}" a fost creată.`);
+                    created++;
+                }
+            } catch (error) {
+                console.error(`❌ Eroare la procesarea sursei "${source.name}":`, error);
             }
         }
 
-        console.log('✅ Populare surse finalizată.');
+        console.log('\n📊 Sumar:');
+        console.log(`✅ Surse create: ${created}`);
+        console.log(`⚠️ Surse sărite (deja existente): ${skipped}`);
 
     } catch (error) {
         console.error('❌ Eroare la popularea surselor:', error);
@@ -87,4 +91,10 @@ async function populateSources() {
     }
 }
 
-populateSources();
+populateSources().then(() => {
+    console.log('🎯 Populare surse finalizată');
+    process.exit(0);
+}).catch(err => {
+    console.error('❌ Eroare finală:', err);
+    process.exit(1);
+});

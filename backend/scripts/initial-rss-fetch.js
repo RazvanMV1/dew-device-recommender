@@ -3,7 +3,7 @@ require('dotenv').config({ path: '../.env' });
 const mongoose = require('mongoose');
 const connectDB = require('../db');
 const Source = require('../models/Source');
-const { processAllRssFeeds } = require('../services/rssService');
+const rssService = require('../services/rssService');
 
 async function initialRssFetch() {
     try {
@@ -21,7 +21,8 @@ async function initialRssFetch() {
         }
 
         console.log('🚀 Începe procesarea feed-urilor RSS...');
-        const results = await processAllRssFeeds();
+        // Schimbăm aici - ne asigurăm că folosim corect rssService
+        const results = await rssService.processAllRssFeeds();
 
         let totalAdded = 0;
         let totalUpdated = 0;

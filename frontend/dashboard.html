@@ -1,6 +1,557 @@
-<!-- frontend/index.html -->
 <!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"><title>Homepage</title></head>
-<body><h1>Homepage</h1></body>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ElectroRecommender</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-microchip"></i>
+                <span>ElectroRecommender</span>
+            </div>
+            <button class="toggle-sidebar" id="toggle-sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <div class="user-profile">
+            <div class="avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-info">
+                <h4 id="user-name">Administrator</h4>
+                <p id="user-role">Admin</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="active">
+                    <a href="#dashboard-overview" data-section="dashboard-overview">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#products-section" data-section="products-section">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Produse</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#sources-section" data-section="sources-section">
+                        <i class="fas fa-rss"></i>
+                        <span>Surse</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#news-section" data-section="news-section">
+                        <i class="fas fa-newspaper"></i>
+                        <span>Știri</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#users-section" data-section="users-section">
+                        <i class="fas fa-users"></i>
+                        <span>Utilizatori</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#settings-section" data-section="settings-section">
+                        <i class="fas fa-cog"></i>
+                        <span>Setări</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="btn-logout" id="logout-button">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Deconectare</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="main-header">
+            <div class="header-left">
+                <h1 id="page-title">Dashboard</h1>
+                <nav class="breadcrumb">
+                    <span><a href="#dashboard">Home</a></span>
+                    <span class="separator">/</span>
+                    <span id="current-page">Dashboard</span>
+                </nav>
+            </div>
+            <div class="header-right">
+                <div class="search-box">
+                    <input type="text" placeholder="Caută...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge">3</span>
+                </div>
+                <div class="user-dropdown">
+                    <i class="fas fa-user-circle"></i>
+                    <div class="dropdown-menu">
+                        <a href="#profile"><i class="fas fa-user"></i> Profil</a>
+                        <a href="#settings"><i class="fas fa-cog"></i> Setări</a>
+                        <div class="divider"></div>
+                        <a href="#" id="dropdown-logout"><i class="fas fa-sign-out-alt"></i> Deconectare</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="content-container">
+            <!-- Dashboard Overview -->
+            <section id="dashboard-overview" class="section active">
+                <div class="section-header">
+                    <h2>Prezentare generală</h2>
+                    <div class="date-selector">
+                        <span>Ultima actualizare: <strong id="last-update-date">astăzi</strong></span>
+                        <button class="btn-refresh"><i class="fas fa-sync-alt"></i></button>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-blue">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="products-count">0</h3>
+                            <p>Produse totale</p>
+                        </div>
+                        <div class="stat-progress">
+                            <div class="progress-bar" style="width: 70%"></div>
+                        </div>
+                        <span class="stat-indicator up">
+                                <i class="fas fa-arrow-up"></i> 12%
+                            </span>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon bg-green">
+                            <i class="fas fa-rss"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="sources-count">0</h3>
+                            <p>Surse active</p>
+                        </div>
+                        <div class="stat-progress">
+                            <div class="progress-bar" style="width: 60%"></div>
+                        </div>
+                        <span class="stat-indicator up">
+                                <i class="fas fa-arrow-up"></i> 5%
+                            </span>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon bg-purple">
+                            <i class="fas fa-newspaper"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="news-count">0</h3>
+                            <p>Știri colectate</p>
+                        </div>
+                        <div class="stat-progress">
+                            <div class="progress-bar" style="width: 80%"></div>
+                        </div>
+                        <span class="stat-indicator up">
+                                <i class="fas fa-arrow-up"></i> 18%
+                            </span>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon bg-orange">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="users-count">0</h3>
+                            <p>Utilizatori înregistrați</p>
+                        </div>
+                        <div class="stat-progress">
+                            <div class="progress-bar" style="width: 50%"></div>
+                        </div>
+                        <span class="stat-indicator up">
+                                <i class="fas fa-arrow-up"></i> 8%
+                            </span>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Activitate recentă</h3>
+                        <div class="card-actions">
+                            <button class="btn-outline"><i class="fas fa-filter"></i> Filtrare</button>
+                            <button class="btn-primary"><i class="fas fa-plus"></i> Adaugă</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="activity-list" id="activity-list">
+                            <div class="activity-item">
+                                <div class="activity-icon bg-blue">
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <div class="activity-details">
+                                    <h4>Produs nou adăugat</h4>
+                                    <p>Samsung Galaxy S21 Ultra a fost adăugat în baza de date</p>
+                                    <span class="activity-time">Acum 2 ore</span>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon bg-green">
+                                    <i class="fas fa-sync"></i>
+                                </div>
+                                <div class="activity-details">
+                                    <h4>Actualizare surse RSS</h4>
+                                    <p>S-au colectat 15 noi știri de la sursele RSS</p>
+                                    <span class="activity-time">Acum 4 ore</span>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon bg-orange">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="activity-details">
+                                    <h4>Utilizator nou înregistrat</h4>
+                                    <p>Utilizatorul "maria_pop" s-a înregistrat în sistem</p>
+                                    <span class="activity-time">Acum 6 ore</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Products Section -->
+            <section id="products-section" class="section">
+                <div class="section-header">
+                    <h2>Managementul Produselor</h2>
+                    <button class="btn-primary" id="add-product-btn"><i class="fas fa-plus"></i> Produs nou</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="search-filter">
+                            <div class="search-box">
+                                <input type="text" id="product-search" placeholder="Caută produs...">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <div class="filter-controls">
+                                <select id="product-category-filter">
+                                    <option value="">Toate categoriile</option>
+                                    <option value="phone">Telefoane</option>
+                                    <option value="tablet">Tablete</option>
+                                    <option value="laptop">Laptopuri</option>
+                                    <option value="watch">Smartwatch-uri</option>
+                                    <option value="drone">Drone</option>
+                                </select>
+                                <select id="product-sort">
+                                    <option value="latest">Cele mai noi</option>
+                                    <option value="price-asc">Preț crescător</option>
+                                    <option value="price-desc">Preț descrescător</option>
+                                    <option value="name-asc">Nume (A-Z)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="data-table" id="products-table">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Imagine</th>
+                                    <th>Nume produs</th>
+                                    <th>Categorie</th>
+                                    <th>Brand</th>
+                                    <th>Preț</th>
+                                    <th>Data adăugării</th>
+                                    <th>Acțiuni</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <!-- Produsele vor fi încărcate dinamic -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination" id="products-pagination">
+                            <button class="btn-page prev" disabled><i class="fas fa-chevron-left"></i></button>
+                            <div class="page-numbers">
+                                <span class="page-number active">1</span>
+                                <span class="page-number">2</span>
+                                <span class="page-number">3</span>
+                                <span class="dots">...</span>
+                                <span class="page-number">10</span>
+                            </div>
+                            <button class="btn-page next"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sources Section -->
+            <section id="sources-section" class="section">
+                <div class="section-header">
+                    <h2>Managementul Surselor</h2>
+                    <button class="btn-primary" id="add-source-btn"><i class="fas fa-plus"></i> Sursă nouă</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="search-filter">
+                            <div class="search-box">
+                                <input type="text" id="source-search" placeholder="Caută sursă...">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <div class="filter-controls">
+                                <select id="source-type-filter">
+                                    <option value="">Toate tipurile</option>
+                                    <option value="rss">RSS</option>
+                                    <option value="api">API</option>
+                                    <option value="scraping">Scraping</option>
+                                    <option value="manual">Manual</option>
+                                </select>
+                                <select id="source-status-filter">
+                                    <option value="">Toate statusurile</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="data-table" id="sources-table">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nume</th>
+                                    <th>Tip</th>
+                                    <th>URL</th>
+                                    <th>Status</th>
+                                    <th>Ultima actualizare</th>
+                                    <th>Acțiuni</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <!-- Sursele vor fi încărcate dinamic -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination" id="sources-pagination">
+                            <button class="btn-page prev" disabled><i class="fas fa-chevron-left"></i></button>
+                            <div class="page-numbers">
+                                <span class="page-number active">1</span>
+                                <span class="page-number">2</span>
+                            </div>
+                            <button class="btn-page next"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- News Section (laconic) -->
+            <section id="news-section" class="section">
+                <div class="section-header">
+                    <h2>Managementul Știrilor</h2>
+                    <button class="btn-primary" id="refresh-news-btn"><i class="fas fa-sync"></i> Actualizează știri</button>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="placeholder-content">
+                            <i class="fas fa-newspaper fa-3x"></i>
+                            <h3>Conținut în dezvoltare</h3>
+                            <p>Interfața pentru managementul știrilor va fi disponibilă în curând.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Users Section (laconic) -->
+            <section id="users-section" class="section">
+                <div class="section-header">
+                    <h2>Managementul Utilizatorilor</h2>
+                    <button class="btn-primary" id="add-user-btn"><i class="fas fa-user-plus"></i> Utilizator nou</button>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="placeholder-content">
+                            <i class="fas fa-users fa-3x"></i>
+                            <h3>Conținut în dezvoltare</h3>
+                            <p>Interfața pentru managementul utilizatorilor va fi disponibilă în curând.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section (laconic) -->
+            <section id="settings-section" class="section">
+                <div class="section-header">
+                    <h2>Setări Sistem</h2>
+                    <button class="btn-primary" id="save-settings-btn"><i class="fas fa-save"></i> Salvează setări</button>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="placeholder-content">
+                            <i class="fas fa-cog fa-3x"></i>
+                            <h3>Conținut în dezvoltare</h3>
+                            <p>Interfața pentru setările sistemului va fi disponibilă în curând.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+
+<!-- Modals -->
+<div class="modal" id="product-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="product-modal-title">Adaugă produs nou</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="product-form">
+                <div class="form-group">
+                    <label for="product-name">Nume produs</label>
+                    <input type="text" id="product-name" name="name" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-brand">Brand</label>
+                        <input type="text" id="product-brand" name="brand">
+                    </div>
+                    <div class="form-group">
+                        <label for="product-category">Categorie</label>
+                        <select id="product-category" name="category" required>
+                            <option value="">Selectează categoria</option>
+                            <option value="phone">Telefoane</option>
+                            <option value="tablet">Tablete</option>
+                            <option value="laptop">Laptopuri</option>
+                            <option value="watch">Smartwatch-uri</option>
+                            <option value="drone">Drone</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-price">Preț</label>
+                        <input type="number" id="product-price" name="price" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-color">Culoare</label>
+                        <input type="text" id="product-color" name="color">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="product-image">URL imagine</label>
+                    <input type="url" id="product-image" name="image" placeholder="https://example.com/image.jpg">
+                </div>
+                <div class="form-group">
+                    <label for="product-features">Caracteristici</label>
+                    <textarea id="product-features" name="features" placeholder="Introduceți fiecare caracteristică pe o linie nouă"></textarea>
+                    <small>Fiecare linie va fi tratată ca o caracteristică separată</small>
+                </div>
+                <input type="hidden" id="product-id" name="id">
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-outline" id="cancel-product">Anulează</button>
+            <button class="btn-primary" id="save-product">Salvează</button>
+        </div>
+    </div>
+</div>
+
+<!-- Source Modal -->
+<div class="modal" id="source-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="source-modal-title">Adaugă sursă nouă</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="source-form">
+                <div class="form-group">
+                    <label for="source-name">Nume sursă</label>
+                    <input type="text" id="source-name" name="name" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="source-type">Tip</label>
+                        <select id="source-type" name="type" required>
+                            <option value="">Selectează tipul</option>
+                            <option value="rss">RSS</option>
+                            <option value="api">API</option>
+                            <option value="scraping">Scraping</option>
+                            <option value="manual">Manual</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="source-active">Status</label>
+                        <select id="source-active" name="active">
+                            <option value="true">Activ</option>
+                            <option value="false">Inactiv</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="source-url">URL</label>
+                    <input type="url" id="source-url" name="url" required>
+                </div>
+                <div class="form-group">
+                    <label for="source-description">Descriere</label>
+                    <textarea id="source-description" name="description"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="source-update-freq">Frecvență actualizare (minute)</label>
+                        <input type="number" id="source-update-freq" name="updateFrequency" min="5" value="60">
+                    </div>
+                </div>
+                <input type="hidden" id="source-id" name="id">
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-outline" id="cancel-source">Anulează</button>
+            <button class="btn-primary" id="save-source">Salvează</button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal" id="confirm-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirmare</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p id="confirm-message">Ești sigur că vrei să ștergi acest element?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-outline" id="cancel-confirm">Anulează</button>
+            <button class="btn-danger" id="confirm-action">Șterge</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/dashboard.js"></script>
+</body>
 </html>

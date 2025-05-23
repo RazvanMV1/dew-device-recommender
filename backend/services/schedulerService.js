@@ -1,72 +1,122 @@
 // backend/services/schedulerService.js
-const cron = require('cron');
+const cron = require('node-cron');
 const { processSourcesDueForUpdate } = require('./rssService');
-const { cleanupOldNews } = require('./newsService');
 
-// Job pentru actualizarea automată a feed-urilor RSS
-const setupRssUpdateJob = () => {
-    // Rulează la fiecare 15 minute
-    const job = new cron.CronJob('*/15 * * * *', async () => {
-        console.log('🔄 Rulare job actualizare RSS:', new Date().toISOString());
+// Stare job-uri
+let scheduledJobs = {};
+
+/**
+ * Inițializează job-urile programate pentru actualizarea RSS
+ */
+const initScheduledJobs = () => {
+    // Eliberează resursele job-urilor existente
+    stopAllJobs();
+
+    // Programează job-ul principal pentru verificarea surselor la fiecare 10 minute
+    scheduledJobs.rssFeedUpdate = cron.schedule('*/10 * * * *', async () => {
+        console.log('🕒 [Scheduled Job] Verificare surse RSS pentru actualizare...');
         try {
             const results = await processSourcesDueForUpdate();
-            console.log(`✅ Job actualizare RSS finalizat, ${results.length} surse procesate`);
+            const successfulUpdates = results.filter(r => r.success).length;
+            const totalSources = results.length;
 
-            let added = 0;
-            let updated = 0;
-            let failed = 0;
+            console.log(`✅ [Scheduled Job] S-au actualizat ${successfulUpdates}/${totalSources} surse RSS`);
 
-            results.forEach(result => {
-                if (result.success) {
-                    added += result.added || 0;
-                    updated += result.updated || 0;
-                } else {
-                    failed++;
-                }
+            if (successfulUpdates > 0) {
+                const totalAdded = results.reduce((sum, r) => sum + (r.added || 0), 0);
+                const totalUpdated = results.reduce((sum, r) => sum + (r.updated || 0), 0);
+                console.log(`📰 [Scheduled Job] S-au adăugat ${totalAdded} știri noi și s-au actualizat ${totalUpdated} știri`);
+            }
+
+            // Înregistrează surse care au eșuat
+            const failedSources = results.filter(r => !r.success);
+            if (failedSources.length > 0) {
+                console.error(`❌ [Scheduled Job] Surse cu erori: ${failedSources.map(s => s.sourceName).join(', ')}`);
+            }
+        } catch (error) {
+            console.error('❌ [Scheduled Job] Eroare la procesarea surselor programate:', error);
+        }
+    });
+
+    // Programează job pentru curățarea știrilor vechi - zilnic la 3 dimineața
+    scheduledJobs.cleanOldNews = cron.schedule('0 3 * * *', async () => {
+        console.log('🕒 [Scheduled Job] Curățare știri vechi...');
+        try {
+            // Păstrează știrile din ultimele 60 de zile
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - 60);
+
+            const News = require('../models/News');
+            const result = await News.deleteMany({
+                publishDate: { $lt: cutoffDate },
+                isProcessed: false // Șterge doar știrile neprocesate
             });
 
-            console.log(`📊 Statistici: ${added} adăugate, ${updated} actualizate, ${failed} eșuate`);
+            console.log(`🧹 [Scheduled Job] S-au șters ${result.deletedCount} știri vechi`);
         } catch (error) {
-            console.error('❌ Eroare în job-ul de actualizare RSS:', error);
+            console.error('❌ [Scheduled Job] Eroare la curățarea știrilor vechi:', error);
         }
     });
 
-    return job;
+    console.log('📅 Job-uri programate inițializate cu succes');
 };
 
-// Job pentru curățarea știrilor vechi
-const setupCleanupJob = () => {
-    // Rulează la ora 3:00 AM în fiecare zi
-    const job = new cron.CronJob('0 3 * * *', async () => {
-        console.log('🧹 Rulare job curățare știri vechi:', new Date().toISOString());
-        try {
-            const result = await cleanupOldNews(30); // Păstrează știrile din ultimele 30 zile
-            console.log(`✅ Job curățare finalizat: ${result.deleted} știri vechi șterse`);
-        } catch (error) {
-            console.error('❌ Eroare în job-ul de curățare:', error);
+/**
+ * Oprește toate job-urile programate
+ */
+const stopAllJobs = () => {
+    Object.values(scheduledJobs).forEach(job => {
+        if (job && typeof job.stop === 'function') {
+            job.stop();
         }
     });
-
-    return job;
+    scheduledJobs = {};
 };
 
-// Inițializează și pornește toate job-urile programate
-const initScheduledJobs = () => {
-    const rssUpdateJob = setupRssUpdateJob();
-    const cleanupJob = setupCleanupJob();
+/**
+ * Pornește un job particular după nume
+ * @param {String} jobName - Numele job-ului
+ */
+const startJob = (jobName) => {
+    const job = scheduledJobs[jobName];
+    if (job) {
+        job.start();
+        console.log(`▶️ Job-ul '${jobName}' a fost pornit`);
+    } else {
+        console.error(`❌ Job-ul '${jobName}' nu există`);
+    }
+};
 
-    // Pornește job-urile
-    rssUpdateJob.start();
-    cleanupJob.start();
+/**
+ * Oprește un job particular după nume
+ * @param {String} jobName - Numele job-ului
+ */
+const stopJob = (jobName) => {
+    const job = scheduledJobs[jobName];
+    if (job) {
+        job.stop();
+        console.log(`⏹️ Job-ul '${jobName}' a fost oprit`);
+    } else {
+        console.error(`❌ Job-ul '${jobName}' nu există`);
+    }
+};
 
-    console.log('⏰ Job-uri programate inițializate și pornite.');
-
-    return {
-        rssUpdateJob,
-        cleanupJob
-    };
+/**
+ * Actualizează frecvența unui job programat
+ * @param {String} jobName - Numele job-ului
+ * @param {String} cronExpression - Expresia cron pentru programare
+ */
+const updateJobSchedule = (jobName, cronExpression) => {
+    stopJob(jobName);
+    // Recreează job-ul cu noua programare - aici ar trebui logica specifică pentru fiecare job
+    // Pentru simplitate, reinițializăm toate job-urile
+    initScheduledJobs();
 };
 
 module.exports = {
-    initScheduledJobs
+    initScheduledJobs,
+    stopAllJobs,
+    startJob,
+    stopJob,
+    updateJobSchedule
 };
