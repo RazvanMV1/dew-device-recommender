@@ -1,0 +1,28 @@
+{
+  "name": "electro-recommender-backend",
+  "version": "1.0.0",
+  "description": "Backend pentru aplicația de recomandare dispozitive electronice",
+  "main": "server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "create-admin": "node backend/scripts/create-admin.js",
+    "populate-sources": "node backend/scripts/populate-sources.js",
+    "fetch-rss": "node backend/scripts/initial-rss-fetch.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "bcryptjs": "^2.4.3",
+    "cron": "^3.1.6",
+    "dotenv": "^16.3.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.6.3",
+    "node-html-parser": "^6.1.11",
+    "rss-parser": "^3.13.0",
+    "sanitize-html": "^2.11.0",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
