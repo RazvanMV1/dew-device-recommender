@@ -1,6 +1,79 @@
-<!-- frontend/index.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"><title>Homepage</title></head>
-<body><h1>Homepage</h1></body>
-</html>
+<!-- Secțiunea pentru știri și statistici RSS -->
+<section class="stats-section" id="rss-stats">
+    <div class="container">
+        <div class="section-header">
+            <h2>Statistici RSS și Știri</h2>
+            <p>Vizualizează statistici despre sursele RSS și cele mai recente știri</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stats-card">
+                <div class="stats-icon">
+                    <i class="fas fa-rss"></i>
+                </div>
+                <div class="stats-content">
+                    <h3 id="sources-count">0</h3>
+                    <p>Surse RSS</p>
+                </div>
+            </div>
+
+            <div class="stats-card">
+                <div class="stats-icon">
+                    <i class="fas fa-newspaper"></i>
+                </div>
+                <div class="stats-content">
+                    <h3 id="news-count">0</h3>
+                    <p>Știri colectate</p>
+                </div>
+            </div>
+
+            <div class="stats-card">
+                <div class="stats-icon">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <div class="stats-content">
+                    <h3 id="categories-count">0</h3>
+                    <p>Categorii</p>
+                </div>
+            </div>
+
+            <div class="stats-card">
+                <div class="stats-icon">
+                    <i class="fas fa-sync"></i>
+                </div>
+                <div class="stats-content">
+                    <h3 id="last-updated">-</h3>
+                    <p>Ultima actualizare</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="latest-news-section">
+            <h3>Cele mai recente știri</h3>
+            <div class="news-grid" id="latest-news">
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Se încarcă știrile...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="rss-feeds-section">
+            <h3>Surse RSS active</h3>
+            <div class="rss-sources" id="rss-sources">
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Se încarcă sursele...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart pentru distribuția știrilor pe categorii -->
+        <div class="chart-container">
+            <h3>Distribuția știrilor pe categorii</h3>
+            <div class="chart-wrapper">
+                <canvas id="categories-chart"></canvas>
+            </div>
+        </div>
+    </div>
+</section>

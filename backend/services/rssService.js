@@ -2,9 +2,9 @@
 const RSSParser = require('rss-parser');
 const axios = require('axios');
 const sanitizeHtml = require('sanitize-html');
+const { parse } = require('node-html-parser');
 const Source = require('../models/Source');
 const News = require('../models/News');
-const { parse } = require('node-html-parser');
 
 // Configurare custom pentru RSS Parser
 const parser = new RSSParser({
@@ -142,9 +142,28 @@ const transformItemToNews = (item, source) => {
     const author = item.creator || item.author || 'Unknown';
     const content = item.contentEncoded || item.content || item.description || '';
 
+    // Asigură-te că există întotdeauna o descriere
+    let description = '';
+    if (item.description && item.description.trim()) {
+        // Folosește descrierea din feed dacă există
+        description = sanitizeHtml(item.description, { allowedTags: [] });
+    } else if (content) {
+        // Extrage o descriere scurtă din conținut dacă descrierea nu există
+        const plainContent = sanitizeHtml(content, { allowedTags: [] });
+        description = plainContent.substring(0, 250) + (plainContent.length > 250 ? '...' : '');
+    } else {
+        // Folosește titlul ca descriere dacă nici conținutul nu există
+        description = item.title ? `${item.title} - știre din ${source.name}` : `Știre din ${source.name}`;
+    }
+
+    // Ne asigurăm că descrierea nu este goală
+    if (!description.trim()) {
+        description = `Știre de pe ${source.name} publicată la ${publishDate.toLocaleString()}`;
+    }
+
     return {
-        title: item.title || 'Untitled',
-        description: item.description ? sanitizeHtml(item.description, { allowedTags: [] }) : '',
+        title: item.title || `Știre din ${source.name}`,
+        description: description,  // Asigură-te că avem întotdeauna o descriere
         content: sanitizeContent(content),
         url: item.link || '',
         imageUrl,
@@ -321,9 +340,135 @@ const processSourcesDueForUpdate = async () => {
     }
 };
 
+/**
+ * Detectează formatul imaginii (MIME type) dintr-o imagine URL
+ * @param {String} imageUrl - URL-ul imaginii
+ * @returns {Promise<String|null>} MIME type-ul imaginii sau null în caz de eroare
+ */
+const detectImageMimeType = async (imageUrl) => {
+    try {
+        // Verifică doar headerul pentru a determina tipul de conținut
+        const response = await axios.head(imageUrl);
+        return response.headers['content-type'];
+    } catch (error) {
+        console.warn(`Nu s-a putut detecta tipul imaginii pentru ${imageUrl}:`, error.message);
+        return null;
+    }
+};
+
+/**
+ * Verifică dacă un URL este valid
+ * @param {String} url - URL-ul de verificat
+ * @returns {Boolean} - true dacă URL-ul este valid
+ */
+const isValidUrl = (url) => {
+    try {
+        new URL(url);
+        return true;
+    } catch (error) {
+        return false;
+    }
+};
+
+/**
+ * Corectează URL-uri relative
+ * @param {String} url - URL-ul de corectat
+ * @param {String} baseUrl - URL-ul de bază
+ * @returns {String} - URL-ul corectat
+ */
+const fixRelativeUrl = (url, baseUrl) => {
+    try {
+        if (!url) return null;
+
+        // Verifică dacă URL-ul este deja absolut
+        if (url.match(/^(http|https):\/\//i)) {
+            return url;
+        }
+
+        // Creează URL-ul de bază
+        const base = new URL(baseUrl);
+
+        // Dacă URL-ul începe cu //, adaugă doar protocolul
+        if (url.startsWith('//')) {
+            return `${base.protocol}${url}`;
+        }
+
+        // Dacă URL-ul începe cu /, adaugă doar domeniul
+        if (url.startsWith('/')) {
+            return `${base.origin}${url}`;
+        }
+
+        // Pentru alte URL-uri relative
+        return new URL(url, baseUrl).href;
+    } catch (error) {
+        console.warn(`Nu s-a putut corecta URL-ul relativ ${url}:`, error.message);
+        return url;
+    }
+};
+
+/**
+ * Obține statistici despre sursele RSS
+ * @returns {Promise<Object>} Statistici despre surse
+ */
+const getRssSourcesStats = async () => {
+    try {
+        const [totalSources, activeSources, sourcesByType, newsCountBySource] = await Promise.all([
+            Source.countDocuments({ type: 'rss' }),
+            Source.countDocuments({ type: 'rss', active: true }),
+            Source.aggregate([
+                { $match: { type: 'rss' } },
+                { $group: { _id: '$active', count: { $sum: 1 } } }
+            ]),
+            News.aggregate([
+                { $group: { _id: '$source', count: { $sum: 1 } } }
+            ])
+        ]);
+
+        // Construiește un map pentru numărul de știri pe sursă
+        const newsCountMap = {};
+        newsCountBySource.forEach(item => {
+            newsCountMap[item._id] = item.count;
+        });
+
+        // Obține detaliile surselor active
+        const activeSourcesDetails = await Source.find({ type: 'rss', active: true })
+            .sort({ name: 1 })
+            .lean();
+
+        const sourceStats = activeSourcesDetails.map(source => ({
+            id: source._id,
+            name: source.name,
+            url: source.url,
+            newsCount: newsCountMap[source._id] || 0,
+            lastUpdated: source.lastUpdated || null,
+            updateFrequency: source.updateFrequency || 60
+        }));
+
+        return {
+            totalSources,
+            activeSources,
+            inactiveSources: totalSources - activeSources,
+            sourceStats
+        };
+    } catch (error) {
+        console.error('Eroare la obținerea statisticilor pentru surse RSS:', error);
+        throw error;
+    }
+};
+
+// Exportă toate funcțiile
 module.exports = {
     parseFeed,
     processRssFeed,
     processAllRssFeeds,
-    processSourcesDueForUpdate
+    processSourcesDueForUpdate,
+    extractImageFromHtml,
+    extractImageUrl,
+    sanitizeContent,
+    extractCategories,
+    transformItemToNews,
+    detectImageMimeType,
+    isValidUrl,
+    fixRelativeUrl,
+    getRssSourcesStats
 };

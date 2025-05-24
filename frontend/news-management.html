@@ -1,0 +1,277 @@
+<!-- frontend/news-management.html -->
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management Știri - ElectroRecommender</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <!-- Conținut sidebar similar cu dashboard.html -->
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="main-header">
+            <div class="header-left">
+                <h1 id="page-title">Management Știri</h1>
+                <nav class="breadcrumb">
+                    <span><a href="/admin">Dashboard</a></span>
+                    <span class="separator">/</span>
+                    <span id="current-page">Știri</span>
+                </nav>
+            </div>
+            <div class="header-right">
+                <!-- Conținut header similar cu dashboard.html -->
+            </div>
+        </header>
+
+        <!-- News Management Content -->
+        <div class="content-container">
+            <div class="section-header">
+                <h2>Management Știri RSS</h2>
+                <div class="section-actions">
+                    <button class="btn-primary" id="refresh-rss-btn">
+                        <i class="fas fa-sync"></i> Actualizează RSS
+                    </button>
+                </div>
+            </div>
+
+            <!-- News Stats Cards -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-icon bg-blue">
+                        <i class="fas fa-newspaper"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 id="total-news-count">0</h3>
+                        <p>Știri totale</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon bg-green">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 id="processed-news-count">0</h3>
+                        <p>Știri procesate</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon bg-orange">
+                        <i class="fas fa-rss"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 id="rss-sources-count">0</h3>
+                        <p>Surse RSS active</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon bg-purple">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 id="categories-count">0</h3>
+                        <p>Categorii</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- News Filtering -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Filtrare știri</h3>
+                </div>
+                <div class="card-body">
+                    <div class="filters-container">
+                        <div class="filter-group">
+                            <label for="news-search">Caută:</label>
+                            <div class="search-box">
+                                <input type="text" id="news-search" placeholder="Caută în știri...">
+                                <i class="fas fa-search"></i>
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="news-source-filter">Sursă:</label>
+                            <select id="news-source-filter">
+                                <option value="">Toate sursele</option>
+                                <!-- Se va popula dinamic -->
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="news-category-filter">Categorie:</label>
+                            <select id="news-category-filter">
+                                <option value="">Toate categoriile</option>
+                                <!-- Se va popula dinamic -->
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="news-processed-filter">Status:</label>
+                            <select id="news-processed-filter">
+                                <option value="">Toate</option>
+                                <option value="true">Procesate</option>
+                                <option value="false">Neprocesate</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="news-sort-filter">Sortare:</label>
+                            <select id="news-sort-filter">
+                                <option value="publishDate:desc">Data publicării (desc)</option>
+                                <option value="publishDate:asc">Data publicării (asc)</option>
+                                <option value="title:asc">Titlu (A-Z)</option>
+                                <option value="title:desc">Titlu (Z-A)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- News List -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Listă știri</h3>
+                    <div class="table-info">
+                        <span id="news-total-count">0 știri</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="data-table" id="news-table">
+                            <thead>
+                            <tr>
+                                <th>Imagine</th>
+                                <th>Titlu</th>
+                                <th>Sursă</th>
+                                <th>Categorii</th>
+                                <th>Data publicării</th>
+                                <th>Status</th>
+                                <th>Acțiuni</th>
+                            </tr>
+                            </thead>
+                            <tbody id="news-table-body">
+                            <!-- Se va popula dinamic -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Loading Indicator -->
+                    <div class="loading-indicator" id="news-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Se încarcă știrile...</p>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="pagination" id="news-pagination">
+                        <button class="btn-page prev" id="news-prev-page" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="page-info" id="news-page-info">
+                            Pagina <span id="news-current-page">1</span> din <span id="news-total-pages">1</span>
+                        </div>
+                        <button class="btn-page next" id="news-next-page">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RSS Sources Overview -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Surse RSS Active</h3>
+                </div>
+                <div class="card-body">
+                    <div class="rss-sources-grid" id="rss-sources-grid">
+                        <!-- Se va popula dinamic -->
+                        <div class="loading-indicator">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Se încarcă sursele RSS...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- News Detail Modal -->
+<div class="modal" id="news-detail-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Detalii Știre</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body" id="news-detail-content">
+            <!-- Se va popula dinamic -->
+            <div class="loading-indicator">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Se încarcă detaliile știrii...</p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-outline" data-dismiss="modal">Închide</button>
+            <button class="btn-primary" id="mark-processed-btn">Marchează ca procesat</button>
+        </div>
+    </div>
+</div>
+
+<!-- Related Products Modal -->
+<div class="modal" id="related-products-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Adaugă produse asociate</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="search-box mb-3">
+                <input type="text" id="product-search-input" placeholder="Caută produse...">
+                <i class="fas fa-search"></i>
+            </div>
+
+            <div class="table-responsive">
+                <table class="data-table" id="products-selection-table">
+                    <thead>
+                    <tr>
+                        <th width="30px"><input type="checkbox" id="select-all-products"></th>
+                        <th>Nume produs</th>
+                        <th>Categorie</th>
+                        <th>Preț</th>
+                    </tr>
+                    </thead>
+                    <tbody id="products-selection-body">
+                    <!-- Se va popula dinamic -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="selected-products-list" id="selected-products-list">
+                <h4>Produse selectate</h4>
+                <div id="selected-products-container">
+                    <!-- Se va popula dinamic -->
+                    <p class="no-items-message">Nu sunt produse selectate</p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-outline" data-dismiss="modal">Anulează</button>
+            <button class="btn-primary" id="save-related-products">Salvează asocieri</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/news-management.js"></script>
+</body>
+</html>

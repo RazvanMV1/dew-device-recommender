@@ -8,17 +8,27 @@
     "dev": "nodemon backend/server.js",
     "create-admin": "node backend/scripts/create-admin.js",
     "populate-sources": "node backend/scripts/populate-sources.js",
-    "fetch-rss": "node backend/scripts/initial-rss-fetch.js"
+    "fetch-rss": "node backend/scripts/initial-rss-fetch.js",
+    "stats-refresh": "node backend/scripts/generate-stats.js",
+    "update-sources": "node backend/scripts/update-sources.js"
   },
   "dependencies": {
     "axios": "^1.9.0",
     "bcryptjs": "^2.4.3",
+
     "cheerio": "^1.0.0",
+
+    "chart.js": "^3.9.1",
+
     "cron": "^3.1.6",
     "dotenv": "^16.3.1",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.6.3",
+
     "node-fetch": "^2.7.0",
+
+    "node-cron": "^3.0.2",
+
     "node-html-parser": "^6.1.11",
     "rss-parser": "^3.13.0",
     "sanitize-html": "^2.11.0",
