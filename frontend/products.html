@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>Recomandări Produse</title>
+  <link rel="stylesheet" href="css/products.css">
+  <style>
+    body {
+      background: #f8f9fa;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      margin: 30px 0 15px 0;
+    }
+    #products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 24px;
+      padding: 32px;
+      max-width: 1200px;
+      margin: auto;
+    }
+    .product-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+      padding: 18px 16px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: box-shadow 0.2s;
+    }
+    .product-card:hover {
+      box-shadow: 0 4px 18px rgba(40,40,90,0.15);
+    }
+    .product-card img {
+      max-width: 160px;
+      max-height: 140px;
+      object-fit: contain;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      background: #fafaff;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.03);
+    }
+    .product-title {
+      font-weight: 500;
+      font-size: 1.05em;
+      text-align: center;
+      margin-bottom: 8px;
+      min-height: 44px;
+      color: #1a2b4c;
+    }
+    .product-price {
+      font-weight: 600;
+      color: #12b886;
+      font-size: 1.12em;
+      margin-bottom: 8px;
+    }
+    .product-brand, .product-category {
+      font-size: 0.94em;
+      color: #888;
+      margin-bottom: 4px;
+    }
+    .product-link {
+      display: inline-block;
+      margin-top: 10px;
+      color: #1869e6;
+      font-size: 0.95em;
+      text-decoration: none;
+      border: 1px solid #dee2e6;
+      padding: 6px 14px;
+      border-radius: 8px;
+      transition: background 0.1s, color 0.1s;
+      background: #f7faff;
+    }
+    .product-link:hover {
+      background: #e7f1fd;
+      color: #184db7;
+      border-color: #aac6f6;
+    }
+    .loader {
+      text-align: center;
+      padding: 80px 0 40px 0;
+      color: #888;
+      font-size: 1.3em;
+    }
+    .error-message {
+      color: #b30000;
+      text-align: center;
+      margin: 24px 0;
+    }
+    @media (max-width: 650px) {
+      #products-grid {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+<h1>Recomandări Produse Electronice</h1>
+<div id="products-grid"></div>
+<div id="loader" class="loader">Se încarcă produsele...</div>
+<div id="error" class="error-message"></div>
+<script>
+  // products.js inline (ca să nu depinzi de un fișier separat)
+  const grid = document.getElementById('products-grid');
+  const loader = document.getElementById('loader');
+  const errorBox = document.getElementById('error');
+
+  function createProductCard(prod) {
+    // Fallback la nume și imagine dacă lipsesc
+    const name = prod.name || prod.title || 'Fără titlu';
+    const brand = prod.brand ? `<div class="product-brand">${prod.brand}</div>` : '';
+    const category = prod.category ? `<div class="product-category">${prod.category}</div>` : '';
+    const img = prod.image || (prod.galleryThumbnails && prod.galleryThumbnails[0]) || 'https://via.placeholder.com/120x90?text=No+Image';
+    const price = prod.price !== undefined && prod.price !== null ?
+            `<div class="product-price">${prod.price} ${prod.currency || '€'}</div>` : '';
+    const link = prod.url ?
+            `<a class="product-link" href="${prod.url}" target="_blank" rel="noopener noreferrer">Vezi pe site</a>` : '';
+
+    return `
+        <div class="product-card">
+          <img src="${img}" alt="Imagine produs" loading="lazy">
+          <div class="product-title">${name}</div>
+          ${price}
+          ${brand}
+          ${category}
+          ${link}
+        </div>
+      `;
+  }
+
+  async function loadProducts() {
+    loader.style.display = '';
+    errorBox.textContent = '';
+    grid.innerHTML = '';
+    try {
+      const response = await fetch('/api/products');
+      const data = await response.json();
+      if (!data.success || !data.products || !data.products.length) {
+        errorBox.textContent = "Nu s-au găsit produse momentan!";
+        loader.style.display = 'none';
+        return;
+      }
+      grid.innerHTML = data.products.map(createProductCard).join('');
+      loader.style.display = 'none';
+    } catch (e) {
+      loader.style.display = 'none';
+      errorBox.textContent = 'Eroare la încărcarea produselor: ' + e.message;
+    }
+  }
+
+  loadProducts();
+</script>
+</body>
+</html>
