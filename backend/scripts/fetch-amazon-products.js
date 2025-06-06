@@ -1,4 +1,3 @@
-// fetch-amazon-products.js
 const mongoose = require('mongoose');
 const { importAmazonProductsFromApify } = require('../services/scrapers/amazonScraper');
 

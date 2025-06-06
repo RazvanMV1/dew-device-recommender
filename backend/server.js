@@ -104,6 +104,8 @@ const server = http.createServer(async (req, res) => {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/stats.html'), 'text/html');
                 } else if (pathName === '/admin') {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/dashboard.html'), 'text/html');
+                } else if (pathName === '/products' || pathName === '/products.html') {
+                    serveStaticFile(req, res, path.join(__dirname, '../frontend/products.html'), 'text/html');
                 } else if (pathName === '/news-management' || pathName === '/news-management.html') {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/news-management.html'), 'text/html');
                 }
@@ -137,40 +139,45 @@ const server = http.createServer(async (req, res) => {
                 }
                 // ========== API ROUTES FOR PRODUCTS ==========
                 else if (pathName === '/api/products') {
-                    // Aplică headers de securitate
                     securityHeaders(req, res, async () => {
                         try {
-                            // Parametri de filtrare și sortare opționali
+                            // Construiește filtre pentru ambele colecții
                             const { category, brand, sort, limit = 20, page = 1 } = parsedUrl.query;
-
-                            // Construiește filtre
                             const filter = {};
                             if (category) filter.category = category;
                             if (brand) filter.brand = brand;
 
-                            // Opțiuni sortare și paginare
-                            const options = {
-                                limit: parseInt(limit),
-                                skip: (parseInt(page) - 1) * parseInt(limit)
-                            };
+                            // Ia produsele din ambele colecții
+                            const products1 = await mongoose.connection.db.collection('products').find(filter).toArray();
+                            const products2 = await mongoose.connection.db.collection('amazonproducts').find(filter).toArray();
+                            let products = [...products1, ...products2];
 
-                            // Sortare
+                            // Sortare (manual)
                             if (sort) {
                                 const [field, order] = sort.split(':');
-                                options.sort = { [field]: order === 'desc' ? -1 : 1 };
+                                products = products.sort((a, b) => {
+                                    if (!a[field] || !b[field]) return 0;
+                                    if (order === 'desc') return b[field] > a[field] ? 1 : -1;
+                                    return a[field] > b[field] ? 1 : -1;
+                                });
                             }
 
-                            const products = await Product.find(filter, null, options);
-                            const total = await Product.countDocuments(filter);
+                            // Total
+                            const total = products.length;
+
+                            // Aplică paginarea (manual)
+                            const pageInt = parseInt(page);
+                            const limitInt = parseInt(limit);
+                            const paginated = products.slice((pageInt - 1) * limitInt, pageInt * limitInt);
 
                             res.writeHead(200, { 'Content-Type': 'application/json' });
                             res.end(JSON.stringify({
                                 success: true,
                                 total,
-                                page: parseInt(page),
-                                limit: parseInt(limit),
-                                totalPages: Math.ceil(total / parseInt(limit)),
-                                products
+                                page: pageInt,
+                                limit: limitInt,
+                                totalPages: Math.ceil(total / limitInt),
+                                products: paginated
                             }));
                         } catch (error) {
                             console.error('Eroare la extragerea produselor:', error);
