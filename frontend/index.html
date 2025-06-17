@@ -22,7 +22,7 @@
                     <li><a href="#home" class="active">Acasă</a></li>
                     <li><a href="#categorii">Categorii</a></li>
                     <li><a href="#noutati">Noutăți</a></li>
-                    <li><a href="#comparatii">Comparații</a></li>
+                    <li><a href="products">Produse</a></li>
                 </ul>
             </nav>
 
@@ -95,77 +95,109 @@
         </div>
     </div>
 </section>
-
 <section class="categories-section" id="categorii">
     <div class="container">
         <div class="section-header">
             <h2>Categorii populare</h2>
             <a href="products" class="view-all">Vezi toate <i class="fas fa-arrow-right"></i></a>
         </div>
+
         <div class="categories-grid">
+
             <div class="category-card">
                 <div class="category-icon">
-                    <i class="fas fa-mobile-alt"></i>
+                    <img src="https://m.media-amazon.com/images/I/51UtM-A3fdL.__AC_SX300_SY300_QL70_FMwebp_.jpg" alt="Telefoane">
                 </div>
                 <h3>Telefoane</h3>
                 <p>Cele mai noi smartphone-uri</p>
-                <a href="#telefoane" class="cat-link">Explorează <i class="fas fa-arrow-right"></i></a>
+                <a href="products?category=Telefoane" class="cat-link">Explorează <i class="fas fa-arrow-right"></i></a>
             </div>
+
             <div class="category-card">
                 <div class="category-icon">
-                    <i class="fas fa-tablet-alt"></i>
+                    <img src="https://m.media-amazon.com/images/I/7147JzEtrqL.__AC_SY445_SX342_QL70_FMwebp_.jpg" alt="Tablete">
                 </div>
                 <h3>Tablete</h3>
                 <p>Performanță și portabilitate</p>
-                <a href="#tablete" class="cat-link">Explorează <i class="fas fa-arrow-right"></i></a>
+                <a href="products?category=Tablete" class="cat-link">Explorează <i class="fas fa-arrow-right"></i></a>
             </div>
+
             <div class="category-card">
                 <div class="category-icon">
-                    <i class="fas fa-laptop"></i>
+                    <img src="https://m.media-amazon.com/images/I/61hw7aZWYSL.__AC_SY445_SX342_QL70_FMwebp_.jpg" alt="Laptopuri">
                 </div>
                 <h3>Laptopuri</h3>
                 <p>Putere pentru muncă și gaming</p>
-                <a href="#laptopuri" class="cat-link">Explorează <i class="fas fa-arrow-right"></i></a>
+                <a href="products?category=Laptopuri" class="cat-link">Explorează <i class="fas fa-arrow-right"></i></a>
             </div>
+
             <div class="category-card">
                 <div class="category-icon">
-                    <i class="fas fa-clock"></i>
+                    <img src="https://m.media-amazon.com/images/I/71aHvYUgX1L.__AC_SX300_SY300_QL70_FMwebp_.jpg" alt="Componente PC">
                 </div>
-                <h3>Smartwatch-uri</h3>
-                <p>Tehnologie la încheietura mâinii</p>
-                <a href="#smartwatches" class="cat-link">Explorează <i class="fas fa-arrow-right"></i></a>
+                <h3>Componente PC</h3>
+                <p>Procesoare, RAM, SSD, GPU etc.</p>
+                <a href="products?category=Componente%20PC" class="cat-link">Explorează <i class="fas fa-arrow-right"></i></a>
             </div>
+
             <div class="category-card">
                 <div class="category-icon">
-                    <i class="fas fa-headphones"></i>
+                    <img src="https://m.media-amazon.com/images/I/61C9qC9U+gL._AC_SY300_SX300_.jpg" alt="Periferice">
+                </div>
+                <h3>Periferice</h3>
+                <p>Tastaturi, mouse, adaptoare</p>
+                <a href="products?category=Periferice" class="cat-link">Explorează <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="category-card">
+                <div class="category-icon">
+                    <img src="https://m.media-amazon.com/images/I/61u-OaDSfQL.__AC_SY445_SX342_QL70_FMwebp_.jpg" alt="Audio">
                 </div>
                 <h3>Audio</h3>
                 <p>Calitate superioară a sunetului</p>
-                <a href="#audio" class="cat-link">Explorează <i class="fas fa-arrow-right"></i></a>
+                <a href="products?category=Audio" class="cat-link">Explorează <i class="fas fa-arrow-right"></i></a>
             </div>
+
             <div class="category-card">
                 <div class="category-icon">
-                    <i class="fas fa-drone"></i>
+                    <img src="https://m.media-amazon.com/images/I/71SKOyjXoUL.__AC_SY445_SX342_QL70_FMwebp_.jpg" alt="Smartwatch-uri">
+                </div>
+                <h3>Smartwatch-uri</h3>
+                <p>Tehnologie la încheietura mâinii</p>
+                <a href="products?category=Smartwatch-uri" class="cat-link">Explorează <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="category-card">
+                <div class="category-icon">
+                    <img src="https://m.media-amazon.com/images/I/71FxO+4laVL._AC_SY300_SX300_.jpg" alt="Drone">
                 </div>
                 <h3>Drone</h3>
                 <p>Fotografii și video aeriene</p>
-                <a href="#drone" class="cat-link">Explorează <i class="fas fa-arrow-right"></i></a>
+                <a href="products?category=Drone" class="cat-link">Explorează <i class="fas fa-arrow-right"></i></a>
             </div>
+
         </div>
     </div>
 </section>
 
+
+
 <section class="recommendations-section" id="recomandari">
     <div class="container">
         <div class="section-header">
-            <h2>Recomandări pentru tine</h2>
+            <h2>Recomandări</h2>
             <div class="filters">
                 <button class="filter-btn active" data-filter="all">Toate</button>
                 <button class="filter-btn" data-filter="phone">Telefoane</button>
                 <button class="filter-btn" data-filter="tablet">Tablete</button>
                 <button class="filter-btn" data-filter="laptop">Laptopuri</button>
+                <button class="filter-btn" data-filter="pc">Componente PC</button>
+                <button class="filter-btn" data-filter="periferice">Periferice</button>
                 <button class="filter-btn" data-filter="watch">Smartwatch-uri</button>
+                <button class="filter-btn" data-filter="drone">Drone</button>
+
             </div>
+
         </div>
 
         <div class="products-grid" id="products-container">

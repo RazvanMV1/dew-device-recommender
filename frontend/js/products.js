@@ -4,10 +4,26 @@ window.addEventListener("DOMContentLoaded", function () {
     const loader = document.getElementById("loader");
     const errorBox = document.getElementById("error");
     const pagination = document.getElementById("pagination");
+    const searchInput = document.getElementById("search-input");
+    const searchBtn = document.getElementById("search-btn");
 
-    let currentCategory = "";
+    const params = new URLSearchParams(window.location.search);
+    let currentCategory = params.get("category") || "";
+    let searchQuery = params.get("search") || "";
     let currentSort = "";
     let currentPage = 1;
+
+    if (searchInput && searchQuery) searchInput.value = searchQuery;
+
+    if (currentCategory) {
+        document.querySelectorAll(".category-btn").forEach(btn => {
+            if (btn.dataset.cat === currentCategory) {
+                btn.classList.add("active");
+            } else {
+                btn.classList.remove("active");
+            }
+        });
+    }
 
     function createProductCard(prod) {
         const name = prod.name || prod.title || "Fără nume";
@@ -32,7 +48,6 @@ window.addEventListener("DOMContentLoaded", function () {
         </div>`;
     }
 
-
     function renderPagination(current, total) {
         pagination.innerHTML = "";
 
@@ -43,7 +58,7 @@ window.addEventListener("DOMContentLoaded", function () {
             if (isActive) btn.classList.add("active");
             if (disabled) btn.disabled = true;
             btn.addEventListener("click", () => {
-                if (!disabled) loadProducts(page);
+                if (!disabled && page) loadProducts(page);
             });
             return btn;
         };
@@ -84,7 +99,6 @@ window.addEventListener("DOMContentLoaded", function () {
         pagination.appendChild(createButton("»", total, false, current === total));
     }
 
-
     async function loadProducts(page = 1) {
         loader.style.display = "";
         errorBox.textContent = "";
@@ -94,6 +108,7 @@ window.addEventListener("DOMContentLoaded", function () {
         let url = `/api/products?limit=20&page=${page}`;
         if (currentCategory) url += `&category=${encodeURIComponent(currentCategory)}`;
         if (currentSort) url += `&sort=${encodeURIComponent(currentSort)}`;
+        if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
 
         try {
             const res = await fetch(url);
@@ -126,6 +141,13 @@ window.addEventListener("DOMContentLoaded", function () {
     sortSelect.addEventListener("change", () => {
         currentSort = sortSelect.value;
         loadProducts(1);
+    });
+
+    searchBtn.addEventListener("click", () => {
+        const inputValue = searchInput.value.trim();
+        if (inputValue) {
+            window.location.href = `/products.html?search=${encodeURIComponent(inputValue)}`;
+        }
     });
 
     loadProducts();
