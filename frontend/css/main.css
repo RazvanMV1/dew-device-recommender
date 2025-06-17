@@ -1,18 +1,14 @@
-/* Resetare CSS și variabile */
 :root {
-    /* Culori principale */
     --primary: #4361ee;
     --primary-dark: #3a0ca3;
     --primary-light: #4cc9f0;
     --accent: #f72585;
     --secondary: #7209b7;
 
-    /* Culori funcționale */
     --success: #06d6a0;
     --warning: #ffd166;
     --danger: #ef476f;
 
-    /* Nuanțe de gri */
     --gray-100: #f8f9fa;
     --gray-200: #e9ecef;
     --gray-300: #dee2e6;
@@ -23,7 +19,6 @@
     --gray-800: #343a40;
     --gray-900: #212529;
 
-    /* Alte variabile */
     --white: #ffffff;
     --body-bg: #f5f8fa;
     --border-radius: 8px;
@@ -33,7 +28,6 @@
     --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.1);
     --transition: all 0.3s ease;
 
-    /* Gradient-uri */
     --gradient-primary: linear-gradient(135deg, var(--primary), var(--primary-dark));
     --gradient-accent: linear-gradient(135deg, var(--accent), var(--secondary));
 }
@@ -80,7 +74,6 @@ img {
     padding: 0 1.5rem;
 }
 
-/* Header și Navigare */
 .main-header {
     background-color: var(--white);
     box-shadow: var(--shadow-sm);
@@ -297,7 +290,6 @@ img {
     transition: var(--transition);
 }
 
-/* Hero Section */
 .hero-section {
     padding: 4rem 0;
     background: linear-gradient(145deg, #f5f7fa, #c3cfe2);
@@ -344,7 +336,6 @@ img {
     box-shadow: var(--shadow-lg);
 }
 
-/* Buttons */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -381,7 +372,6 @@ img {
     box-shadow: 0 4px 15px rgba(67, 97, 238, 0.2);
 }
 
-/* Section Common Styles */
 section {
     padding: 5rem 0;
 }
@@ -411,7 +401,6 @@ section {
     color: var(--primary-dark);
 }
 
-/* Categories Section */
 .categories-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -487,7 +476,6 @@ section {
     color: var(--primary-dark);
 }
 
-/* Recommendations Section */
 .recommendations-section {
     background-color: var(--white);
 }
@@ -499,15 +487,14 @@ section {
 }
 
 .filter-btn {
-    padding: 0.5rem 1rem;
-    background: transparent;
-    border: none;
-    border-radius: var(--border-radius);
-    font-size: 0.9rem;
+    background-color: transparent;
+    color: #374151;
     font-weight: 500;
-    color: var(--gray-600);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
     cursor: pointer;
-    transition: var(--transition);
 }
 
 .filter-btn:hover {
@@ -515,8 +502,9 @@ section {
 }
 
 .filter-btn.active {
-    background-color: var(--primary);
-    color: var(--white);
+    background-color: #3b82f6;
+    color: #fff;
+    font-weight: 600;
 }
 
 .products-grid {
@@ -713,7 +701,6 @@ section {
     text-align: center;
 }
 
-/* News Section */
 .news-section {
     background-color: var(--gray-100);
 }
@@ -800,7 +787,6 @@ section {
     color: var(--primary-dark);
 }
 
-/* Newsletter Section */
 .newsletter-section {
     background: var(--gradient-primary);
     color: var(--white);
@@ -856,7 +842,6 @@ section {
     background-color: #e0195b;
 }
 
-/* Footer */
 .main-footer {
     background-color: var(--gray-900);
     color: var(--gray-300);
@@ -958,7 +943,6 @@ section {
     font-size: 0.9rem;
 }
 
-/* Scroll to Top Button */
 .scroll-top {
     position: fixed;
     bottom: 2rem;
@@ -990,7 +974,6 @@ section {
     box-shadow: 0 6px 20px rgba(67, 97, 238, 0.3);
 }
 
-/* Loading Spinner */
 .loading-spinner {
     display: flex;
     flex-direction: column;
@@ -1010,7 +993,6 @@ section {
     color: var(--gray-600);
 }
 
-/* Product Modal */
 .modal {
     position: fixed;
     top: 0;
@@ -1288,7 +1270,6 @@ section {
     color: var(--primary);
 }
 
-/* Responsive Design */
 @media (max-width: 992px) {
     .hero-section .container {
         flex-direction: column;
