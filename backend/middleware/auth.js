@@ -4,12 +4,14 @@ const User = require('../models/User');
 
 // 🔒 Middleware pentru verificarea token-urilor JWT
 const verifyToken = async (req, res, next) => {
+    console.log("=== INTRAT IN verifyToken ===");
     try {
         // Extragere token din header
         const authHeader = req.headers['authorization'];
         const token = authHeader && authHeader.split(' ')[1];
 
         if (!token) {
+            console.log("LIPSESTE TOKENUL!");
             return res.writeHead(401, { 'Content-Type': 'application/json' });
             return res.end(JSON.stringify({
                 success: false,
@@ -30,11 +32,16 @@ const verifyToken = async (req, res, next) => {
             }));
         }
 
+        console.log("TOKEN VALID, setez req.user si apelez next()");
         // Adaugă informații user la request
         req.user = {
             id: user._id,
             username: user.username,
-            role: user.role
+            email: user.email,
+            role: user.role,
+            avatar: user.avatar,
+            createdAt: user.createdAt,
+            lastLogin: user.lastLogin
         };
 
         next();

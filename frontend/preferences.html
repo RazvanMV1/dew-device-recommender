@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preferințele mele - ElectroRecommender</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .pref-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 32px rgba(67, 97, 238, 0.08);
+            max-width: 500px;
+            margin: 3rem auto 0 auto;
+            padding: 2.5rem;
+        }
+        .pref-card h2 { text-align: center; margin-bottom: 2rem; }
+        fieldset {
+            border: none;
+            margin-bottom: 1.5rem;
+        }
+        legend {
+            font-weight: 600;
+            margin-bottom: 0.7rem;
+        }
+        label {
+            margin-right: 1.5rem;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+            cursor: pointer;
+        }
+        select, input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+        .pref-form-message {
+            margin-top: 1.5rem;
+            font-weight: 500;
+            text-align: center;
+        }
+        .btn-primary {
+            background: var(--gradient-primary, linear-gradient(135deg, #4361ee, #3a0ca3));
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.7rem 1.8rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 0 auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<header class="main-header">
+    <div class="container">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-microchip"></i>
+                <h1>ElectroRecommender</h1>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/">Acasă</a></li>
+                    <li><a href="#categorii">Categorii</a></li>
+                    <li><a href="#noutati">Noutăți</a></li>
+                    <li><a href="#comparatii">Comparații</a></li>
+                    <li><a href="/stats">Statistici</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="pref-card">
+        <h2>Preferințele mele</h2>
+        <form id="preferences-form">
+            <fieldset>
+                <legend>Categorii preferate</legend>
+                <label><input type="checkbox" name="category" value="telefoane"> Telefoane</label>
+                <label><input type="checkbox" name="category" value="tablete"> Tablete</label>
+                <label><input type="checkbox" name="category" value="laptopuri"> Laptopuri</label>
+                <label><input type="checkbox" name="category" value="audio"> Audio</label>
+                <label><input type="checkbox" name="category" value="drone"> Drone</label>
+                <label><input type="checkbox" name="category" value="smartwatch-uri"> Smartwatch-uri</label>
+            </fieldset>
+            <fieldset>
+                <legend>Interval de preț preferat</legend>
+                <select name="priceRange" id="priceRange">
+                    <option value="">Oricare</option>
+                    <option value="low">&lt; 1000 lei</option>
+                    <option value="mid">1000–3000 lei</option>
+                    <option value="high">&gt; 3000 lei</option>
+                </select>
+            </fieldset>
+            <fieldset>
+                <legend>Branduri favorite</legend>
+                <label><input type="checkbox" name="brand" value="Samsung"> Samsung</label>
+                <label><input type="checkbox" name="brand" value="Apple"> Apple</label>
+                <label><input type="checkbox" name="brand" value="Lenovo"> Lenovo</label>
+                <label><input type="checkbox" name="brand" value="Xiaomi"> Xiaomi</label>
+                <label><input type="checkbox" name="brand" value="Asus"> Asus</label>
+                <label><input type="checkbox" name="brand" value="Huawei"> Huawei</label>
+            </fieldset>
+            <button type="submit" class="btn-primary">Salvează preferințele</button>
+            <div id="preferences-message" class="pref-form-message"></div>
+        </form>
+    </div>
+</main>
+
+<script src="js/preferences.js"></script>
+</body>
+</html>
