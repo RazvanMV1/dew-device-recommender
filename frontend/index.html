@@ -23,6 +23,8 @@
                     <li><a href="#categorii">Categorii</a></li>
                     <li><a href="#noutati">Noutăți</a></li>
                     <li><a href="products">Produse</a></li>
+                    <li><a href="/stats" id="stats-link">Statistici</a></li>
+
                 </ul>
             </nav>
 
@@ -188,8 +190,8 @@
             <h2>Recomandări</h2>
             <div class="filters">
                 <button class="filter-btn active" data-filter="all">Toate</button>
-                <button class="filter-btn" data-filter="phone">Telefoane</button>
-                <button class="filter-btn" data-filter="tablet">Tablete</button>
+                <button class="filter-btn" data-filter="telefoane">Telefoane</button>
+                <button class="filter-btn" data-filter="tablete">Tablete</button>
                 <button class="filter-btn" data-filter="laptop">Laptopuri</button>
                 <button class="filter-btn" data-filter="pc">Componente PC</button>
                 <button class="filter-btn" data-filter="periferice">Periferice</button>
@@ -233,20 +235,6 @@
         </div>
     </div>
 </section>
-
-<section class="newsletter-section">
-    <div class="container">
-        <div class="newsletter-content">
-            <h2>Abonează-te pentru recomandări personalizate</h2>
-            <p>Primește cele mai bune oferte și recomandări direct în inbox-ul tău.</p>
-            <form class="newsletter-form">
-                <input type="email" placeholder="Adresa ta de email" required>
-                <button type="submit" class="btn btn-primary">Abonare</button>
-            </form>
-        </div>
-    </div>
-</section>
-
 <footer class="main-footer">
     <div class="container">
         <div class="footer-content">
@@ -323,6 +311,23 @@
         </div>
     </div>
 </div>
+
+<!-- Funcționalitate Explorează pentru categorii -->
+<script>
+    document.querySelectorAll('.explore-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('recomandari').scrollIntoView({ behavior: 'smooth' });
+            const cat = btn.getAttribute('data-category');
+            if (cat) {
+                const filterBtn = document.querySelector(`.filter-btn[data-filter*="${cat.toLowerCase()}"]`);
+                if (filterBtn) {
+                    filterBtn.click();
+                }
+            }
+        });
+    });
+</script>
 
 <script src="js/main.js"></script>
 </body>

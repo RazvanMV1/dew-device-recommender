@@ -86,10 +86,14 @@ const server = http.createServer(async (req, res) => {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/index.html'), 'text/html');
                 } else if (pathName === '/stats') {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/stats.html'), 'text/html');
+                } else if (pathName === '/profile') {
+                    serveStaticFile(req, res, path.join(__dirname, '../frontend/profile.html'), 'text/html');
                 } else if (pathName === '/admin') {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/dashboard.html'), 'text/html');
                 } else if (pathName === '/products' || pathName === '/products.html') {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/products.html'), 'text/html');
+                } else if (pathName === '/preferences' || pathName === '/preferences.html') {
+                    serveStaticFile(req, res, path.join(__dirname, '../frontend/preferences.html'), 'text/html');
                 } else if (pathName === '/news-management' || pathName === '/news-management.html') {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/news-management.html'), 'text/html');
                 }
@@ -119,6 +123,53 @@ const server = http.createServer(async (req, res) => {
                         }
                     });
                 }
+
+                else if (pathName === '/api/profile/preferences') {
+                    securityHeaders(req, res, async () => {
+                        verifyToken(req, res, async () => {
+                            if (!req.user) {
+                                res.writeHead(401, { 'Content-Type': 'application/json' });
+                                res.end(JSON.stringify({ success: false, message: 'Neautentificat' }));
+                                return;
+                            }
+                            const user = await User.findById(req.user.id);
+                            res.writeHead(200, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ success: true, preferences: user.preferences || {} }));
+                        });
+                    });
+                }
+                else if (pathName === '/api/profile') {
+                    console.log("=== INTRAT PE /api/profile ===");
+                    securityHeaders(req, res, async () => {
+                        verifyToken(req, res, async () => {
+                            console.log("=== verifyToken CALLBACK ===");
+                            if (!req.user) {
+                                console.log("NU E USER LOGAT");
+                                res.writeHead(401, { 'Content-Type': 'application/json' });
+                                res.end(JSON.stringify({ success: false, message: 'Neautentificat' }));
+                                return;
+                            }
+                            console.log("USER LOGAT:", req.user);
+                            res.writeHead(200, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({
+                                success: true,
+                                user: {
+                                    username: req.user.username,
+                                    email: req.user.email,
+                                    role: req.user.role,
+                                    avatar: req.user.avatar || null,
+                                    createdAt: req.user.createdAt ? new Date(req.user.createdAt).toISOString() : null,
+                                    lastLogin: req.user.lastLogin ? new Date(req.user.lastLogin).toISOString() : null
+                                }
+                            }));
+                        });
+                    });
+                }
+
+
+
+                // ========== API ROUTES FOR PRODUCTS ==========
+
                 else if (pathName === '/api/products') {
                     securityHeaders(req, res, async () => {
                         try {
@@ -212,6 +263,88 @@ const server = http.createServer(async (req, res) => {
                         }
                     });
                 }
+                // ==================== STATISTICI PRODUSE ====================
+                else if (pathName === '/api/products/stats') {
+                    // Endpoint pentru statistici produse (public)
+                    securityHeaders(req, res, async () => {
+                        try {
+                            // Top 5 produse după numărul de recenzii
+                            const topProducts = await mongoose.connection.db.collection('products')
+                                .find({})
+                                .sort({ reviewsCount: -1 })
+                                .limit(5)
+                                .project({ name: 1, reviewsCount: 1, category: 1, brand: 1, _id: 0 })
+                                .toArray();
+
+                            // Distribuție pe categorii (agregare + normalizare)
+                            const categoriesAgg = await mongoose.connection.db.collection('products').aggregate([
+                                { $group: { _id: "$category", count: { $sum: 1 } } },
+                                { $sort: { count: -1 } }
+                            ]).toArray();
+
+                            // Normalizare categorii
+                            const categoryMap = {};
+                            categoriesAgg.forEach(cat => {
+                                if (!cat._id) return;
+                                let norm = cat._id.trim().toLowerCase();
+
+                                // Reguli de normalizare (adaugă aici ce ai nevoie)
+                                if (["laptopuri", "laptop", "laptops"].includes(norm)) norm = "laptop";
+                                if (["telefoane", "telefon", "phones"].includes(norm)) norm = "telefon";
+                                if (["tablete", "tablet", "tablets"].includes(norm)) norm = "tabletă";
+                                if (["smartwatch-uri", "smartwatch", "ceasuri"].includes(norm)) norm = "smartwatch";
+                                if (["componente pc", "componentă pc", "pc components"].includes(norm)) norm = "componente pc";
+                                if (["periferice", "periferic", "peripherals"].includes(norm)) norm = "periferice";
+                                if (["audio", "sunet"].includes(norm)) norm = "audio";
+                                if (["drone", "dronă"].includes(norm)) norm = "dronă";
+                                if (["altele", "other", "diverse"].includes(norm)) norm = "altele";
+
+                                // Transformă la format cu prima literă mare
+                                let displayName = norm.charAt(0).toUpperCase() + norm.slice(1);
+
+                                if (categoryMap[norm]) {
+                                    categoryMap[norm].count += cat.count;
+                                } else {
+                                    categoryMap[norm] = {
+                                        _id: displayName,
+                                        count: cat.count
+                                    };
+                                }
+                            });
+                            // Transformă rezultatul în array pentru frontend
+                            const categoriesNormalized = Object.values(categoryMap);
+
+                            // Distribuție pe culori - doar cele relevante
+                            const allowedColors = [
+                                "Black", "White", "Silver", "Gray", "Blue", "Red", "Green", "Pink", "Gold", "Yellow", "Purple", "Orange",
+                                "Brown", "Beige", "Cyan", "Violet", "Rose", "Mint", "Cream", "Graphite", "Obsidian", "Teal", "Bronze", "Multicolor"
+                            ];
+                            const colorsAgg = await mongoose.connection.db.collection('products').aggregate([
+                                { $group: { _id: "$color", count: { $sum: 1 } } },
+                                { $sort: { count: -1 } }
+                            ]).toArray();
+                            const filteredColors = colorsAgg.filter(c => allowedColors.includes(c._id));
+
+                            res.writeHead(200, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({
+                                success: true,
+                                topProducts,
+                                categories: categoriesNormalized,
+                                colors: filteredColors
+                            }));
+                        } catch (error) {
+                            console.error('Eroare la statistici produse:', error);
+                            res.writeHead(500, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({
+                                success: false,
+                                message: 'Eroare la extragerea statisticilor',
+                                error: error.message
+                            }));
+                        }
+                    });
+                }
+                else if (pathName.startsWith('/api/products/') && pathName.split('/').length === 4) {
+                    // Extrage produsul după ID
                 else if (pathName.startsWith('/api/products/') && pathName.split('/').length === 4) {
                     securityHeaders(req, res, async () => {
                         try {
@@ -777,6 +910,104 @@ const server = http.createServer(async (req, res) => {
                                             }));
                                         }
                                     });
+                                }
+                                else if (pathName === '/api/profile/preferences') {
+                                    securityHeaders(req, res, async () => {
+                                        verifyToken(req, res, async () => {
+                                            if (!req.user) {
+                                                res.writeHead(401, { 'Content-Type': 'application/json' });
+                                                res.end(JSON.stringify({ success: false, message: 'Neautentificat' }));
+                                                return;
+                                            }
+                                            try {
+                                                const { categories, priceRange, brands } = await parseRequestBody(req);
+                                                const user = await User.findById(req.user.id);
+                                                user.preferences = { categories, priceRange, brands };
+                                                await user.save();
+                                                res.writeHead(200, { 'Content-Type': 'application/json' });
+                                                res.end(JSON.stringify({ success: true }));
+                                            } catch (err) {
+                                                res.writeHead(500, { 'Content-Type': 'application/json' });
+                                                res.end(JSON.stringify({ success: false, message: 'Eroare la salvare preferințe.' }));
+                                            }
+                                        });
+                                    });
+                                }
+                                else if (pathName === '/api/profile/avatar') {
+                                    securityHeaders(req, res, async () => {
+                                        verifyToken(req, res, async () => {
+                                            if (!req.user) {
+                                                res.writeHead(401, { 'Content-Type': 'application/json' });
+                                                res.end(JSON.stringify({ success: false, message: 'Neautentificat' }));
+                                                return;
+                                            }
+                                            try {
+                                                const { avatar } = await parseRequestBody(req);
+                                                if (!avatar || typeof avatar !== 'string' || !avatar.startsWith('http')) {
+                                                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                                                    res.end(JSON.stringify({ success: false, message: 'Link invalid!' }));
+                                                    return;
+                                                }
+                                                const user = await User.findById(req.user.id);
+                                                if (!user) {
+                                                    res.writeHead(404, { 'Content-Type': 'application/json' });
+                                                    res.end(JSON.stringify({ success: false, message: 'Utilizator inexistent.' }));
+                                                    return;
+                                                }
+                                                user.avatar = avatar;
+                                                await user.save();
+                                                res.writeHead(200, { 'Content-Type': 'application/json' });
+                                                res.end(JSON.stringify({ success: true, message: 'Avatar actualizat!' }));
+                                            } catch (error) {
+                                                res.writeHead(500, { 'Content-Type': 'application/json' });
+                                                res.end(JSON.stringify({ success: false, message: 'Eroare la schimbarea avatarului.' }));
+                                            }
+                                        });
+                                    });
+                                }
+                                else if (pathName === '/api/profile/password') {
+                                    securityHeaders(req, res, async () => {
+                                        verifyToken(req, res, async () => {
+                                            if (!req.user) {
+                                                res.writeHead(401, { 'Content-Type': 'application/json' });
+                                                res.end(JSON.stringify({ success: false, message: 'Neautentificat' }));
+                                                return;
+                                            }
+                                            try {
+                                                const { currentPassword, newPassword } = await parseRequestBody(req);
+                                                if (!currentPassword || !newPassword) {
+                                                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                                                    res.end(JSON.stringify({ success: false, message: 'Toate câmpurile sunt obligatorii.' }));
+                                                    return;
+                                                }
+                                                // Găsește userul în DB
+                                                const user = await User.findById(req.user.id);
+                                                if (!user) {
+                                                    res.writeHead(404, { 'Content-Type': 'application/json' });
+                                                    res.end(JSON.stringify({ success: false, message: 'Utilizator inexistent.' }));
+                                                    return;
+                                                }
+                                                // Verifică parola veche
+                                                const valid = await user.comparePassword(currentPassword);
+                                                if (!valid) {
+                                                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                                                    res.end(JSON.stringify({ success: false, message: 'Parola veche este greșită.' }));
+                                                    return;
+                                                }
+                                                // Setează parola nouă și salvează
+                                                user.password = newPassword;
+                                                await user.save();
+                                                res.writeHead(200, { 'Content-Type': 'application/json' });
+                                                res.end(JSON.stringify({ success: true, message: 'Parola a fost schimbată cu succes.' }));
+                                            } catch (error) {
+                                                res.writeHead(500, { 'Content-Type': 'application/json' });
+                                                res.end(JSON.stringify({ success: false, message: 'Eroare la schimbarea parolei.' }));
+                                            }
+                                        });
+                                    });
+                                }
+                                 else if (pathName === '/api/register') {
+                                    // Înregistrare publică (membri și primul admin)
                                 } else if (pathName === '/api/register') {
                                     securityHeaders(req, res, async () => {
                                         try {
