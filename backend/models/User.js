@@ -5,8 +5,14 @@ const UserSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, enum: ['admin', 'member'], default: 'member' },
+    avatar: { type: String },
     createdAt: { type: Date, default: Date.now },
-    lastLogin: { type: Date }
+    lastLogin: { type: Date },
+    preferences: {
+        categories: [String],
+        priceRange: String,
+        brands: [String]
+    }
 });
 
 // 🔒 Pre-hook pentru hash-uirea parolelor înainte de salvare
