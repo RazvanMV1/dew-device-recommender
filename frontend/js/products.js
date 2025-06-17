@@ -146,7 +146,16 @@ window.addEventListener("DOMContentLoaded", function () {
     searchBtn.addEventListener("click", () => {
         const inputValue = searchInput.value.trim();
         if (inputValue) {
-            window.location.href = `/products.html?search=${encodeURIComponent(inputValue)}`;
+            window.location.href = `/products?search=${encodeURIComponent(inputValue)}`;
+        }
+    });
+
+    searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            const inputValue = searchInput.value.trim();
+            if (inputValue) {
+                window.location.href = `/products?search=${encodeURIComponent(inputValue)}`;
+            }
         }
     });
 

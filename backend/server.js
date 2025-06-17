@@ -1,5 +1,3 @@
-// backend/server.js
-
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -11,30 +9,24 @@ const config = require('./config/config');
 const Product = require('./models/Product');
 const Source = require('./models/Source');
 const User = require('./models/User');
-const News = require('./models/News'); // Adaugă modelul News
+const News = require('./models/News');
 const { verifyToken, isAdmin } = require('./middleware/auth');
 const { securityHeaders } = require('./middleware/security');
 const { rateLimiter } = require('./middleware/rateLimiter');
 const { validateProduct, sanitizeText } = require('./utils/validator');
 const authService = require('./services/authService');
 const sourceService = require('./services/sourceService');
-const rssService = require('./services/rssService'); // Adaugă serviciul RSS
-const newsService = require('./services/newsService'); // Adaugă serviciul News
-const schedulerService = require('./services/schedulerService'); // Adaugă serviciul Scheduler
+const rssService = require('./services/rssService');
+const newsService = require('./services/newsService');
+const schedulerService = require('./services/schedulerService');
 
-// Conectare la baza de date MongoDB și inițializare job-uri
 connectDB().then(() => {
-    // Creează utilizatorul admin implicit
     createDefaultAdmin();
-
-    // Inițializează job-urile programate pentru actualizarea RSS
     schedulerService.initScheduledJobs();
     console.log('📅 Job-uri programate pentru actualizare RSS inițializate');
 }).catch(err => {
     console.error('❌ Eroare la conectarea la MongoDB:', err);
 });
-
-// Creează un utilizator admin implicit dacă nu există
 async function createDefaultAdmin() {
     try {
         const adminCount = await User.countDocuments({ role: 'admin' });
@@ -52,9 +44,7 @@ async function createDefaultAdmin() {
     }
 }
 
-// Funcție pentru servire fisiere statice cu middleware de securitate
 function serveStaticFile(req, res, filePath, contentType, responseCode = 200) {
-    // Aplică headers de securitate pentru toate răspunsurile
     securityHeaders(req, res, () => {
         fs.readFile(filePath, (err, data) => {
             if (err) {
@@ -68,7 +58,6 @@ function serveStaticFile(req, res, filePath, contentType, responseCode = 200) {
     });
 }
 
-// Funcție pentru parsarea body-ului cererilor
 async function parseRequestBody(req) {
     return new Promise((resolve, reject) => {
         let body = '';
@@ -84,19 +73,14 @@ async function parseRequestBody(req) {
         req.on('error', reject);
     });
 }
-
-// Creare server
 const server = http.createServer(async (req, res) => {
     const parsedUrl = url.parse(req.url, true);
     const method = req.method;
     const pathName = parsedUrl.pathname;
 
     console.log(`${method} ${pathName}`);
-
-    // Aplică rate limiting pentru toate cererile
     rateLimiter(req, res, async () => {
         try {
-            // Rutare
             if (method === 'GET') {
                 if (pathName === '/') {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/index.html'), 'text/html');
@@ -109,7 +93,6 @@ const server = http.createServer(async (req, res) => {
                 } else if (pathName === '/news-management' || pathName === '/news-management.html') {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/news-management.html'), 'text/html');
                 }
-                // Rute pentru paginile de autentificare și înregistrare
                 else if (pathName === '/login' || pathName === '/login.html') {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/login.html'), 'text/html');
                 } else if (pathName === '/register' || pathName === '/register.html') {
@@ -117,7 +100,6 @@ const server = http.createServer(async (req, res) => {
                 } else if (pathName === '/register-admin' || pathName === '/register-admin.html') {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/register-admin.html'), 'text/html');
                 }
-                // Rută pentru verificarea existenței administratorilor
                 else if (pathName === '/api/check-admin-exists') {
                     securityHeaders(req, res, async () => {
                         try {
@@ -137,22 +119,47 @@ const server = http.createServer(async (req, res) => {
                         }
                     });
                 }
-                // ========== API ROUTES FOR PRODUCTS ==========
                 else if (pathName === '/api/products') {
                     securityHeaders(req, res, async () => {
                         try {
-                            // Construiește filtre pentru ambele colecții
-                            const { category, brand, sort, limit = 20, page = 1 } = parsedUrl.query;
+                            const { category, brand, sort, limit = 20, page = 1, search } = parsedUrl.query;
+
                             const filter = {};
                             if (category) filter.category = category;
                             if (brand) filter.brand = brand;
 
-                            // Ia produsele din ambele colecții
-                            const products1 = await mongoose.connection.db.collection('products').find(filter).toArray();
-                            const products2 = await mongoose.connection.db.collection('amazonproducts').find(filter).toArray();
+                            const { normalizeSearchTerm, getSynonyms, buildSearchPipeline } = require('./utils/searchEnhancer');
+
+                            const normalizedSearch = normalizeSearchTerm(search);
+                            const synonyms = getSynonyms(normalizedSearch);
+
+                            const pipeline = synonyms.length > 0
+                                ? buildSearchPipeline(synonyms, filter)
+                                : [{ $match: filter }];
+
+                            let products1 = await mongoose.connection.db.collection('products').aggregate(pipeline).toArray();
+                            let products2 = await mongoose.connection.db.collection('amazonproducts').aggregate(pipeline).toArray();
                             let products = [...products1, ...products2];
 
-                            // Sortare (manual)
+                            if (products.length === 0 && synonyms.length > 0) {
+                                const fallbackPipeline = [
+                                    {
+                                        $match: {
+                                            $or: synonyms.map(term => ({
+                                                $or: [
+                                                    { name: { $regex: term, $options: 'i' } },
+                                                    { brand: { $regex: term, $options: 'i' } },
+                                                    { category: { $regex: term, $options: 'i' } }
+                                                ]
+                                            }))
+                                        }
+                                    }
+                                ];
+
+                                const fb1 = await mongoose.connection.db.collection('products').aggregate(fallbackPipeline).toArray();
+                                const fb2 = await mongoose.connection.db.collection('amazonproducts').aggregate(fallbackPipeline).toArray();
+                                products = [...fb1, ...fb2];
+                            }
                             if (sort) {
                                 const [field, order] = sort.split(':');
                                 products = products.sort((a, b) => {
@@ -160,12 +167,27 @@ const server = http.createServer(async (req, res) => {
                                     if (order === 'desc') return b[field] > a[field] ? 1 : -1;
                                     return a[field] > b[field] ? 1 : -1;
                                 });
+                            } else if (search) {
+                                const lowerTerms = synonyms.map(t => t.toLowerCase());
+
+                                products = products.map(p => {
+                                    let score = 0;
+                                    const fields = [p.name, p.title, p.description, p.brand, p.category];
+
+                                    for (const field of fields) {
+                                        if (!field) continue;
+                                        const text = field.toLowerCase();
+                                        for (const term of lowerTerms) {
+                                            if (text.includes(term)) score += 2;
+                                            else if (text.split(' ').some(w => w.startsWith(term))) score += 1;
+                                        }
+                                    }
+
+                                    return { ...p, _score: score };
+                                }).sort((a, b) => b._score - a._score);
                             }
 
-                            // Total
                             const total = products.length;
-
-                            // Aplică paginarea (manual)
                             const pageInt = parseInt(page);
                             const limitInt = parseInt(limit);
                             const paginated = products.slice((pageInt - 1) * limitInt, pageInt * limitInt);
@@ -189,8 +211,8 @@ const server = http.createServer(async (req, res) => {
                             }));
                         }
                     });
-                } else if (pathName.startsWith('/api/products/') && pathName.split('/').length === 4) {
-                    // Extrage produsul după ID
+                }
+                else if (pathName.startsWith('/api/products/') && pathName.split('/').length === 4) {
                     securityHeaders(req, res, async () => {
                         try {
                             const id = pathName.split('/')[3];
@@ -218,26 +240,17 @@ const server = http.createServer(async (req, res) => {
                         }
                     });
                 }
-                // ========== API ROUTES FOR SOURCES ==========
                 else if (pathName === '/api/sources') {
-                    // Listează toate sursele
                     securityHeaders(req, res, async () => {
                         try {
-                            // Parametri de filtrare și paginare
                             const { type, active, sort, limit = 20, page = 1 } = parsedUrl.query;
-
-                            // Construiește filtre
                             const filters = {};
                             if (type) filters.type = type;
                             if (active !== undefined) filters.active = active === 'true';
-
-                            // Opțiuni
                             const options = {
                                 limit: parseInt(limit),
                                 page: parseInt(page)
                             };
-
-                            // Sortare
                             if (sort) {
                                 const [field, order] = sort.split(':');
                                 options.sort = { [field]: order === 'desc' ? -1 : 1 };
@@ -266,7 +279,6 @@ const server = http.createServer(async (req, res) => {
                         }
                     });
                 } else if (pathName.match(/^\/api\/sources\/[a-zA-Z0-9]+$/)) {
-                    // Obține detaliile unei surse
                     securityHeaders(req, res, async () => {
                         try {
                             const id = pathName.split('/')[3];
@@ -297,12 +309,9 @@ const server = http.createServer(async (req, res) => {
                         }
                     });
                 } else if (pathName.match(/^\/api\/sources\/by-type\/[a-zA-Z]+$/)) {
-                    // Obține surse după tip
                     securityHeaders(req, res, async () => {
                         try {
                             const type = pathName.split('/')[4];
-
-                            // Validare tip
                             const validTypes = ['rss', 'api', 'scraping', 'manual'];
                             if (!validTypes.includes(type)) {
                                 res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -331,12 +340,9 @@ const server = http.createServer(async (req, res) => {
                         }
                     });
                 }
-                // ========== API ROUTES FOR NEWS & RSS ==========
                 else if (pathName === '/api/news') {
-                    // Obține lista de știri, cu filtrare și paginare
                     securityHeaders(req, res, async () => {
                         try {
-                            // Parametri de filtrare și paginare
                             const {
                                 source,
                                 category,
@@ -346,18 +352,15 @@ const server = http.createServer(async (req, res) => {
                                 page = 1
                             } = parsedUrl.query;
 
-                            // Construiește filtre
                             const filters = {};
                             if (source) filters.source = source;
                             if (category) filters.categories = category;
 
-                            // Opțiuni
                             const options = {
                                 limit: parseInt(limit),
                                 page: parseInt(page)
                             };
 
-                            // Sortare
                             if (sort) {
                                 const [field, order] = sort.split(':');
                                 options.sort = { [field]: order === 'desc' ? -1 : 1 };
@@ -366,10 +369,8 @@ const server = http.createServer(async (req, res) => {
                             let news;
                             let totalNews;
 
-                            // Dacă există termen de căutare, folosește căutarea specială
                             if (search) {
                                 news = await newsService.searchNews(search, options);
-                                // Pentru simplitate, nu calculăm numărul total pentru căutări
                                 totalNews = news.length;
                             } else {
                                 news = await newsService.getNews(filters, options);
@@ -397,7 +398,6 @@ const server = http.createServer(async (req, res) => {
                     });
                 }
                 else if (pathName.match(/^\/api\/news\/[a-zA-Z0-9]+$/)) {
-                    // Obține detalii știre
                     securityHeaders(req, res, async () => {
                         try {
                             const id = pathName.split('/')[3];
@@ -429,7 +429,6 @@ const server = http.createServer(async (req, res) => {
                     });
                 }
                 else if (pathName.match(/^\/api\/news\/latest\/\d+$/)) {
-                    // Obține cele mai recente știri
                     securityHeaders(req, res, async () => {
                         try {
                             const limit = parseInt(pathName.split('/')[4]) || 10;
@@ -453,7 +452,6 @@ const server = http.createServer(async (req, res) => {
                     });
                 }
                 else if (pathName.match(/^\/api\/news\/by-source\/[a-zA-Z0-9]+$/)) {
-                    // Obține știri după sursă
                     securityHeaders(req, res, async () => {
                         try {
                             const sourceId = pathName.split('/')[4];
@@ -489,7 +487,6 @@ const server = http.createServer(async (req, res) => {
                     });
                 }
                 else if (pathName.match(/^\/api\/news\/by-category\/[a-zA-Z0-9-]+$/)) {
-                    // Obține știri după categorie
                     securityHeaders(req, res, async () => {
                         try {
                             const category = pathName.split('/')[4];
@@ -525,7 +522,6 @@ const server = http.createServer(async (req, res) => {
                     });
                 }
                 else if (pathName === '/api/news/categories') {
-                    // Aplică headers de securitate
                     securityHeaders(req, res, async () => {
                         try {
                             const categories = await News.distinct('categories');
@@ -533,7 +529,7 @@ const server = http.createServer(async (req, res) => {
                             res.writeHead(200, { 'Content-Type': 'application/json' });
                             res.end(JSON.stringify({
                                 success: true,
-                                categories: categories.filter(cat => cat) // Filtrăm valorile null/undefined
+                                categories: categories.filter(cat => cat)
                             }));
                         } catch (error) {
                             console.error('Eroare la obținerea categoriilor de știri:', error);
@@ -547,7 +543,6 @@ const server = http.createServer(async (req, res) => {
                     });
                 }
                 else if (pathName === '/api/news/stats') {
-                    // Aplică headers de securitate
                     securityHeaders(req, res, async () => {
                         try {
                             const stats = await newsService.getNewsStats();
@@ -576,7 +571,6 @@ const server = http.createServer(async (req, res) => {
                     });
                 }
                 else if (pathName === '/api/rss/stats') {
-                    // Aplică headers de securitate și autentificare
                     securityHeaders(req, res, async () => {
                         verifyToken(req, res, async () => {
                             try {
@@ -600,7 +594,6 @@ const server = http.createServer(async (req, res) => {
                     });
                 }
                 else if (pathName === '/api/news/distribution') {
-                    // Aplică headers de securitate și autentificare
                     securityHeaders(req, res, async () => {
                         verifyToken(req, res, async () => {
                             try {
@@ -624,12 +617,10 @@ const server = http.createServer(async (req, res) => {
                     });
                 }
                 else if (pathName === '/api/rss/schedule') {
-                    // Aplică headers de securitate și autentificare
                     securityHeaders(req, res, async () => {
                         verifyToken(req, res, async () => {
                             isAdmin(req, res, async () => {
                                 try {
-                                    // Returnează starea job-urilor
                                     res.writeHead(200, { 'Content-Type': 'application/json' });
                                     res.end(JSON.stringify({
                                         success: true,
@@ -638,12 +629,12 @@ const server = http.createServer(async (req, res) => {
                                             {
                                                 name: 'rssFeedUpdate',
                                                 description: 'Verifică sursele RSS pentru actualizare',
-                                                schedule: '*/10 * * * *' // Cron expression: la fiecare 10 minute
+                                                schedule: '*/10 * * * *'
                                             },
                                             {
                                                 name: 'cleanOldNews',
                                                 description: 'Curăță știrile vechi neprocesate',
-                                                schedule: '0 3 * * *' // Cron expression: la 3 AM în fiecare zi
+                                                schedule: '0 3 * * *'
                                             }
                                         ]
                                     }));
@@ -661,7 +652,6 @@ const server = http.createServer(async (req, res) => {
                     });
                 }
                 else if (pathName === '/api/feed/products') {
-                    // Generează feed RSS cu produse recomandate
                     securityHeaders(req, res, async () => {
                         try {
                             const { limit = 20, category } = parsedUrl.query;
@@ -669,12 +659,10 @@ const server = http.createServer(async (req, res) => {
                             const filter = {};
                             if (category) filter.category = category;
 
-                            // Obține cele mai recente produse
                             const products = await Product.find(filter)
                                 .sort({ createdAt: -1 })
                                 .limit(parseInt(limit));
 
-                            // Generează feed-ul
                             const baseUrl = `http://${req.headers.host || 'localhost:3000'}`;
                             const rssFeedGenerator = require('./services/rssFeedGeneratorService');
                             const xmlFeed = await rssFeedGenerator.generateProductRssFeed(
@@ -698,7 +686,6 @@ const server = http.createServer(async (req, res) => {
                     });
                 }
                 else if (pathName === '/api/feed/news') {
-                    // Generează feed RSS cu ultimele știri
                     securityHeaders(req, res, async () => {
                         try {
                             const { limit = 20, category, source } = parsedUrl.query;
@@ -707,12 +694,10 @@ const server = http.createServer(async (req, res) => {
                             if (category) filter.categories = category;
                             if (source) filter.source = source;
 
-                            // Obține cele mai recente știri
                             const news = await News.find(filter)
                                 .sort({ publishDate: -1 })
                                 .limit(parseInt(limit));
 
-                            // Generează feed-ul
                             const baseUrl = `http://${req.headers.host || 'localhost:3000'}`;
                             const rssFeedGenerator = require('./services/rssFeedGeneratorService');
                             const xmlFeed = await rssFeedGenerator.generateNewsRssFeed(
@@ -735,9 +720,7 @@ const server = http.createServer(async (req, res) => {
                         }
                     });
                 }
-                // Fișiere statice
                                 else if (pathName.match(/\.(css|js|png|jpg|jpeg|gif|svg)$/)) {
-                                    // Servire fișiere statice (CSS, JS, imagini)
                                     const extname = path.extname(pathName);
                                     let contentType = 'text/html';
 
@@ -760,12 +743,10 @@ const server = http.createServer(async (req, res) => {
                                 }
                             } else if (method === 'POST') {
                                 if (pathName === '/api/login') {
-                                    // Aplică headers de securitate
                                     securityHeaders(req, res, async () => {
                                         try {
                                             const credentials = await parseRequestBody(req);
 
-                                            // Validare date de intrare
                                             if (!credentials.username || !credentials.password) {
                                                 res.writeHead(400, { 'Content-Type': 'application/json' });
                                                 res.end(JSON.stringify({
@@ -775,7 +756,6 @@ const server = http.createServer(async (req, res) => {
                                                 return;
                                             }
 
-                                            // Autentificare prin serviciul de autentificare
                                             const result = await authService.authenticate(
                                                 sanitizeText(credentials.username),
                                                 credentials.password
@@ -798,12 +778,10 @@ const server = http.createServer(async (req, res) => {
                                         }
                                     });
                                 } else if (pathName === '/api/register') {
-                                    // Înregistrare publică (membri și primul admin)
                                     securityHeaders(req, res, async () => {
                                         try {
                                             const userData = await parseRequestBody(req);
 
-                                            // Validare date
                                             if (!userData.username || !userData.password) {
                                                 res.writeHead(400, { 'Content-Type': 'application/json' });
                                                 res.end(JSON.stringify({
@@ -813,11 +791,9 @@ const server = http.createServer(async (req, res) => {
                                                 return;
                                             }
 
-                                            // Pentru înregistrare admin, verifică dacă există deja administratori
                                             if (userData.role === 'admin') {
                                                 const adminCount = await User.countDocuments({ role: 'admin' });
 
-                                                // Doar dacă nu există administratori, permite înregistrarea
                                                 if (adminCount > 0) {
                                                     res.writeHead(403, { 'Content-Type': 'application/json' });
                                                     res.end(JSON.stringify({
@@ -828,7 +804,6 @@ const server = http.createServer(async (req, res) => {
                                                 }
                                             }
 
-                                            // Înregistrare utilizator nou
                                             const result = await authService.registerUser({
                                                 username: sanitizeText(userData.username),
                                                 password: userData.password,
@@ -854,16 +829,13 @@ const server = http.createServer(async (req, res) => {
                                         }
                                     });
                                 } else if (pathName === '/api/admin/users') {
-                                    // Rută protejată pentru crearea utilizatorilor noi (admin only)
                                     securityHeaders(req, res, async () => {
                                         try {
-                                            // Verifică autentificarea și rolul
                                             verifyToken(req, res, async () => {
                                                 isAdmin(req, res, async () => {
                                                     try {
                                                         const userData = await parseRequestBody(req);
 
-                                                        // Validare date
                                                         if (!userData.username || !userData.password) {
                                                             res.writeHead(400, { 'Content-Type': 'application/json' });
                                                             res.end(JSON.stringify({
@@ -872,8 +844,6 @@ const server = http.createServer(async (req, res) => {
                                                             }));
                                                             return;
                                                         }
-
-                                                        // Înregistrare utilizator nou
                                                         const result = await authService.registerUser({
                                                             username: sanitizeText(userData.username),
                                                             password: userData.password,
@@ -907,16 +877,13 @@ const server = http.createServer(async (req, res) => {
                                         }
                                     });
                                 } else if (pathName === '/api/products') {
-                                    // Rută protejată pentru crearea produselor noi
                                     securityHeaders(req, res, async () => {
                                         try {
-                                            // Verifică autentificarea și rolul
                                             verifyToken(req, res, async () => {
                                                 isAdmin(req, res, async () => {
                                                     try {
                                                         const productData = await parseRequestBody(req);
 
-                                                        // Validare și sanitizare date
                                                         const validationResult = validateProduct(productData);
 
                                                         if (!validationResult.isValid) {
@@ -929,7 +896,6 @@ const server = http.createServer(async (req, res) => {
                                                             return;
                                                         }
 
-                                                        // Sanitizare câmpuri text
                                                         const sanitizedProduct = {
                                                             ...productData,
                                                             name: sanitizeText(productData.name),
@@ -940,7 +906,6 @@ const server = http.createServer(async (req, res) => {
                                                             features: productData.features?.map(feature => sanitizeText(feature))
                                                         };
 
-                                                        // Creează produsul nou
                                                         const newProduct = new Product(sanitizedProduct);
                                                         const savedProduct = await newProduct.save();
 
@@ -971,7 +936,6 @@ const server = http.createServer(async (req, res) => {
                                         }
                                     });
                                 } else if (pathName === '/api/sources') {
-                                    // Creează o sursă nouă (necesită autentificare)
                                     securityHeaders(req, res, async () => {
                                         try {
                                             verifyToken(req, res, async () => {
@@ -979,7 +943,6 @@ const server = http.createServer(async (req, res) => {
                                                     try {
                                                         const sourceData = await parseRequestBody(req);
 
-                                                        // Validare date de bază
                                                         if (!sourceData.name || !sourceData.type || !sourceData.url) {
                                                             res.writeHead(400, { 'Content-Type': 'application/json' });
                                                             res.end(JSON.stringify({
@@ -1018,7 +981,6 @@ const server = http.createServer(async (req, res) => {
                                         }
                                     });
                                 } else if (pathName === '/api/rss/process') {
-                                    // Procesează manual feed-uri RSS (pentru admin)
                                     securityHeaders(req, res, async () => {
                                         try {
                                             verifyToken(req, res, async () => {
@@ -1028,7 +990,6 @@ const server = http.createServer(async (req, res) => {
                                                         let results;
 
                                                         if (body && body.sourceId) {
-                                                            // Procesează doar un anumit feed
                                                             const source = await Source.findById(body.sourceId);
 
                                                             if (!source) {
@@ -1051,7 +1012,6 @@ const server = http.createServer(async (req, res) => {
 
                                                             results = await rssService.processRssFeed(source);
                                                         } else {
-                                                            // Procesează toate feed-urile
                                                             results = await rssService.processAllRssFeeds();
                                                         }
 
@@ -1081,12 +1041,10 @@ const server = http.createServer(async (req, res) => {
                                         }
                                     });
                                 } else if (pathName === '/api/rss/schedule') {
-                                    // Configurare job-uri programate pentru RSS
                                     securityHeaders(req, res, async () => {
                                         verifyToken(req, res, async () => {
                                             isAdmin(req, res, async () => {
                                                 try {
-                                                    // Actualizează configurația job-urilor
                                                     const body = await parseRequestBody(req);
 
                                                     if (body.action === 'start') {
@@ -1137,17 +1095,14 @@ const server = http.createServer(async (req, res) => {
                                 }
                             } else if (method === 'PUT') {
                                 if (pathName.startsWith('/api/products/')) {
-                                    // Rută protejată pentru actualizarea produselor
                                     securityHeaders(req, res, async () => {
                                         try {
-                                            // Verifică autentificarea și rolul
                                             verifyToken(req, res, async () => {
                                                 isAdmin(req, res, async () => {
                                                     try {
                                                         const id = pathName.split('/')[3];
                                                         const updates = await parseRequestBody(req);
 
-                                                        // Validare și sanitizare date
                                                         const validationResult = validateProduct(updates);
 
                                                         if (!validationResult.isValid) {
@@ -1160,7 +1115,6 @@ const server = http.createServer(async (req, res) => {
                                                             return;
                                                         }
 
-                                                        // Sanitizare câmpuri text
                                                         const sanitizedUpdates = {
                                                             ...updates,
                                                             name: updates.name ? sanitizeText(updates.name) : undefined,
@@ -1171,7 +1125,6 @@ const server = http.createServer(async (req, res) => {
                                                             features: updates.features?.map(feature => sanitizeText(feature))
                                                         };
 
-                                                        // Actualizează produsul
                                                         const product = await Product.findByIdAndUpdate(id, sanitizedUpdates, {
                                                             new: true,
                                                             runValidators: true
@@ -1213,7 +1166,6 @@ const server = http.createServer(async (req, res) => {
                                         }
                                     });
                                 } else if (pathName.match(/^\/api\/sources\/[a-zA-Z0-9]+$/)) {
-                                    // Actualizează o sursă (necesită autentificare)
                                     securityHeaders(req, res, async () => {
                                         try {
                                             verifyToken(req, res, async () => {
@@ -1262,7 +1214,6 @@ const server = http.createServer(async (req, res) => {
                                 }
                             } else if (method === 'PATCH') {
                                 if (pathName.match(/^\/api\/sources\/[a-zA-Z0-9]+\/toggle-active$/)) {
-                                    // Activează/dezactivează o sursă (necesită autentificare)
                                     securityHeaders(req, res, async () => {
                                         try {
                                             verifyToken(req, res, async () => {
@@ -1318,7 +1269,6 @@ const server = http.createServer(async (req, res) => {
                                         }
                                     });
                                 } else if (pathName.match(/^\/api\/news\/[a-zA-Z0-9]+\/process$/)) {
-                                    // Marchează o știre ca procesată (pentru admin)
                                     securityHeaders(req, res, async () => {
                                         try {
                                             verifyToken(req, res, async () => {
@@ -1367,16 +1317,13 @@ const server = http.createServer(async (req, res) => {
                                 }
                             } else if (method === 'DELETE') {
                                 if (pathName.startsWith('/api/products/')) {
-                                    // Rută protejată pentru ștergerea produselor
                                     securityHeaders(req, res, async () => {
                                         try {
-                                            // Verifică autentificarea și rolul
                                             verifyToken(req, res, async () => {
                                                 isAdmin(req, res, async () => {
                                                     try {
                                                         const id = pathName.split('/')[3];
 
-                                                        // Șterge produsul
                                                         const product = await Product.findByIdAndDelete(id);
 
                                                         if (!product) {
@@ -1414,7 +1361,6 @@ const server = http.createServer(async (req, res) => {
                                         }
                                     });
                                 } else if (pathName.match(/^\/api\/sources\/[a-zA-Z0-9]+$/)) {
-                                    // Șterge o sursă (necesită autentificare)
                                     securityHeaders(req, res, async () => {
                                         try {
                                             verifyToken(req, res, async () => {
@@ -1460,13 +1406,12 @@ const server = http.createServer(async (req, res) => {
                                                                             });
                                                                         }
                                                                     } else if (method === 'OPTIONS') {
-                                                                        // Tratează pre-flight CORS requests
                                                                         securityHeaders(req, res, () => {
                                                                             res.writeHead(204, {
                                                                                 'Access-Control-Allow-Origin': '*',
                                                                                 'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
                                                                                 'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-                                                                                'Access-Control-Max-Age': '86400' // 24 ore
+                                                                                'Access-Control-Max-Age': '86400'
                                                                             });
                                                                             res.end();
                                                                         });
@@ -1486,12 +1431,10 @@ const server = http.createServer(async (req, res) => {
                                                             });
                                                         });
 
-                                                        // Handler pentru erori neașteptate la nivel de server
                                                         server.on('error', (err) => {
                                                             console.error('Eroare server:', err);
                                                         });
 
-                                                        // Pornim serverul
                                                         server.listen(config.PORT, () => {
                                                             console.log(`📡 Serverul rulează la http://localhost:${config.PORT}`);
                                                             console.log(`🧪 Rutele API disponibile pentru surse și știri:
@@ -1535,7 +1478,6 @@ const server = http.createServer(async (req, res) => {
                                                             `);
                                                         });
 
-                                                        // Gestionare închidere gracioasă
                                                         process.on('SIGINT', () => {
                                                             console.log('Închidere server...');
                                                             server.close(() => {

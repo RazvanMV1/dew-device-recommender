@@ -430,6 +430,20 @@ function loadProducts(filter = 'all', resetPage = true) {
         });
 }
 
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                const query = searchInput.value.trim();
+                if (query.length > 0) {
+                    window.location.href = `/products?search=${encodeURIComponent(query)}`;
+                }
+            }
+        });
+    }
+});
+
                                 function loadMoreProducts() {
                                     if (hasMoreProducts) {
                                         currentPage++;
