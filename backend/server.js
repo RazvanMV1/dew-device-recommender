@@ -166,10 +166,6 @@ const server = http.createServer(async (req, res) => {
                     });
                 }
 
-
-
-                // ========== API ROUTES FOR PRODUCTS ==========
-
                 else if (pathName === '/api/products') {
                     securityHeaders(req, res, async () => {
                         try {
@@ -263,12 +259,20 @@ const server = http.createServer(async (req, res) => {
                         }
                     });
                 }
-                // ==================== STATISTICI PRODUSE ====================
+                else if (pathName.match(/^\/api\/products\/[a-zA-Z0-9]+\/recommendations$/)) {
+                    const productId = pathName.split('/')[3];
+                    const { getSimilarProducts } = require('./services/recommendationService');
+                    const recommended = await getSimilarProducts(productId);
+
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        success: true,
+                        recommendations: recommended
+                    }));
+                }
                 else if (pathName === '/api/products/stats') {
-                    // Endpoint pentru statistici produse (public)
                     securityHeaders(req, res, async () => {
                         try {
-                            // Top 5 produse după numărul de recenzii
                             const topProducts = await mongoose.connection.db.collection('products')
                                 .find({})
                                 .sort({ reviewsCount: -1 })
@@ -276,19 +280,16 @@ const server = http.createServer(async (req, res) => {
                                 .project({ name: 1, reviewsCount: 1, category: 1, brand: 1, _id: 0 })
                                 .toArray();
 
-                            // Distribuție pe categorii (agregare + normalizare)
                             const categoriesAgg = await mongoose.connection.db.collection('products').aggregate([
                                 { $group: { _id: "$category", count: { $sum: 1 } } },
                                 { $sort: { count: -1 } }
                             ]).toArray();
 
-                            // Normalizare categorii
                             const categoryMap = {};
                             categoriesAgg.forEach(cat => {
                                 if (!cat._id) return;
                                 let norm = cat._id.trim().toLowerCase();
 
-                                // Reguli de normalizare (adaugă aici ce ai nevoie)
                                 if (["laptopuri", "laptop", "laptops"].includes(norm)) norm = "laptop";
                                 if (["telefoane", "telefon", "phones"].includes(norm)) norm = "telefon";
                                 if (["tablete", "tablet", "tablets"].includes(norm)) norm = "tabletă";
@@ -299,7 +300,6 @@ const server = http.createServer(async (req, res) => {
                                 if (["drone", "dronă"].includes(norm)) norm = "dronă";
                                 if (["altele", "other", "diverse"].includes(norm)) norm = "altele";
 
-                                // Transformă la format cu prima literă mare
                                 let displayName = norm.charAt(0).toUpperCase() + norm.slice(1);
 
                                 if (categoryMap[norm]) {
@@ -311,10 +311,8 @@ const server = http.createServer(async (req, res) => {
                                     };
                                 }
                             });
-                            // Transformă rezultatul în array pentru frontend
                             const categoriesNormalized = Object.values(categoryMap);
 
-                            // Distribuție pe culori - doar cele relevante
                             const allowedColors = [
                                 "Black", "White", "Silver", "Gray", "Blue", "Red", "Green", "Pink", "Gold", "Yellow", "Purple", "Orange",
                                 "Brown", "Beige", "Cyan", "Violet", "Rose", "Mint", "Cream", "Graphite", "Obsidian", "Teal", "Bronze", "Multicolor"
@@ -343,8 +341,6 @@ const server = http.createServer(async (req, res) => {
                         }
                     });
                 }
-                else if (pathName.startsWith('/api/products/') && pathName.split('/').length === 4) {
-                    // Extrage produsul după ID
                 else if (pathName.startsWith('/api/products/') && pathName.split('/').length === 4) {
                     securityHeaders(req, res, async () => {
                         try {
@@ -980,21 +976,18 @@ const server = http.createServer(async (req, res) => {
                                                     res.end(JSON.stringify({ success: false, message: 'Toate câmpurile sunt obligatorii.' }));
                                                     return;
                                                 }
-                                                // Găsește userul în DB
                                                 const user = await User.findById(req.user.id);
                                                 if (!user) {
                                                     res.writeHead(404, { 'Content-Type': 'application/json' });
                                                     res.end(JSON.stringify({ success: false, message: 'Utilizator inexistent.' }));
                                                     return;
                                                 }
-                                                // Verifică parola veche
                                                 const valid = await user.comparePassword(currentPassword);
                                                 if (!valid) {
                                                     res.writeHead(400, { 'Content-Type': 'application/json' });
                                                     res.end(JSON.stringify({ success: false, message: 'Parola veche este greșită.' }));
                                                     return;
                                                 }
-                                                // Setează parola nouă și salvează
                                                 user.password = newPassword;
                                                 await user.save();
                                                 res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -1007,7 +1000,6 @@ const server = http.createServer(async (req, res) => {
                                     });
                                 }
                                  else if (pathName === '/api/register') {
-                                    // Înregistrare publică (membri și primul admin)
                                 } else if (pathName === '/api/register') {
                                     securityHeaders(req, res, async () => {
                                         try {
