@@ -1,29 +1,28 @@
 const mongoose = require('mongoose');
 
 const ProductSchema = new mongoose.Schema({
-    name: { type: String, required: true },         // Sau title
+    name: { type: String, required: true },
     brand: { type: String },
     model: { type: String },
     price: { type: Number, required: false },
-    currency: { type: String },                     // Nou!
+    currency: { type: String },
     color: { type: String },
     autonomy: { type: String },
     category: { type: String },
-    asin: { type: String },                         // Nou!
-    url: { type: String },                          // Nou!
-    image: { type: String },                        // Folosește thumbnailImage sau image
-    galleryThumbnails: { type: [String] },          // Nou!
-    description: { type: String },                  // Nou!
+    asin: { type: String },
+    url: { type: String },
+    image: { type: String },
+    galleryThumbnails: { type: [String] },
+    description: { type: String },
     features: { type: [String] },
-    stars: { type: Number },                        // Nou!
-    reviewsCount: { type: Number },                 // Nou!
-    inStock: { type: Boolean },                     // Nou!
-    breadCrumbs: { type: String },                  // Nou! Poți salva calea de categorii aici
+    stars: { type: Number },
+    reviewsCount: { type: Number },
+    inStock: { type: Boolean },
+    breadCrumbs: { type: String },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });
 
-// Indecși (păstrezi ce ai)
 ProductSchema.index({ name: 1 });
 ProductSchema.index({ brand: 1 });
 ProductSchema.index({ category: 1 });

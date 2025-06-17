@@ -1,56 +1,39 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Inițializare pentru UI
     initUI();
-
-    // Încarcă datele pentru produse și știri
     loadProducts();
     loadNews();
 
-    // Adaugă eveniment pentru filtrare produse
     const filterBtns = document.querySelectorAll('.filter-btn');
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            // Elimină clasa active de pe toate butoanele
-            filterBtns.forEach(b => b.classList.remove('active'));
-            // Adaugă clasa active pe butonul curent
-            this.classList.add('active');
 
-            // Filtrează produsele după categoria selectată
-            const filter = this.getAttribute('data-filter');
-            loadProducts(filter);
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const selectedCategory = btn.dataset.filter || 'all';
+            loadProducts(selectedCategory);
         });
     });
-
-    // Adaugă eveniment pentru butonul "Load More"
     document.getElementById('load-more').addEventListener('click', function() {
         loadMoreProducts();
     });
-
-    // Inițializează butonul de scroll to top
     initScrollToTop();
 });
 
-// Funcție pentru inițializarea UI
 function initUI() {
-    // Verifică dacă utilizatorul este autentificat
     checkAuthStatus();
 
-    // Inițializarea meniului utilizator
     const userMenuTrigger = document.getElementById('user-menu-trigger');
     const userMenu = document.getElementById('user-menu');
 
     userMenuTrigger.addEventListener('click', function() {
         userMenu.classList.toggle('active');
     });
-
-    // Închide meniul la click în afara acestuia
     document.addEventListener('click', function(event) {
         if (!userMenu.contains(event.target) && !userMenuTrigger.contains(event.target)) {
             userMenu.classList.remove('active');
         }
     });
-
-    // Inițializarea meniului mobil
     const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
     const mainNav = document.querySelector('.main-nav');
 
@@ -58,11 +41,8 @@ function initUI() {
         this.classList.toggle('active');
         mainNav.classList.toggle('active');
     });
-
-    // Inițializare modal produs
     initProductModal();
 
-    // Adaugă eveniment pentru butonul de logout
     const logoutLink = document.getElementById('logout-link');
     if (logoutLink) {
         logoutLink.addEventListener('click', function(e) {
@@ -72,33 +52,26 @@ function initUI() {
     }
 }
 
-// Funcție pentru verificarea statusului de autentificare
 function checkAuthStatus() {
     const authToken = localStorage.getItem('authToken');
 
     if (authToken) {
         try {
-            // Obține datele utilizatorului din localStorage
             const userData = JSON.parse(localStorage.getItem('userData') || '{}');
 
-            // Actualizează UI pentru utilizator autentificat
             document.getElementById('dropdown-user-name').textContent = userData.username || 'Utilizator';
             document.getElementById('dropdown-user-role').textContent = userData.role === 'admin' ? 'Administrator' : 'Membru';
 
-            // Afișează link-urile pentru utilizator autentificat
             document.getElementById('profile-link').style.display = 'flex';
             document.getElementById('preferences-link').style.display = 'flex';
             document.getElementById('logout-link').style.display = 'flex';
 
-            // Ascunde link-urile pentru utilizator neautentificat
             document.getElementById('auth-link').style.display = 'none';
             document.getElementById('register-link').style.display = 'none';
 
-            // Actualizează textul din header
             const userNameElement = document.querySelector('.user-name');
             userNameElement.textContent = userData.username || 'Contul meu';
 
-            // Adaugă link către dashboard pentru administratori
             if (userData.role === 'admin') {
                 const adminLinkHTML = `
                     <a href="/admin" class="dropdown-item">
@@ -115,7 +88,6 @@ function checkAuthStatus() {
     }
 }
 
-// Funcție pentru inițializarea butonului de scroll to top
 function initScrollToTop() {
     const scrollTopButton = document.getElementById('scroll-top');
 
@@ -135,24 +107,20 @@ function initScrollToTop() {
     });
 }
 
-// Funcție pentru inițializarea modalului de produs
 function initProductModal() {
     const productModal = document.getElementById('product-modal');
     const closeModalBtn = productModal.querySelector('.close-modal');
 
-    // Închide modal la click pe butonul de închidere
     closeModalBtn.addEventListener('click', function() {
         closeProductModal();
     });
 
-    // Închide modal la click în afara conținutului
     productModal.addEventListener('click', function(e) {
         if (e.target === productModal) {
             closeProductModal();
         }
     });
 
-    // Închide modal la apăsarea tastei Escape
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && productModal.classList.contains('active')) {
             closeProductModal();
@@ -160,12 +128,10 @@ function initProductModal() {
     });
 }
 
-// Funcție pentru deschiderea modalului cu detalii despre produs
 function openProductModal(productId) {
     const productModal = document.getElementById('product-modal');
     const productDetailContainer = document.getElementById('product-detail-container');
 
-    // Afișează loading spinner
     productDetailContainer.innerHTML = `
         <div class="loading-spinner">
             <i class="fas fa-spinner fa-spin"></i>
@@ -173,18 +139,15 @@ function openProductModal(productId) {
         </div>
     `;
 
-    // Activează modalul
     productModal.classList.add('active');
-    document.body.style.overflow = 'hidden'; // Previne scrollarea în pagină
+    document.body.style.overflow = 'hidden';
 
-    // Încarcă detaliile produsului
     fetch(`/api/products/${productId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success && data.product) {
                 const product = data.product;
 
-                // Generează HTML pentru detaliile produsului
                 const productHTML = `
                     <div class="product-detail-content">
                         <div class="product-gallery">
@@ -195,7 +158,6 @@ function openProductModal(productId) {
                                 <div class="product-thumbnail active">
                                     <img src="${product.image || 'https://via.placeholder.com/600x400?text=No+Image'}" alt="${product.name}">
                                 </div>
-                                <!-- Placeholder thumbnails -->
                                 <div class="product-thumbnail">
                                     <img src="https://via.placeholder.com/150?text=Image+2" alt="Thumbnail">
                                 </div>
@@ -224,34 +186,33 @@ function openProductModal(productId) {
                                 <span class="rating-count">(24 recenzii)</span>
                             </div>
                             <div class="product-detail-price">
-                                                                <span class="detail-current-price">${product.price.toFixed(2)} RON</span>
-                                                                <span class="detail-old-price">${(product.price * 1.2).toFixed(2)} RON</span>
-                                                                <span class="detail-discount">-20%</span>
-                                                            </div>
-                                                            <div class="product-detail-description">
-                                                                <p>${product.description || 'Acest produs nu are o descriere detaliată. Este un dispozitiv electronic ' + product.category + ' de înaltă calitate produs de ' + (product.brand || 'un producător cunoscut') + '.'}
-                                                                </p>
-                                                            </div>
-                                                            <div class="product-detail-features">
-                                                                <h4>Caracteristici principale</h4>
-                                                                <ul class="feature-list">
-                                                                    ${generateFeaturesList(product)}
-                                                                </ul>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="product-comparable-models">
-                                                        <h4>Modele similare</h4>
-                                                        <div class="comparable-models-grid" id="comparable-models">
-                                                            <!-- Placeholder pentru modele similare -->
-                                                            <div class="comparable-model-card">
-                                                                <div class="comparable-model-img">
-                                                                    <img src="https://via.placeholder.com/80" alt="Model similar">
-                                                                </div>
-                                                                <div class="comparable-model-name">Model similar 1</div>
-                                                                <div class="comparable-model-price">2199 RON</div>
-                                                            </div>
-                                                            <div class="comparable-model-card">
+                                <span class="detail-current-price">${product.price.toFixed(2)} RON</span>
+                                <span class="detail-old-price">${(product.price * 1.2).toFixed(2)} RON</span>
+                                <span class="detail-discount">-20%</span>
+                            </div>
+                            <div class="product-detail-description">
+                                <p>${product.description || 'Acest produs nu are o descriere detaliată. Este un dispozitiv electronic ' + product.category + ' de înaltă calitate produs de ' + (product.brand || 'un producător cunoscut') + '.'}
+                                 </p>
+                            </div>
+                            <div class="product-detail-features">
+                                <h4>Caracteristici principale</h4>
+                                    <ul class="feature-list">
+                                    ${generateFeaturesList(product)}
+                                    </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-comparable-models">
+                        <h4>Modele similare</h4>
+                        <div class="comparable-models-grid" id="comparable-models">
+                            <div class="comparable-model-card">
+                                <div class="comparable-model-img">
+                                    <img src="https://via.placeholder.com/80" alt="Model similar">
+                                </div>
+                                <div class="comparable-model-name">Model similar 1</div>
+                                    <div class="comparable-model-price">2199 RON</div>
+                                </div>
+                                <div class="comparable-model-card">
                                                                 <div class="comparable-model-img">
                                                                     <img src="https://via.placeholder.com/80" alt="Model similar">
                                                                 </div>
@@ -275,17 +236,10 @@ function openProductModal(productId) {
                                                         </div>
                                                     </div>
                                                 `;
-
-                                                // Actualizează conținutul modal
                                                 productDetailContainer.innerHTML = productHTML;
-
-                                                // Inițializare evenimente pentru galeria de imagini
                                                 initProductGallery();
-
-                                                // Încarcă produse similare
                                                 loadSimilarProducts(product);
                                             } else {
-                                                // Afișează mesaj de eroare
                                                 productDetailContainer.innerHTML = `
                                                     <div class="error-message">
                                                         <i class="fas fa-exclamation-circle"></i>
@@ -307,18 +261,15 @@ function openProductModal(productId) {
                                         });
                                 }
 
-                                // Funcție pentru închiderea modalului de produs
                                 function closeProductModal() {
                                     const productModal = document.getElementById('product-modal');
                                     productModal.classList.remove('active');
-                                    document.body.style.overflow = ''; // Permite scrollarea în pagină
+                                    document.body.style.overflow = '';
                                 }
 
-                                // Funcție pentru generarea listei de caracteristici
                                 function generateFeaturesList(product) {
                                     let featuresHTML = '';
 
-                                    // Adaugă caracteristici din array-ul de features, dacă există
                                     if (product.features && product.features.length > 0) {
                                         product.features.forEach(feature => {
                                             featuresHTML += `
@@ -329,7 +280,6 @@ function openProductModal(productId) {
                                             `;
                                         });
                                     } else {
-                                        // Caracteristici generice bazate pe categoria produsului
                                         if (product.category === 'phone' || product.category === 'tablet') {
                                             featuresHTML += `
                                                 <li class="feature-item"><i class="fas fa-check-circle"></i> <span>Ecran de înaltă rezoluție</span></li>
@@ -358,7 +308,6 @@ function openProductModal(productId) {
                                                 <li class="feature-item"><i class="fas fa-check-circle"></i> <span>Design elegant</span></li>
                                             `;
                                         } else {
-                                            // Caracteristici generice pentru alte categorii
                                             featuresHTML += `
                                                 <li class="feature-item"><i class="fas fa-check-circle"></i> <span>Calitate premium</span></li>
                                                 <li class="feature-item"><i class="fas fa-check-circle"></i> <span>Design modern</span></li>
@@ -370,7 +319,6 @@ function openProductModal(productId) {
                                         }
                                     }
 
-                                    // Adaugă culoarea ca o caracteristică dacă există
                                     if (product.color) {
                                         featuresHTML += `
                                             <li class="feature-item">
@@ -383,115 +331,119 @@ function openProductModal(productId) {
                                     return featuresHTML;
                                 }
 
-                                // Funcție pentru inițializarea galeriei de imagini din modal
                                 function initProductGallery() {
                                     const thumbnails = document.querySelectorAll('.product-thumbnail');
                                     const mainImage = document.querySelector('.product-main-image img');
 
                                     thumbnails.forEach(thumbnail => {
                                         thumbnail.addEventListener('click', function() {
-                                            // Elimină clasa active de pe toate thumbnail-urile
                                             thumbnails.forEach(t => t.classList.remove('active'));
-                                            // Adaugă clasa active pe thumbnail-ul curent
                                             this.classList.add('active');
 
-                                            // Schimbă imaginea principală
                                             const newImageSrc = this.querySelector('img').src;
                                             mainImage.src = newImageSrc;
                                         });
                                     });
                                 }
-
-                                // Funcție pentru încărcarea produselor similare
                                 function loadSimilarProducts(product) {
-                                    // În implementarea reală, ai putea face un apel către API pentru a obține produse similare
-                                    // Aici simulăm acest comportament pentru demonstrație
-
-                                    // Categoria și brand-ul produsului curent pentru a găsi produse similare
                                     const category = product.category;
                                     const brand = product.brand;
-
-                                    // Ar trebui să implementezi un endpoint în API pentru a obține produse similare
-                                    // De exemplu: /api/products/similar?category=phone&brand=Samsung&exclude=123
                                 }
 
-                                // Funcție pentru încărcarea produselor
                                 let currentPage = 1;
                                 let currentFilter = 'all';
                                 let hasMoreProducts = true;
 
-                                function loadProducts(filter = 'all', resetPage = true) {
-                                    if (resetPage) {
-                                        currentPage = 1;
-                                        hasMoreProducts = true;
-                                    }
+function loadProducts(filter = 'all', resetPage = true) {
+    if (resetPage) {
+        currentPage = 1;
+        hasMoreProducts = true;
+    }
 
-                                    currentFilter = filter;
+    currentFilter = filter;
 
-                                    const productsContainer = document.getElementById('products-container');
-                                    const emptyResults = document.querySelector('.empty-results');
-                                    const loadMoreBtn = document.getElementById('load-more');
+    const productsContainer = document.getElementById('products-container');
+    const emptyResults = document.querySelector('.empty-results');
+    const loadMoreBtn = document.getElementById('load-more');
 
-                                    // Afișează loading spinner doar la prima încărcare sau resetare
-                                    if (resetPage) {
-                                        productsContainer.innerHTML = `
-                                            <div class="loading-spinner">
-                                                <i class="fas fa-spinner fa-spin"></i>
-                                                <p>Se încarcă produsele...</p>
-                                            </div>
-                                        `;
-                                    }
+    if (resetPage) {
+        productsContainer.innerHTML = `
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Se încarcă produsele...</p>
+            </div>
+        `;
+    }
 
-                                    // Ascunde mesajul de rezultate goale
-                                    emptyResults.style.display = 'none';
+    emptyResults.style.display = 'none';
 
-                                    // Construiește parametrii pentru cerere
-                                    let params = `?page=${currentPage}&limit=8`;
-                                    if (filter !== 'all') {
-                                        params += `&category=${filter}`;
-                                    }
+    let normalizedCategory = null;
+    if (filter !== 'all') {
+        const categoryMap = {
+            phone: 'Telefoane',
+            tablet: 'Tablete',
+            laptop: 'Laptopuri',
+            watch: 'Smartwatch-uri',
+            pc: 'Componente PC',
+            periferice: 'Periferice',
+            audio: 'Audio',
+            drone: 'Drone'
+        };
+        normalizedCategory = categoryMap[filter] || filter;
+    }
 
-                                    // Solicită produse de la API
-                                    fetch(`/api/products${params}`)
-                                        .then(response => response.json())
-                                        .then(data => {
-                                            // Elimină loading spinner
-                                            if (resetPage) {
-                                                productsContainer.innerHTML = '';
-                                            }
+    let params = `?page=${currentPage}&limit=8`;
+    if (normalizedCategory) {
+        params += `&category=${encodeURIComponent(normalizedCategory)}`;
+    }
 
-                                            if (data.success && data.products && data.products.length > 0) {
-                                                // Populează container-ul cu produse
-                                                data.products.forEach(product => {
-                                                    const productCard = createProductCard(product);
-                                                    productsContainer.appendChild(productCard);
-                                                });
+    fetch(`/api/products${params}`)
+        .then(response => response.json())
+        .then(data => {
+            if (resetPage) productsContainer.innerHTML = '';
 
-                                                // Verifică dacă mai sunt produse de încărcat
-                                                hasMoreProducts = data.page < data.totalPages;
-                                                loadMoreBtn.style.display = hasMoreProducts ? 'inline-block' : 'none';
-                                            } else {
-                                                if (resetPage) {
-                                                    // Afișează mesaj dacă nu există produse
-                                                    emptyResults.style.display = 'block';
-                                                    loadMoreBtn.style.display = 'none';
-                                                }
-                                            }
-                                        })
-                                        .catch(error => {
-                                            console.error('Eroare la încărcarea produselor:', error);
-                                            productsContainer.innerHTML = `
-                                                <div class="error-message">
-                                                    <i class="fas fa-exclamation-circle"></i>
-                                                    <h3>Eroare la încărcarea produselor</h3>
-                                                    <p>A apărut o eroare în comunicarea cu serverul. Te rugăm să încerci din nou.</p>
-                                                </div>
-                                            `;
-                                            loadMoreBtn.style.display = 'none';
-                                        });
-                                }
+            if (data.success && data.products && data.products.length > 0) {
+                data.products.forEach(product => {
+                    const productCard = createProductCard(product);
+                    productsContainer.appendChild(productCard);
+                });
 
-                                // Funcție pentru încărcarea mai multor produse
+                hasMoreProducts = data.page < data.totalPages;
+                loadMoreBtn.style.display = hasMoreProducts ? 'inline-block' : 'none';
+            } else {
+                if (resetPage) {
+                    emptyResults.style.display = 'block';
+                    loadMoreBtn.style.display = 'none';
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Eroare la încărcarea produselor:', error);
+            productsContainer.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <h3>Eroare la încărcarea produselor</h3>
+                    <p>A apărut o eroare în comunicarea cu serverul. Te rugăm să încerci din nou.</p>
+                </div>
+            `;
+            loadMoreBtn.style.display = 'none';
+        });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                const query = searchInput.value.trim();
+                if (query.length > 0) {
+                    window.location.href = `/products?search=${encodeURIComponent(query)}`;
+                }
+            }
+        });
+    }
+});
+
                                 function loadMoreProducts() {
                                     if (hasMoreProducts) {
                                         currentPage++;
@@ -499,13 +451,11 @@ function openProductModal(productId) {
                                     }
                                 }
 
-                                // Funcție pentru crearea cardului de produs
                                 function createProductCard(product) {
                                     const productCard = document.createElement('div');
                                     productCard.className = 'product-card';
                                     productCard.setAttribute('data-id', product._id);
 
-                                    // Generează HTML pentru card
                                     productCard.innerHTML = `
                                         <div class="product-image">
                                             <img src="${product.image || 'https://via.placeholder.com/300x200?text=No+Image'}" alt="${product.name}">
@@ -538,7 +488,6 @@ function openProductModal(productId) {
                                         </div>
                                     `;
 
-                                    // Adaugă eveniment pentru deschiderea modalului
                                     const detailsBtn = productCard.querySelector('.details-btn');
                                     detailsBtn.addEventListener('click', function(e) {
                                         e.preventDefault();
@@ -546,7 +495,6 @@ function openProductModal(productId) {
                                         openProductModal(productId);
                                     });
 
-                                    // Adaugă eveniment pentru butonul de favorite
                                     const favoriteBtn = productCard.querySelector('.favorite-btn');
                                     favoriteBtn.addEventListener('click', function() {
                                         this.classList.toggle('active');
@@ -561,11 +509,9 @@ function openProductModal(productId) {
                                     return productCard;
                                 }
 
-                                // Funcție pentru încărcarea știrilor
                                 function loadNews() {
                                     const newsContainer = document.getElementById('news-container');
 
-                                    // Afișează loading spinner
                                     newsContainer.innerHTML = `
                                         <div class="loading-spinner">
                                             <i class="fas fa-spinner fa-spin"></i>
@@ -573,20 +519,17 @@ function openProductModal(productId) {
                                         </div>
                                     `;
 
-                                    // Solicită știri de la API
-                                    fetch('/api/news/latest/3') // Doar 3 știri recente
+                                    fetch('/api/news/latest/3')
                                         .then(response => response.json())
                                         .then(data => {
-                                            newsContainer.innerHTML = ''; // Curăță container-ul
+                                            newsContainer.innerHTML = '';
 
                                             if (data.success && data.news && data.news.length > 0) {
-                                                // Populează știrile
                                                 data.news.forEach(newsItem => {
                                                     const newsCard = createNewsCard(newsItem);
                                                     newsContainer.appendChild(newsCard);
                                                 });
                                             } else {
-                                                // Afișează știri placeholder dacă nu există știri reale
                                                 const placeholderNews = [
                                                     {
                                                         title: 'Noile telefoane Samsung Galaxy S24 sunt disponibile în România',
@@ -640,16 +583,13 @@ function openProductModal(productId) {
                                         });
                                 }
 
-                                // Funcție pentru crearea cardului de știri
                                 function createNewsCard(newsItem) {
                                     const newsCard = document.createElement('div');
                                     newsCard.className = 'news-card';
 
-                                    // Formatează data publicării
                                     const publishDate = new Date(newsItem.publishDate);
                                     const formattedDate = formatDate(publishDate);
 
-                                    // Generează HTML pentru card
                                     newsCard.innerHTML = `
                                         <div class="news-image">
                                             <img src="${newsItem.imageUrl || 'https://via.placeholder.com/600x400?text=No+Image'}" alt="${newsItem.title}">
@@ -665,7 +605,6 @@ function openProductModal(productId) {
                                     return newsCard;
                                 }
 
-                                // Funcție pentru formatarea datei
                                 function formatDate(date) {
                                     return new Intl.DateTimeFormat('ro-RO', {
                                         day: 'numeric',
@@ -674,12 +613,9 @@ function openProductModal(productId) {
                                     }).format(date);
                                 }
 
-                                // Funcție pentru deconectare
                                 function logout() {
-                                    // Șterge token-ul din localStorage
                                     localStorage.removeItem('authToken');
                                     localStorage.removeItem('userData');
 
-                                    // Redirecționează către pagina principală
                                     window.location.href = '/';
                                 }
