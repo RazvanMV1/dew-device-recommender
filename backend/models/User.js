@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs'); // 🔒 Pentru hash-uirea parolelor
+const bcrypt = require('bcryptjs');
 
 const UserSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
@@ -15,7 +15,6 @@ const UserSchema = new mongoose.Schema({
     }
 });
 
-// 🔒 Pre-hook pentru hash-uirea parolelor înainte de salvare
 UserSchema.pre('save', async function(next) {
     if (this.isModified('password')) {
         const salt = await bcrypt.genSalt(10);
@@ -24,7 +23,6 @@ UserSchema.pre('save', async function(next) {
     next();
 });
 
-// 🔒 Metodă pentru verificarea parolei
 UserSchema.methods.comparePassword = async function(candidatePassword) {
     return await bcrypt.compare(candidatePassword, this.password);
 };

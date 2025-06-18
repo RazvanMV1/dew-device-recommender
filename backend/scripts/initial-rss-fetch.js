@@ -1,4 +1,4 @@
-// backend/scripts/initial-rss-fetch.js
+
 require('dotenv').config({ path: '../.env' });
 const mongoose = require('mongoose');
 const connectDB = require('../db');
@@ -10,7 +10,6 @@ async function initialRssFetch() {
         await connectDB();
         console.log('✅ Conectat la baza de date');
 
-        // Obține toate sursele RSS active
         const sources = await Source.find({ type: 'rss', active: true });
         console.log(`🔍 ${sources.length} surse RSS active găsite`);
 
@@ -21,7 +20,6 @@ async function initialRssFetch() {
         }
 
         console.log('🚀 Începe procesarea feed-urilor RSS...');
-        // Schimbăm aici - ne asigurăm că folosim corect rssService
         const results = await rssService.processAllRssFeeds();
 
         let totalAdded = 0;
@@ -53,7 +51,6 @@ async function initialRssFetch() {
     }
 }
 
-// Rulează funcția
 initialRssFetch().then(() => {
     console.log('🎯 Fetch inițial RSS finalizat');
     process.exit(0);
