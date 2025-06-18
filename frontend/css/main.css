@@ -1091,6 +1091,21 @@ section {
     transition: all 0.3s ease;
 }
 
+#product-modal .modal-content {
+    border-radius: 18px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: 90vh;
+}
+#product-modal .modal-content::-webkit-scrollbar {
+    width: 6px;
+}
+#product-modal .modal-content::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 10px;
+}
+
+
 .modal.active .modal-content {
     transform: translateY(0);
 }
@@ -1131,6 +1146,7 @@ section {
     flex: 1;
     max-width: 450px;
     text-align: center;
+    border-radius: 16px;
 }
 
 .product-main-image img {

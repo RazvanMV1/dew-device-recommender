@@ -272,7 +272,9 @@ function loadSimilarProducts(product) {
                 const truncate = (str, max = 60) =>
                     str.length > max ? str.slice(0, max - 3) + '...' : str;
 
-                data.recommendations.forEach(similar => {
+                data.recommendations
+                    .slice(0, 10)
+                    .forEach(similar => {
                     const card = document.createElement('div');
                     card.className = 'comparable-model-card';
                     card.innerHTML = `
