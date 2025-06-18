@@ -1,10 +1,8 @@
-// backend/scripts/update-sources.js
 require('dotenv').config({ path: '../.env' });
 const mongoose = require('mongoose');
 const connectDB = require('../db');
 const Source = require('../models/Source');
 
-// URL-uri valide pentru surse RSS
 const validSources = [
     {
         name: 'The Verge',
@@ -38,41 +36,35 @@ async function updateSources() {
         await connectDB();
         console.log('✅ Conectat la baza de date');
 
-        // Dezactivează toate sursele existente
         await Source.updateMany({}, { active: false });
         console.log('✅ Toate sursele existente au fost dezactivate');
 
-        // Adaugă sau actualizează sursele valide
         for (const sourceData of validSources) {
-            // Verifică dacă sursa există deja
             const existingSource = await Source.findOne({ url: sourceData.url });
 
             if (existingSource) {
-                // Actualizează sursa existentă
                 await Source.updateOne(
                     { _id: existingSource._id },
                     {
                         name: sourceData.name,
                         active: true,
-                        updateFrequency: 60, // 60 minute
-                        lastUpdated: null // Reset lastUpdated pentru a forța actualizarea
+                        updateFrequency: 60,
+                        lastUpdated: null
                     }
                 );
                 console.log(`✅ Sursa "${sourceData.name}" a fost actualizată`);
             } else {
-                // Creează o sursă nouă
                 await Source.create({
                     ...sourceData,
                     description: `Feed RSS pentru ${sourceData.name}`,
                     active: true,
-                    updateFrequency: 60, // 60 minute
+                    updateFrequency: 60,
                     tags: ['tech', 'news']
                 });
                 console.log(`✅ Sursa "${sourceData.name}" a fost creată`);
             }
         }
 
-        // Afișează sumarul surselor active
         const activeSourcesCount = await Source.countDocuments({ active: true });
         console.log(`\n📊 Sumar: ${activeSourcesCount} surse active`);
 
@@ -84,7 +76,6 @@ async function updateSources() {
     }
 }
 
-// Rulează funcția
 updateSources().then(() => {
     console.log('🎯 Actualizare surse finalizată');
     process.exit(0);

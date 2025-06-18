@@ -1,4 +1,3 @@
-// models/Source.js
 const mongoose = require('mongoose');
 
 const SourceSchema = new mongoose.Schema({
@@ -23,7 +22,7 @@ const SourceSchema = new mongoose.Schema({
         trim: true
     },
     updateFrequency: {
-        type: Number, // în minute
+        type: Number,
         default: 60
     },
     lastUpdated: {
@@ -52,13 +51,11 @@ const SourceSchema = new mongoose.Schema({
     }
 });
 
-// Pre-save hook pentru actualizarea câmpului updatedAt la fiecare modificare
 SourceSchema.pre('save', function(next) {
     this.updatedAt = Date.now();
     next();
 });
 
-// Metoda pentru verificare dacă o sursă trebuie actualizată
 SourceSchema.methods.shouldUpdate = function() {
     if (!this.lastUpdated) return true;
 
@@ -69,7 +66,6 @@ SourceSchema.methods.shouldUpdate = function() {
     return diffMinutes >= this.updateFrequency;
 };
 
-// Adaugă în models/Source.js
 SourceSchema.index({ type: 1, active: 1 });
 SourceSchema.index({ url: 1 }, { unique: true });
 SourceSchema.index({ lastUpdated: 1 });

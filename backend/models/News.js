@@ -1,4 +1,4 @@
-// backend/models/News.js
+
 const mongoose = require('mongoose');
 
 const NewsSchema = new mongoose.Schema({
@@ -59,14 +59,12 @@ const NewsSchema = new mongoose.Schema({
     }
 });
 
-// Adaugă indecși pentru performanță
 NewsSchema.index({ publishDate: -1 });
 NewsSchema.index({ source: 1 });
 NewsSchema.index({ url: 1 }, { unique: true });
 NewsSchema.index({ categories: 1 });
 NewsSchema.index({ 'relatedProducts': 1 });
 
-// Pre-save hook pentru actualizarea câmpului updatedAt
 NewsSchema.pre('save', function(next) {
     this.updatedAt = Date.now();
     next();
