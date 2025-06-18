@@ -1,137 +1,91 @@
 <!DOCTYPE html>
 <html lang="ro">
 <head>
-    <meta charset="UTF-8">
-    <title>Statistici Produse</title>
-    <link rel="stylesheet" href="css/main.css"> <!-- dacă ai un fișier CSS -->
-    <script src="js/chart.umd.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Toate Știrile</title>
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/news.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
-<h1>Statistici Produse Recomandate</h1>
-<div style="max-width: 600px; margin: auto;">
-    <h2>Top Produse</h2>
-    <canvas id="topProductsChart"></canvas>
-    <h2>Distribuție pe Categorii</h2>
-    <canvas id="categoriesChart"></canvas>
-    <h2>Distribuție pe Culori</h2>
-    <canvas id="colorsChart"></canvas>
-</div>
 
+<header class="main-header">
+    <div class="container">
+        <div class="header-content">
+            <a href="/" class="logo-link">ElectroRecommender</a>
+
+            <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <nav class="main-nav" id="main-nav">
+                <ul>
+                    <li><a href="/">Acasă</a></li>
+                    <li><a href="/#categorii">Categorii</a></li>
+                    <li><a href="/products">Produse</a></li>
+                    <li><a href="/stats">Statistici</a></li>
+                </ul>
+            </nav>
+
+            <div class="header-actions">
+                <a href="/profile" class="btn btn-outline">Profilul meu</a>
+                <button id="logout-btn" class="btn btn-outline">Deconectare</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="container news-wrapper">
+    <h1>Toate Știrile din Tehnologie</h1>
+    <div id="news-list" class="news-grid">
+        <p>Se încarcă știrile...</p>
+    </div>
+</main>
+
+<footer class="main-footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-column">
+                <div class="footer-logo">
+                    <i class="fas fa-microchip"></i>
+                    <h3>ElectroRecommender</h3>
+                </div>
+                <p>Platforma ta pentru recomandări inteligente de dispozitive electronice.</p>
+            </div>
+
+            <div class="footer-column">
+                <h4>Legături rapide</h4>
+                <ul>
+                    <li><a href="/">Acasă</a></li>
+                    <li><a href="/#categorii">Categorii</a></li>
+                    <li><a href="/products">Produse</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4>Contact</h4>
+                <ul>
+                    <li><a href="mailto:support@electrorecommender.com">Trimite email</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2025 ElectroRecommender. Toate drepturile rezervate.</p>
+        </div>
+    </div>
+</footer>
+
+<script src="js/news.js"></script>
 <script>
-    // PASUL 2: Fetch date de la backend
-    fetch('/api/products/stats')
-        .then(response => response.json())
-        .then(data => {
-            if (!data.success) {
-                document.body.innerHTML += "<p style='color:red;'>Eroare la încărcarea statisticilor!</p>";
-                return;
-            }
-
-            // PASUL 3: Desenează graficul Top Produse
-            const tpLabels = (data.topProducts || data.TopProducts || []).map(p => p.name);
-            const tpData = (data.topProducts || data.TopProducts || []).map(p => p.reviewsCount || 0);
-
-            new Chart(document.getElementById('topProductsChart'), {
-                type: 'bar',
-                data: {
-                    labels: tpLabels,
-                    datasets: [{
-                        label: 'Număr recenzii',
-                        data: tpData,
-                        backgroundColor: 'rgba(54, 162, 235, 0.5)'
-                    }]
-                },
-                options: {
-    responsive: true,
-    plugins: {
-        title: {
-            display: true,
-            text: 'Top 5 produse după recenzii'
-        }
-    },
-    scales: {
-        x: {
-            ticks: {
-                maxRotation: 45,
-                minRotation: 45,
-                callback: function(value, index, ticks) {
-                    let label = this.getLabelForValue(value);
-                    return label.length > 25 ? label.slice(0, 25) + '...' : label;
-                }
-            }
-        }
-    }
-}
-
-            });
-
-            // PASUL 4: Desenează graficul pe Categorii
-            const catLabels = (data.categories || []).map(c => c._id || "Necunoscut");
-            const catData = (data.categories || []).map(c => c.count);
-
-            new Chart(document.getElementById('categoriesChart'), {
-                type: 'pie',
-                data: {
-                    labels: catLabels,
-                    datasets: [{
-                        label: 'Număr produse',
-                        data: catData,
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.6)',
-                            'rgba(54, 162, 235, 0.6)',
-                            'rgba(255, 206, 86, 0.6)',
-                            'rgba(75, 192, 192, 0.6)',
-                            'rgba(153, 102, 255, 0.6)',
-                            'rgba(255, 159, 64, 0.6)'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Distribuție pe categorii'
-                        }
-                    }
-                }
-            });
-
-            // PASUL 5: Desenează graficul pe Culori
-            const colorLabels = (data.colors || []).map(c => c._id || "Necunoscut");
-            const colorData = (data.colors || []).map(c => c.count);
-
-            new Chart(document.getElementById('colorsChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: colorLabels,
-                    datasets: [{
-                        label: 'Număr produse',
-                        data: colorData,
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.7)',
-                            'rgba(54, 162, 235, 0.7)',
-                            'rgba(255, 206, 86, 0.7)',
-                            'rgba(75, 192, 192, 0.7)',
-                            'rgba(153, 102, 255, 0.7)',
-                            'rgba(255, 159, 64, 0.7)'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Distribuție pe culori'
-                        }
-                    }
-                }
-            });
-        })
-        .catch(err => {
-            document.body.innerHTML += "<p style='color:red;'>Eroare la conectare cu serverul!</p>";
-        });
+    // Meniu mobil toggle
+    document.getElementById('mobile-menu-toggle')?.addEventListener('click', () => {
+      document.getElementById('main-nav')?.classList.toggle('open');
+    });
 </script>
+
 </body>
 </html>
