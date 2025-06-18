@@ -88,6 +88,8 @@ const server = http.createServer(async (req, res) => {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/stats.html'), 'text/html');
                 } else if (pathName === '/profile') {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/profile.html'), 'text/html');
+                } else if (pathName === '/news') {
+                    serveStaticFile(req, res, path.join(__dirname, '../frontend/news.html'), 'text/html');
                 } else if (pathName === '/admin') {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/dashboard.html'), 'text/html');
                 } else if (pathName === '/products' || pathName === '/products.html') {
