@@ -1,0 +1,286 @@
+/* ====== Layout & Fonts ====== */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  background: #f5f7fa;
+  color: #1e293b;
+}
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ====== Header ====== */
+.main-header {
+  background: #fff;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.logo-link {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1e293b;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.main-nav ul {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.main-nav ul li a {
+  text-decoration: none;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.header-actions .btn {
+  border: 1px solid #3a0ca3;
+  background: transparent;
+  color: #3a0ca3;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* ====== Mobile Menu ====== */
+.mobile-menu-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.mobile-menu-toggle span {
+  width: 25px;
+  height: 3px;
+  background-color: #333;
+  border-radius: 2px;
+}
+
+.main-nav.open {
+  display: block !important;
+}
+
+/* ====== Profile Section ====== */
+.profile-flex-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+  margin: 3rem auto 0;
+}
+
+.profile-card,
+.profile-side-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 32px rgba(67, 97, 238, 0.08);
+  padding: 2rem;
+  text-align: center;
+  flex: 1 1 320px;
+  max-width: 400px;
+}
+
+.profile-avatar {
+  font-size: 4rem;
+  background: linear-gradient(135deg, #4361ee, #3a0ca3);
+  color: #fff;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem auto;
+  overflow: hidden;
+}
+
+.profile-avatar img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.profile-title {
+  font-weight: 700;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.profile-role {
+  color: #3a0ca3;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.profile-info {
+  text-align: left;
+  margin-top: 2rem;
+}
+
+.profile-info p {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.profile-info span {
+  font-weight: 500;
+  color: #3a0ca3;
+}
+
+.profile-form-group {
+  text-align: left;
+  margin-bottom: 1rem;
+}
+
+.profile-form-group label {
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.profile-form-group input {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ced4da;
+  font-size: 1rem;
+}
+
+.btn.btn-primary {
+  background: #4361ee;
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn.btn-outline {
+  border: 1px solid #3a0ca3;
+  background: transparent;
+  color: #3a0ca3;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.profile-form-message {
+  margin-top: 0.7rem;
+  font-weight: 500;
+}
+
+.profile-preferences {
+  margin-top: 2rem;
+  text-align: left;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1.2rem;
+}
+
+.profile-preferences h4 {
+  margin-bottom: 1rem;
+  color: #4361ee;
+}
+
+.profile-preferences p {
+  margin: 0 0 0.3rem 0;
+  font-size: 1rem;
+}
+
+/* ====== Footer ====== */
+.main-footer {
+  background-color: #1a1a1a;
+  color: #fff;
+  padding: 2rem 0;
+  margin-top: 4rem;
+}
+
+.footer-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: space-between;
+}
+
+.footer-column {
+  flex: 1 1 220px;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-column ul li {
+  margin-bottom: 0.5rem;
+}
+
+.footer-column ul li a {
+  color: #ffffffcc;
+  text-decoration: none;
+}
+
+.footer-column ul li a:hover {
+  text-decoration: underline;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+/* ====== Responsive ====== */
+@media (max-width: 768px) {
+  .main-nav {
+    display: none;
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  .main-nav ul {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .mobile-menu-toggle {
+    display: flex;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

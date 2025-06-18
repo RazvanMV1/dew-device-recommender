@@ -149,22 +149,28 @@ const server = http.createServer(async (req, res) => {
                                 res.end(JSON.stringify({ success: false, message: 'Neautentificat' }));
                                 return;
                             }
+                            // Ia userul complet din baza de date pentru preferințe și eventual avatar actualizat
+                            const userDB = await User.findById(req.user.id);
+
                             console.log("USER LOGAT:", req.user);
                             res.writeHead(200, { 'Content-Type': 'application/json' });
                             res.end(JSON.stringify({
                                 success: true,
                                 user: {
-                                    username: req.user.username,
-                                    email: req.user.email,
-                                    role: req.user.role,
-                                    avatar: req.user.avatar || null,
-                                    createdAt: req.user.createdAt ? new Date(req.user.createdAt).toISOString() : null,
-                                    lastLogin: req.user.lastLogin ? new Date(req.user.lastLogin).toISOString() : null
+                                    username: userDB.username,
+                                    email: userDB.email,
+                                    role: userDB.role,
+                                    avatar: userDB.avatar || null,
+                                    createdAt: userDB.createdAt ? new Date(userDB.createdAt).toISOString() : null,
+                                    lastLogin: userDB.lastLogin ? new Date(userDB.lastLogin).toISOString() : null,
+                                    preferences: userDB.preferences || {}
                                 }
                             }));
                         });
                     });
                 }
+
+
 
 
 
@@ -343,8 +349,6 @@ const server = http.createServer(async (req, res) => {
                         }
                     });
                 }
-                else if (pathName.startsWith('/api/products/') && pathName.split('/').length === 4) {
-                    // Extrage produsul după ID
                 else if (pathName.startsWith('/api/products/') && pathName.split('/').length === 4) {
                     securityHeaders(req, res, async () => {
                         try {

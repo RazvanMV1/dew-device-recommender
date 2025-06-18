@@ -1,143 +1,140 @@
 <!DOCTYPE html>
 <html lang="ro">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Profilul meu - ElectroRecommender</title>
-    <link rel="stylesheet" href="css/main.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .profile-card {
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 4px 32px rgba(67, 97, 238, 0.08);
-            max-width: 400px;
-            margin: 3rem auto 0 auto;
-            padding: 2.5rem;
-            text-align: center;
-        }
-        .profile-avatar {
-            font-size: 4rem;
-            background: var(--gradient-primary, linear-gradient(135deg, #4361ee, #3a0ca3));
-            color: #fff;
-            border-radius: 50%;
-            width: 80px;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem auto;
-            overflow: hidden;
-        }
-        .profile-avatar img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 50%;
-        }
-        .profile-info {
-            text-align: left;
-            margin-top: 2rem;
-        }
-        .profile-info p {
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-        }
-        .profile-info span {
-            font-weight: 500;
-            color: var(--primary-dark, #3a0ca3);
-        }
-        .profile-title {
-            font-weight: 700;
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-        .profile-role {
-            color: var(--primary);
-            font-weight: 500;
-            margin-bottom: 1rem;
-        }
-        .profile-form-group {
-            text-align: left;
-            margin-bottom: 1rem;
-        }
-        .profile-form-group label {
-            display: block;
-            margin-bottom: 0.3rem;
-        }
-        .profile-form-group input {
-            width: 100%;
-            padding: 0.5rem;
-            border-radius: 6px;
-            border: 1px solid #ced4da;
-            font-size: 1rem;
-        }
-        .profile-form-message {
-            margin-top: 0.7rem;
-            font-weight: 500;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/profile.css">
 </head>
 <body>
 <header class="main-header">
     <div class="container">
         <div class="header-content">
-            <div class="logo">
-                <i class="fas fa-microchip"></i>
-                <h1>ElectroRecommender</h1>
-            </div>
+            <a href="/" class="logo-link">
+                <i class="fas fa-microchip"></i> ElectroRecommender
+            </a>
+
             <nav class="main-nav">
                 <ul>
-                    <li><a href="/">Acasă</a></li>
-                    <li><a href="#categorii">Categorii</a></li>
-                    <li><a href="#noutati">Noutăți</a></li>
-                    <li><a href="#comparatii">Comparații</a></li>
-                    <li><a href="/stats">Statistici</a></li>
+                    <li><a href="/#categorii">Categorii</a></li>
+                    <li><a href="/#noutati">Noutăți</a></li>
+                    <li><a href="/products">Produse</a></li>
+                    <li><a href="/stats" id="stats-link">Statistici</a></li>
                 </ul>
             </nav>
+
+            <div class="header-actions">
+                <button id="logout-btn" class="btn btn-outline">
+                    <i class="fas fa-sign-out-alt"></i> Deconectare
+                </button>
+            </div>
+
+            <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                <span></span><span></span><span></span>
+            </button>
         </div>
     </div>
 </header>
 
 <main>
-    <div class="profile-card" id="profile-card">
-        <div class="profile-avatar" id="profile-avatar">
-            <i class="fas fa-user-circle"></i>
+    <div class="profile-flex-container">
+        <!-- Avatar -->
+        <div class="profile-side-card">
+            <h3>Schimbă imaginea de profil</h3>
+            <form id="avatar-form" autocomplete="off">
+                <div class="profile-form-group">
+                    <label for="avatar-url">Link imagine (jpg/png):</label>
+                    <input type="url" id="avatar-url" name="avatar" placeholder="https://exemplu.ro/avatar.jpg" />
+                </div>
+                <button type="submit" class="btn btn-primary">Salvează avatar</button>
+            </form>
+            <div id="avatar-message" class="profile-form-message"></div>
         </div>
-        <div class="profile-title" id="profile-username">Se încarcă...</div>
-        <div class="profile-role" id="profile-role"></div>
-        <div class="profile-info" id="profile-info"></div>
-    </div>
 
-    <div class="profile-card" style="margin-top: 2rem;">
-        <h3>Schimbă imaginea de profil</h3>
-        <form id="avatar-form" autocomplete="off">
-            <div class="profile-form-group">
-                <label for="avatar-url">Link imagine (jpg/png):</label>
-                <input type="url" id="avatar-url" name="avatar" placeholder="https://exemplu.ro/avatar.jpg">
+        <!-- Profil -->
+        <div class="profile-card" id="profile-card">
+            <div class="profile-avatar" id="profile-avatar">
+                <i class="fas fa-user-circle"></i>
             </div>
-            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Salvează avatar</button>
-        </form>
-        <div id="avatar-message" class="profile-form-message"></div>
-    </div>
+            <div class="profile-title" id="profile-username">Se încarcă...</div>
+            <div class="profile-role" id="profile-role"></div>
+            <div class="profile-info" id="profile-info"></div>
+            <div class="profile-preferences" id="profile-preferences">
+                <h4>Preferințele mele</h4>
+                <div id="preferences-display"></div>
+                <a href="/preferences" class="btn btn-outline" style="margin-top: 1rem;">Editează preferințele</a>
+            </div>
+        </div>
 
-    <div class="profile-card" style="margin-top: 2rem;">
-        <h3>Schimbă parola</h3>
-        <form id="change-password-form" autocomplete="off">
-            <div class="profile-form-group">
-                <label for="current-password">Parola veche:</label>
-                <input type="password" id="current-password" name="currentPassword" required>
-            </div>
-            <div class="profile-form-group">
-                <label for="new-password">Parola nouă:</label>
-                <input type="password" id="new-password" name="newPassword" required>
-            </div>
-            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Schimbă parola</button>
-        </form>
-        <div id="change-password-message" class="profile-form-message"></div>
+        <!-- Schimbă parola -->
+        <div class="profile-side-card">
+            <h3>Schimbă parola</h3>
+            <form id="change-password-form" autocomplete="off">
+                <div class="profile-form-group">
+                    <label for="current-password">Parola veche:</label>
+                    <input type="password" id="current-password" name="currentPassword" required />
+                </div>
+                <div class="profile-form-group">
+                    <label for="new-password">Parola nouă:</label>
+                    <input type="password" id="new-password" name="newPassword" required />
+                </div>
+                <button type="submit" class="btn btn-primary">Schimbă parola</button>
+            </form>
+            <div id="change-password-message" class="profile-form-message"></div>
+        </div>
     </div>
 </main>
+
+<footer class="main-footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-column">
+                <div class="footer-logo">
+                    <i class="fas fa-microchip"></i>
+                    <h3>ElectroRecommender</h3>
+                </div>
+                <p>Platforma ta pentru recomandări inteligente de dispozitive electronice.</p>
+            </div>
+
+            <div class="footer-column">
+                <h4>Legături rapide</h4>
+                <ul>
+                    <li><a href="/">Acasă</a></li>
+                    <li><a href="/#categorii">Categorii</a></li>
+                    <li><a href="/#recomandari">Recomandări</a></li>
+                    <li><a href="/#noutati">Noutăți</a></li>
+                    <li><a href="/products">Produse</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4>Categorii</h4>
+                <ul>
+                    <li><a href="/products?category=Telefoane">Telefoane</a></li>
+                    <li><a href="/products?category=Tablete">Tablete</a></li>
+                    <li><a href="/products?category=Laptopuri">Laptopuri</a></li>
+                    <li><a href="/products?category=Componente%20PC">Componente PC</a></li>
+                    <li><a href="/products?category=Periferice">Periferice</a></li>
+                    <li><a href="/products?category=Smartwatch-uri">Smartwatch-uri</a></li>
+                    <li><a href="/products?category=Audio">Audio</a></li>
+                    <li><a href="/products?category=Drone">Drone</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2025 ElectroRecommender. Toate drepturile rezervate.</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+    document.getElementById('mobile-menu-toggle')?.addEventListener('click', () => {
+      document.querySelector('.main-nav')?.classList.toggle('open');
+    });
+</script>
 
 <script src="js/profile.js"></script>
 </body>
