@@ -190,8 +190,8 @@
             <h2>Recomandări</h2>
             <div class="filters">
                 <button class="filter-btn active" data-filter="all">Toate</button>
-                <button class="filter-btn" data-filter="telefoane">Telefoane</button>
-                <button class="filter-btn" data-filter="tablete">Tablete</button>
+                <button class="filter-btn" data-filter="Telefoane">Telefoane</button>
+                <button class="filter-btn" data-filter="Tablete">Tablete</button>
                 <button class="filter-btn" data-filter="laptop">Laptopuri</button>
                 <button class="filter-btn" data-filter="pc">Componente PC</button>
                 <button class="filter-btn" data-filter="periferice">Periferice</button>
@@ -300,7 +300,7 @@
     <i class="fas fa-arrow-up"></i>
 </button>
 
-<div class="modal" id="product-modal">
+<div id="product-modal" class="modal">
     <div class="modal-content">
         <span class="close-modal">&times;</span>
         <div class="product-detail" id="product-detail-container">
@@ -312,7 +312,7 @@
     </div>
 </div>
 
-<!-- Funcționalitate Explorează pentru categorii -->
+
 <script>
     document.querySelectorAll('.explore-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {

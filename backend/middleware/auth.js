@@ -2,11 +2,9 @@ const jwt = require('jsonwebtoken');
 const config = require('../config/config');
 const User = require('../models/User');
 
-// 🔒 Middleware pentru verificarea token-urilor JWT
 const verifyToken = async (req, res, next) => {
     console.log("=== INTRAT IN verifyToken ===");
     try {
-        // Extragere token din header
         const authHeader = req.headers['authorization'];
         const token = authHeader && authHeader.split(' ')[1];
 
@@ -19,10 +17,8 @@ const verifyToken = async (req, res, next) => {
             }));
         }
 
-        // Verificare token
         const decoded = jwt.verify(token, config.JWT_SECRET);
 
-        // Verificare existență user și roluri
         const user = await User.findById(decoded.id);
         if (!user) {
             return res.writeHead(401, { 'Content-Type': 'application/json' });
@@ -33,7 +29,6 @@ const verifyToken = async (req, res, next) => {
         }
 
         console.log("TOKEN VALID, setez req.user si apelez next()");
-        // Adaugă informații user la request
         req.user = {
             id: user._id,
             username: user.username,
@@ -55,7 +50,6 @@ const verifyToken = async (req, res, next) => {
     }
 };
 
-// 🔒 Middleware pentru verificarea rolurilor
 const isAdmin = (req, res, next) => {
     if (!req.user || req.user.role !== 'admin') {
         res.writeHead(403, { 'Content-Type': 'application/json' });

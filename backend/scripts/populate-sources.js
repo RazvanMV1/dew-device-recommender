@@ -1,4 +1,4 @@
-// backend/scripts/populate-sources.js
+
 require('dotenv').config({ path: '../.env' });
 const mongoose = require('mongoose');
 const connectDB = require('../db');
@@ -46,7 +46,7 @@ const predefinedSources = [
         type: 'rss',
         url: 'https://arena.ro/feed/',
         description: 'Noutăți din lumea IT și tehnologie',
-        updateFrequency: 90,  // minute
+        updateFrequency: 90,
         tags: ['tech', 'IT'],
         active: true
     }
@@ -62,14 +62,12 @@ async function populateSources() {
 
         for (const source of predefinedSources) {
             try {
-                // Verifică dacă sursa există deja
                 const existingSource = await Source.findOne({ url: source.url });
 
                 if (existingSource) {
                     console.log(`⚠️ Sursa ${source.name} există deja, se sare peste.`);
                     skipped++;
                 } else {
-                    // Creează sursa nouă
                     await Source.create(source);
                     console.log(`✅ Sursa "${source.name}" a fost creată.`);
                     created++;

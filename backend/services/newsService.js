@@ -1,4 +1,4 @@
-// backend/services/newsService.js
+
 const News = require('../models/News');
 const mongoose = require('mongoose');
 

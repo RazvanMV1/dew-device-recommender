@@ -1,4 +1,3 @@
-// scripts/create-admin.js
 
 require('dotenv').config({ path: '../.env' });
 const mongoose = require('mongoose');
@@ -6,13 +5,11 @@ const User = require('../models/User');
 const connectDB = require('../db');
 const readline = require('readline');
 
-// Interfață pentru citirea de la tastatură
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
 
-// Funcție pentru întrebări utilizator
 function question(query) {
     return new Promise(resolve => {
         rl.question(query, resolve);
@@ -24,7 +21,6 @@ async function createAdmin() {
         await connectDB();
         console.log('✅ Conectat la baza de date');
 
-        // Solicită informații despre admin
         const username = await question('Numele de utilizator admin: ');
         const password = await question('Parola admin (minim 8 caractere): ');
 
@@ -34,7 +30,6 @@ async function createAdmin() {
             return;
         }
 
-        // Verifică dacă utilizatorul există deja
         const existingUser = await User.findOne({ username });
 
         if (existingUser) {
@@ -49,7 +44,6 @@ async function createAdmin() {
                 console.log('❌ Operațiune anulată');
             }
         } else {
-            // Creează utilizator nou
             const newAdmin = new User({
                 username,
                 password,
@@ -67,7 +61,6 @@ async function createAdmin() {
     }
 }
 
-// Rulează funcția
 createAdmin().then(() => {
     mongoose.connection.close();
     console.log('Conexiune închisă');

@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 const { importDummyJsonProducts } = require('../services/scrapers/dummyJsonScraper');
-const dbConfig = require('../config/config'); // dacă ai setări pentru DB, altfel modifică path
+const dbConfig = require('../config/config');
 
-// Conectează la MongoDB (adaptează cu connection stringul tău!)
 mongoose.connect(dbConfig.mongoUri || 'mongodb+srv://dew-admin:parola123@cluster0.4wjx28g.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
     useNewUrlParser: true,
     useUnifiedTopology: true
