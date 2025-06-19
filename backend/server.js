@@ -1874,6 +1874,3 @@ const server = http.createServer(async (req, res) => {
                                                                 });
                                                             });
                                                         });
-server.listen(80, () => {
-    console.log('Serverul rulează pe portul 80');
-});
