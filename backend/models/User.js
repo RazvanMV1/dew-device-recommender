@@ -8,6 +8,7 @@ const UserSchema = new mongoose.Schema({
     avatar: { type: String },
     createdAt: { type: Date, default: Date.now },
     lastLogin: { type: Date },
+    email: { type: String, required: true, unique: true },
     preferences: {
         categories: [String],
         priceRange: String,

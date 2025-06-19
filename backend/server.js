@@ -125,6 +125,26 @@ const server = http.createServer(async (req, res) => {
                         }
                     });
                 }
+                else if (pathName === '/api/users') {
+                    securityHeaders(req, res, async () => {
+                        verifyToken(req, res, async () => {
+                            isAdmin(req, res, async () => {
+                                try {
+                                    const users = await User.find({}, '-password'); // exclude parola
+                                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                                    res.end(JSON.stringify({ success: true, users }));
+                                } catch (error) {
+                                    console.error('Eroare la obținerea utilizatorilor:', error);
+                                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                                    res.end(JSON.stringify({
+                                        success: false,
+                                        message: 'Eroare internă server'
+                                    }));
+                                }
+                            });
+                        });
+                    });
+                }
 
                 else if (pathName === '/api/profile/preferences') {
                     securityHeaders(req, res, async () => {
@@ -1004,8 +1024,7 @@ const server = http.createServer(async (req, res) => {
                                         });
                                     });
                                 }
-                                 else if (pathName === '/api/register') {
-                                } else if (pathName === '/api/register') {
+                                else if (pathName === '/api/register') {
                                     securityHeaders(req, res, async () => {
                                         try {
                                             const userData = await parseRequestBody(req);
@@ -1074,6 +1093,7 @@ const server = http.createServer(async (req, res) => {
                                                         }
                                                         const result = await authService.registerUser({
                                                             username: sanitizeText(userData.username),
+                                                            email: sanitizeText(userData.email),
                                                             password: userData.password,
                                                             role: userData.role || 'admin'
                                                         });
@@ -1588,7 +1608,79 @@ const server = http.createServer(async (req, res) => {
                                             }));
                                         }
                                     });
-                                } else if (pathName.match(/^\/api\/sources\/[a-zA-Z0-9]+$/)) {
+                                }
+                                else if (pathName.startsWith('/api/users/')) {
+                                    securityHeaders(req, res, async () => {
+                                        verifyToken(req, res, async () => {
+                                            isAdmin(req, res, async () => {
+                                                const userId = pathName.split('/').pop();
+
+                                                try {
+                                                    const deletedUser = await User.findByIdAndDelete(userId);
+
+                                                    if (!deletedUser) {
+                                                        res.writeHead(404, { 'Content-Type': 'application/json' });
+                                                        res.end(JSON.stringify({
+                                                            success: false,
+                                                            message: 'Utilizatorul nu a fost găsit.'
+                                                        }));
+                                                        return;
+                                                    }
+
+                                                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                                                    res.end(JSON.stringify({
+                                                        success: true,
+                                                        message: 'Utilizator șters cu succes.',
+                                                        userId: deletedUser._id
+                                                    }));
+                                                } catch (error) {
+                                                    console.error('Eroare la ștergerea utilizatorului:', error);
+                                                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                                                    res.end(JSON.stringify({
+                                                        success: false,
+                                                        message: 'Eroare internă server.'
+                                                    }));
+                                                }
+                                            });
+                                        });
+                                    });
+                                }
+                                else if (pathName.startsWith('/api/news/')) {
+                                    securityHeaders(req, res, async () => {
+                                        verifyToken(req, res, async () => {
+                                            isAdmin(req, res, async () => {
+                                                try {
+                                                    const newsId = pathName.split('/').pop();
+
+                                                    const deleted = await News.findByIdAndDelete(newsId);
+
+                                                    if (!deleted) {
+                                                        res.writeHead(404, { 'Content-Type': 'application/json' });
+                                                        res.end(JSON.stringify({
+                                                            success: false,
+                                                            message: 'Știrea nu a fost găsită.'
+                                                        }));
+                                                        return;
+                                                    }
+
+                                                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                                                    res.end(JSON.stringify({
+                                                        success: true,
+                                                        message: 'Știrea a fost ștearsă.'
+                                                    }));
+                                                } catch (error) {
+                                                    console.error('Eroare la ștergerea știrii:', error);
+                                                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                                                    res.end(JSON.stringify({
+                                                        success: false,
+                                                        message: 'Eroare internă la ștergerea știrii.'
+                                                    }));
+                                                }
+                                            });
+                                        });
+                                    });
+                                }
+                                 else if (pathName.match(/^\/api\/sources\/[a-zA-Z0-9]+$/)) {
                                     securityHeaders(req, res, async () => {
                                         try {
                                             verifyToken(req, res, async () => {

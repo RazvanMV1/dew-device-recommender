@@ -2,11 +2,12 @@
 <html lang="ro">
 <head>
     <meta charset="UTF-8" />
+    <title>Statistici Produse</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Toate Știrile</title>
     <link rel="stylesheet" href="css/main.css" />
-    <link rel="stylesheet" href="css/news.css" />
+    <link rel="stylesheet" href="css/stats.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="js/chart.umd.js"></script>
 </head>
 <body>
 
@@ -14,34 +15,40 @@
     <div class="container">
         <div class="header-content">
             <a href="/" class="logo-link">ElectroRecommender</a>
-
             <button class="mobile-menu-toggle" id="mobile-menu-toggle">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
-
             <nav class="main-nav" id="main-nav">
                 <ul>
-                    <li><a href="/">Acasă</a></li>
                     <li><a href="/#categorii">Categorii</a></li>
+                    <li><a href="/#noutati">Noutăți</a></li>
                     <li><a href="/products">Produse</a></li>
                     <li><a href="/stats">Statistici</a></li>
                 </ul>
+                <div class="header-actions">
+                    <a href="/profile" class="btn btn-outline">Profilul meu</a>
+                    <button id="logout-btn" class="btn btn-outline">Deconectare</button>
+                </div>
             </nav>
-
-            <div class="header-actions">
-                <a href="/profile" class="btn btn-outline">Profilul meu</a>
-                <button id="logout-btn" class="btn btn-outline">Deconectare</button>
-            </div>
         </div>
     </div>
 </header>
 
-<main class="container news-wrapper">
-    <h1>Toate Știrile din Tehnologie</h1>
-    <div id="news-list" class="news-grid">
-        <p>Se încarcă știrile...</p>
+<main class="container stats-wrapper">
+    <h1>Statistici Produse Recomandate</h1>
+    <div class="chart-box">
+        <h2>Top Produse</h2>
+        <canvas id="topProductsChart"></canvas>
+    </div>
+    <div class="chart-box">
+        <h2>Distribuție pe Categorii</h2>
+        <canvas id="categoriesChart"></canvas>
+    </div>
+    <div class="chart-box">
+        <h2>Distribuție pe Culori</h2>
+        <canvas id="colorsChart"></canvas>
     </div>
 </main>
 
@@ -55,37 +62,33 @@
                 </div>
                 <p>Platforma ta pentru recomandări inteligente de dispozitive electronice.</p>
             </div>
-
             <div class="footer-column">
                 <h4>Legături rapide</h4>
                 <ul>
                     <li><a href="/">Acasă</a></li>
                     <li><a href="/#categorii">Categorii</a></li>
+                    <li><a href="/#noutati">Noutăți</a></li>
                     <li><a href="/products">Produse</a></li>
                 </ul>
             </div>
-
             <div class="footer-column">
-                <h4>Contact</h4>
+                <h4>Categorii</h4>
                 <ul>
-                    <li><a href="mailto:support@electrorecommender.com">Trimite email</a></li>
+                    <li><a href="/products?category=Telefoane">Telefoane</a></li>
+                    <li><a href="/products?category=Tablete">Tablete</a></li>
+                    <li><a href="/products?category=Laptopuri">Laptopuri</a></li>
+                    <li><a href="/products?category=Smartwatch-uri">Smartwatch-uri</a></li>
+                    <li><a href="/products?category=Audio">Audio</a></li>
+                    <li><a href="/products?category=Drone">Drone</a></li>
                 </ul>
             </div>
         </div>
-
         <div class="footer-bottom">
             <p>&copy; 2025 ElectroRecommender. Toate drepturile rezervate.</p>
         </div>
     </div>
 </footer>
 
-<script src="js/news.js"></script>
-<script>
-    // Meniu mobil toggle
-    document.getElementById('mobile-menu-toggle')?.addEventListener('click', () => {
-      document.getElementById('main-nav')?.classList.toggle('open');
-    });
-</script>
-
+<script src="js/stats.js"></script>
 </body>
 </html>
