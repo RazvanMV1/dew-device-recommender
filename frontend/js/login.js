@@ -74,7 +74,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Salvare token în localStorage pentru autentificări ulterioare
                 localStorage.setItem('authToken', data.token);
-                localStorage.setItem('userData', JSON.stringify(data.user));
+
+                // -- AICI este modificarea esențială --
+                // Asigură-te că salvezi avatar, username și rol în userData
+                localStorage.setItem('userData', JSON.stringify({
+                    username: data.user.username,
+                    role: data.user.role,
+                    avatar: data.user.avatar || ''
+                }));
 
                 // Redirecționare către pagina corespunzătoare după 1 secundă
                 setTimeout(() => {

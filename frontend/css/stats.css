@@ -59,8 +59,9 @@ body {
 }
 
 .header-actions {
-  display: flex;
-  gap: 1rem;
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
 
 .btn {
@@ -90,9 +91,9 @@ body {
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
-  padding: 2rem;
+  padding: 1.2rem;
   margin-bottom: 2rem;
-  max-width: 700px;
+  max-width: 480px;      /* <-- GRAFIC MAI MIC */
   margin-left: auto;
   margin-right: auto;
 }
@@ -103,8 +104,11 @@ h1, h2 {
 
 .chart-box canvas {
   width: 100% !important;
-  height: auto !important;
+  height: 240px !important;        /* <-- GRAFIC MAI MIC */
   max-width: 100%;
+  max-height: 240px !important;
+  display: block;
+  margin: 0 auto;
 }
 
 /* ======= Footer ======= */
@@ -200,7 +204,7 @@ h1, h2 {
   }
 
   .chart-box {
-    padding: 1rem;
+    padding: 0.7rem;
     max-width: 99vw;
   }
 
@@ -257,9 +261,20 @@ h1, h2 {
     background: #fff;
   }
 
-  /* Ascunde butoanele în header pe mobil, afișează-le doar în meniu când e deschis */
   .header-actions {
-    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 10px;
+  }
+
+  .header-actions .btn {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .main-header .header-content {
+    flex-direction: column;
+    align-items: flex-start;
   }
   .main-nav.open .header-actions {
     display: flex;
@@ -287,11 +302,24 @@ h1, h2 {
     width: 100%;
     margin-bottom: 1rem;
   }
+  .chart-box {
+    max-width: 99vw;
+    padding: 0.3rem;
+  }
+  .chart-box canvas {
+    height: 140px !important;
+    max-height: 140px !important;
+  }
 }
 
 @media (max-width: 480px) {
   .chart-box {
-    padding: 0.5rem;
+    padding: 0.2rem;
+    max-width: 99vw;
+  }
+  .chart-box canvas {
+    height: 110px !important;
+    max-height: 110px !important;
   }
   h1, h2 {
     font-size: 1.1rem;

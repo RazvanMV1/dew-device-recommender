@@ -4,39 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Profilul meu - ElectroRecommender</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- Header și fonturile sunt gestionate dinamic sau local -->
+    <link rel="stylesheet" href="components/header.css" />
     <link rel="stylesheet" href="css/profile.css">
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-<header class="main-header">
-    <div class="container">
-        <div class="header-content">
-            <a href="/" class="logo-link">
-                <i class="fas fa-microchip"></i> ElectroRecommender
-            </a>
 
-            <nav class="main-nav">
-                <ul>
-                    <li><a href="/#categorii">Categorii</a></li>
-                    <li><a href="/#noutati">Noutăți</a></li>
-                    <li><a href="/products">Produse</a></li>
-                    <li><a href="/stats" id="stats-link">Statistici</a></li>
-                </ul>
-            </nav>
-
-            <div class="header-actions">
-                <button id="logout-btn" class="btn btn-outline">
-                    <i class="fas fa-sign-out-alt"></i> Deconectare
-                </button>
-            </div>
-
-            <button class="mobile-menu-toggle" id="mobile-menu-toggle">
-                <span></span><span></span><span></span>
-            </button>
-        </div>
-    </div>
-</header>
+<!-- Header dinamic -->
+<div id="header-placeholder"></div>
 
 <main>
     <div class="profile-flex-container">
@@ -56,7 +32,8 @@
         <!-- Profil -->
         <div class="profile-card" id="profile-card">
             <div class="profile-avatar" id="profile-avatar">
-                <i class="fas fa-user-circle"></i>
+                <!-- Poți pune aici un emoji sau o imagine default -->
+                <span style="font-size:3rem;">👤</span>
             </div>
             <div class="profile-title" id="profile-username">Se încarcă...</div>
             <div class="profile-role" id="profile-role"></div>
@@ -92,12 +69,11 @@
         <div class="footer-content">
             <div class="footer-column">
                 <div class="footer-logo">
-                    <i class="fas fa-microchip"></i>
+                    <span style="font-size:1.5rem;">💻</span>
                     <h3>ElectroRecommender</h3>
                 </div>
                 <p>Platforma ta pentru recomandări inteligente de dispozitive electronice.</p>
             </div>
-
             <div class="footer-column">
                 <h4>Legături rapide</h4>
                 <ul>
@@ -109,7 +85,6 @@
                     <li><a href="/stats">Statistici</a></li>
                 </ul>
             </div>
-
             <div class="footer-column">
                 <h4>Categorii</h4>
                 <ul>
@@ -124,19 +99,23 @@
                 </ul>
             </div>
         </div>
-
         <div class="footer-bottom">
             <p>&copy; 2025 ElectroRecommender. Toate drepturile rezervate.</p>
         </div>
     </div>
 </footer>
 
+<!-- Header dinamic -->
+<script src="components/header.js"></script>
 <script>
-    document.getElementById('mobile-menu-toggle')?.addEventListener('click', () => {
-      document.querySelector('.main-nav')?.classList.toggle('open');
+    document.addEventListener('DOMContentLoaded', function() {
+        loadHeader('header-placeholder', function() {
+            if (typeof initUI === 'function') initUI();
+        });
     });
 </script>
 
+<!-- Scriptul tău pentru profile -->
 <script src="js/profile.js"></script>
 </body>
 </html>
