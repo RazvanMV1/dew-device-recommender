@@ -1,0 +1,46 @@
+#news-section .user-table img {
+  border: 1px solid #ddd;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+#news-section .user-table td a {
+  color: #2c3e50;
+  text-decoration: none;
+}
+#news-section .user-table td a:hover {
+  text-decoration: underline;
+}
+
+.pagination {
+  margin-top: 1rem;
+  text-align: center;
+}
+.pagination button {
+  margin: 0 4px;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  background: white;
+  color: #333;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.pagination button.active {
+  background: #007bff;
+  color: white;
+  font-weight: bold;
+}
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-delete-news {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: red;
+}
+
+.btn-delete-news:hover {
+    opacity: 0.8;
+}
