@@ -62,6 +62,7 @@ const registerUser = async (userData) => {
 
         const newUser = new User({
             username: userData.username,
+            email: userData.email,
             password: userData.password,
             role: userData.role || 'admin'
         });
