@@ -332,7 +332,7 @@ const [productsResponse, sourcesResponse, newsResponse, usersResponse] = await P
 fetch('/api/products?limit=1'),
 fetch('/api/sources?limit=1'),
 fetch('/api/news?limit=1'),
-fetch('/api/admin/users?limit=1', {
+fetch('/api/users', {
 headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
 })
 ]);

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - ElectroRecommender</title>
     <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/admin-users.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -64,12 +65,6 @@
                         <span>Utilizatori</span>
                     </a>
                 </li>
-                <li>
-                    <a href="#settings-section" data-section="settings-section">
-                        <i class="fas fa-cog"></i>
-                        <span>Setări</span>
-                    </a>
-                </li>
             </ul>
         </nav>
 
@@ -92,24 +87,8 @@
                     <span id="current-page">Dashboard</span>
                 </nav>
             </div>
-            <div class="header-right">
-                <div class="search-box">
-                    <input type="text" placeholder="Caută...">
-                    <i class="fas fa-search"></i>
-                </div>
-                <div class="notifications">
-                    <i class="fas fa-bell"></i>
-                    <span class="badge">3</span>
-                </div>
-                <div class="user-dropdown">
-                    <i class="fas fa-user-circle"></i>
-                    <div class="dropdown-menu">
-                        <a href="#profile"><i class="fas fa-user"></i> Profil</a>
-                        <a href="#settings"><i class="fas fa-cog"></i> Setări</a>
-                        <div class="divider"></div>
-                        <a href="#" id="dropdown-logout"><i class="fas fa-sign-out-alt"></i> Deconectare</a>
-                    </div>
-                </div>
+            <div class="header-actions">
+                <a href="/profile" class="btn btn-outline">Profilul meu</a>
             </div>
         </header>
 
@@ -367,52 +346,95 @@
             </section>
 
             <!-- News Section (laconic) -->
+            <!-- News Section (modificat) -->
             <section id="news-section" class="section">
-                <div class="section-header">
-                    <h2>Managementul Știrilor</h2>
-                    <button class="btn-primary" id="refresh-news-btn"><i class="fas fa-sync"></i> Actualizează știri</button>
-                </div>
+
                 <div class="card">
                     <div class="card-body">
-                        <div class="placeholder-content">
-                            <i class="fas fa-newspaper fa-3x"></i>
-                            <h3>Conținut în dezvoltare</h3>
-                            <p>Interfața pentru managementul știrilor va fi disponibilă în curând.</p>
-                        </div>
+                        <table class="user-table">
+                            <thead>
+                            <tr>
+                                <th></th> <!-- Coloana pentru butonul de ștergere -->
+                                <th>Imagine</th>
+                                <th>Titlu</th>
+                                <th>Sursă</th>
+                                <th>Autor</th>
+                                <th>Publicat</th>
+                            </tr>
+                            </thead>
+                            <tbody id="newsTableBody"></tbody>
+                        </table>
+
+                        <!-- PAGINARE -->
+                        <div id="newsPagination" class="pagination"></div>
                     </div>
                 </div>
             </section>
 
-            <!-- Users Section (laconic) -->
+
+
+
+            <!-- Users Section (complet) -->
             <section id="users-section" class="section">
                 <div class="section-header">
                     <h2>Managementul Utilizatorilor</h2>
-                    <button class="btn-primary" id="add-user-btn"><i class="fas fa-user-plus"></i> Utilizator nou</button>
                 </div>
+
+                <!-- Formular creare utilizator -->
                 <div class="card">
                     <div class="card-body">
-                        <div class="placeholder-content">
-                            <i class="fas fa-users fa-3x"></i>
-                            <h3>Conținut în dezvoltare</h3>
-                            <p>Interfața pentru managementul utilizatorilor va fi disponibilă în curând.</p>
-                        </div>
+                        <form id="adminCreateUserForm" class="form-grid">
+                            <div class="form-group">
+                                <label for="username">Nume utilizator</label>
+                                <input type="text" id="username" name="username" required />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Adresă email</label>
+                                <input type="email" id="email" name="email" required />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="password">Parolă</label>
+                                <input type="password" id="password" name="password" required minlength="8" />
+                                <small class="input-hint">Minim 8 caractere</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="role">Rol</label>
+                                <select id="role" name="role" required>
+                                    <option value="member">Membru</option>
+                                    <option value="admin">Administrator</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-user-plus"></i> Creează utilizator
+                            </button>
+                        </form>
+
+                        <div class="alert" id="userFormAlert" style="display: none; margin-top: 1rem;"></div>
                     </div>
                 </div>
-            </section>
 
-            <!-- Settings Section (laconic) -->
-            <section id="settings-section" class="section">
-                <div class="section-header">
-                    <h2>Setări Sistem</h2>
-                    <button class="btn-primary" id="save-settings-btn"><i class="fas fa-save"></i> Salvează setări</button>
-                </div>
-                <div class="card">
+                <!-- Tabel utilizatori -->
+                <div class="card" style="margin-top: 2rem;">
                     <div class="card-body">
-                        <div class="placeholder-content">
-                            <i class="fas fa-cog fa-3x"></i>
-                            <h3>Conținut în dezvoltare</h3>
-                            <p>Interfața pentru setările sistemului va fi disponibilă în curând.</p>
-                        </div>
+                        <h3>Utilizatori existenți</h3>
+                        <table class="user-table">
+                            <thead>
+                            <tr>
+                                <th></th> <!-- coloană pentru buton delete -->
+                                <th>Nume utilizator</th>
+                                <th>Email</th>
+                                <th>Rol</th>
+                                <th>Creat la</th>
+                            </tr>
+                            </thead>
+                            <tbody id="userTableBody">
+                            <!-- Populat din JS -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
@@ -553,5 +575,7 @@
 </div>
 
 <script src="js/dashboard.js"></script>
+<script src="js/admin-users.js"></script>
+<script src="js/admin-news.js"></script>
 </body>
 </html>
