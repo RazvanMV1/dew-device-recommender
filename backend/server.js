@@ -174,11 +174,38 @@ const server = http.createServer(async (req, res) => {
                 else if (pathName === '/api/products') {
                     securityHeaders(req, res, async () => {
                         try {
-                            const { category, brand, sort, limit = 20, page = 1, search } = parsedUrl.query;
-
+                            const { category, brand, price, sort, limit = 20, page = 1, search } = parsedUrl.query;
                             const filter = {};
-                            if (category) filter.category = category;
-                            if (brand) filter.brand = brand;
+
+                            if (category) {
+                                const categories = category.split(',').map(c =>
+                                    new RegExp('^' + c.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i')
+                                );
+                                filter.category = { $in: categories };
+                            }
+                            if (brand) {
+                                const brands = brand.split(',').map(b =>
+                                    new RegExp('^' + b.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i')
+                                );
+                                filter.brand = { $in: brands };
+                            }
+                            if (price) {
+                                let priceQuery = [];
+                                for (const p of price.split(',')) {
+                                    if (p.trim().toLowerCase() === "low") {
+                                        priceQuery.push({ price: { $gte: 0, $lt: 200 } });
+                                    } else if (p.trim().toLowerCase() === "mid") {
+                                        priceQuery.push({ price: { $gte: 200, $lt: 600 } });
+                                    } else if (p.trim().toLowerCase() === "high") {
+                                        priceQuery.push({ price: { $gte: 600 } });
+                                    }
+                                }
+                                if (priceQuery.length === 1) {
+                                    Object.assign(filter, priceQuery[0]);
+                                } else if (priceQuery.length > 1) {
+                                    filter.$or = priceQuery;
+                                }
+                            }
 
                             const { normalizeSearchTerm, getSynonyms, buildSearchPipeline } = require('./utils/searchEnhancer');
 
@@ -192,6 +219,12 @@ const server = http.createServer(async (req, res) => {
                             let products1 = await mongoose.connection.db.collection('products').aggregate(pipeline).toArray();
                             let products2 = await mongoose.connection.db.collection('amazonproducts').aggregate(pipeline).toArray();
                             let products = [...products1, ...products2];
+
+                            // Shuffle array-ul pentru a randomiza ordinea produselor pentru orice categorie
+                            for (let i = products.length - 1; i > 0; i--) {
+                                const j = Math.floor(Math.random() * (i + 1));
+                                [products[i], products[j]] = [products[j], products[i]];
+                            }
 
                             if (products.length === 0 && synonyms.length > 0) {
                                 const fallbackPipeline = [
@@ -211,6 +244,13 @@ const server = http.createServer(async (req, res) => {
                                 const fb1 = await mongoose.connection.db.collection('products').aggregate(fallbackPipeline).toArray();
                                 const fb2 = await mongoose.connection.db.collection('amazonproducts').aggregate(fallbackPipeline).toArray();
                                 products = [...fb1, ...fb2];
+
+                                // Shuffle array-ul pentru a randomiza ordinea produselor pentru orice categorie
+                                for (let i = products.length - 1; i > 0; i--) {
+                                    const j = Math.floor(Math.random() * (i + 1));
+                                    [products[i], products[j]] = [products[j], products[i]];
+                                }
+
                             }
                             if (sort) {
                                 const [field, order] = sort.split(':');

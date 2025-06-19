@@ -326,6 +326,51 @@ window.addEventListener("DOMContentLoaded", function () {
             loadProducts(1);
         });
     });
+    const preferencesBtn = document.querySelector('.category-nav .category-btn:not([data-cat])');
+    if (preferencesBtn) {
+        preferencesBtn.addEventListener('click', async function () {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                alert('Trebuie să fii autentificat pentru a folosi preferințele!');
+                return;
+            }
+            try {
+                const resp = await fetch('/api/profile/preferences', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await resp.json();
+                if (!data.success) {
+                    alert('Nu s-au putut prelua preferințele!');
+                    return;
+                }
+                const prefs = data.preferences || {};
+
+                let query = '';
+                if (prefs.categories && prefs.categories.length > 0) {
+                    // FĂRĂ .toLowerCase() (folosește exact denumirea din Mongo)
+                    const cats = prefs.categories.map(cat => cat.trim());
+                    query += 'category=' + encodeURIComponent(cats.join(',')) + '&';
+                }
+                if (prefs.brands && prefs.brands.length > 0) {
+                    // FĂRĂ .toLowerCase() (folosește exact denumirea din Mongo)
+                    const brs = prefs.brands.map(brand => brand.trim());
+                    query += 'brand=' + encodeURIComponent(brs.join(',')) + '&';
+                }
+                if (prefs.priceRange) {
+                    let prices = Array.isArray(prefs.priceRange) ? prefs.priceRange : [prefs.priceRange];
+                    prices = prices.map(p => p.trim().toLowerCase());
+                    query += 'price=' + encodeURIComponent(prices.join(',')) + '&';
+                }
+
+                window.location.href = '/products?' + query.slice(0, -1);
+            } catch (err) {
+                alert('Eroare la preluarea preferințelor!');
+            }
+        });
+    }
+
 
     sortSelect.addEventListener("change", () => {
         currentSort = sortSelect.value;
