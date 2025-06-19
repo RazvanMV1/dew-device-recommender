@@ -7,24 +7,6 @@ window.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.getElementById("search-input");
     const searchBtn = document.getElementById("search-btn");
 
-    const params = new URLSearchParams(window.location.search);
-    let currentCategory = params.get("category") || "";
-    let searchQuery = params.get("search") || "";
-    let currentSort = "";
-    let currentPage = 1;
-
-    if (searchInput && searchQuery) searchInput.value = searchQuery;
-
-    if (currentCategory) {
-        document.querySelectorAll(".category-btn").forEach(btn => {
-            if (btn.dataset.cat === currentCategory) {
-                btn.classList.add("active");
-            } else {
-                btn.classList.remove("active");
-            }
-        });
-    }
-
     function truncate(text, maxLength = 80) {
         return text.length > maxLength ? text.slice(0, maxLength - 3) + "..." : text;
     }
@@ -56,7 +38,7 @@ window.addEventListener("DOMContentLoaded", function () {
             if (isActive) btn.classList.add("active");
             if (disabled) btn.disabled = true;
             btn.addEventListener("click", () => {
-                if (!disabled && page) loadProducts(page);
+                if (!disabled && page) setPage(page);
             });
             return btn;
         };
@@ -91,23 +73,47 @@ window.addEventListener("DOMContentLoaded", function () {
         pagination.appendChild(createButton("»", total, false, current === total));
     }
 
-    async function loadProducts(page = 1) {
+    function setPage(page) {
+        const params = new URLSearchParams(window.location.search);
+        params.set("page", page);
+        window.location.search = params.toString();
+    }
+
+    async function loadProducts() {
         loader.style.display = "";
         errorBox.textContent = "";
         grid.innerHTML = "";
-        currentPage = page;
+        highlightActiveCategory();
+        const params = new URLSearchParams(window.location.search);
+        let url = `/api/products?`;
 
-        let url = `/api/products?limit=20&page=${page}`;
-        if (currentCategory) url += `&category=${encodeURIComponent(currentCategory)}`;
-        if (currentSort) url += `&sort=${encodeURIComponent(currentSort)}`;
-        if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
+        for (const [key, value] of params.entries()) {
+            if (value) {
+                url += `${encodeURIComponent(key)}=${encodeURIComponent(value)}&`;
+            }
+        }
+        if (url.endsWith('&')) url = url.slice(0, -1);
+
+        console.log("URL FETCH:", url);
 
         try {
             const res = await fetch(url);
             const data = await res.json();
+            console.log("PRODUSE API:", data.products);
+
+            const currentCategory = params.get("category") || "";
+            document.querySelectorAll(".category-btn").forEach(btn => {
+                if (btn.dataset.cat === currentCategory) {
+                    btn.classList.add("active");
+                } else {
+                    btn.classList.remove("active");
+                }
+            });
+
             if (!data.products || !data.products.length) {
                 errorBox.textContent = "Nu s-au găsit produse.";
                 loader.style.display = "none";
+                pagination.innerHTML = "";
                 return;
             }
             grid.innerHTML = data.products.map(createProductCard).join("");
@@ -263,6 +269,28 @@ window.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    function highlightActiveCategory() {
+        const params = new URLSearchParams(window.location.search);
+        const cat = params.get("category") || "";
+        const brand = params.get("brand") || "";
+        const price = params.get("price") || "";
+
+        document.querySelectorAll(".category-btn").forEach(btn => btn.classList.remove("active"));
+
+        const isPreferences =
+            (cat && cat.includes(",")) || brand || price;
+
+        if (isPreferences) {
+            const prefBtn = document.querySelector(".btn-preferences");
+            if (prefBtn) prefBtn.classList.add("active");
+        } else if (cat) {
+            document.querySelectorAll(".category-btn[data-cat]").forEach(btn => {
+                if (btn.dataset.cat === cat) btn.classList.add("active");
+            });
+        }
+    }
+
+
     function loadSimilarProducts(product) {
         const container = document.getElementById('comparable-models');
         container.innerHTML = '<p>Se încarcă recomandările...</p>';
@@ -318,14 +346,18 @@ window.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    document.querySelectorAll(".category-btn").forEach(btn => {
+    document.querySelectorAll(".category-btn[data-cat]").forEach(btn => {
         btn.addEventListener("click", () => {
-            currentCategory = btn.dataset.cat;
-            document.querySelectorAll(".category-btn").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            loadProducts(1);
+            const cat = btn.dataset.cat;
+            if (cat) {
+                window.location.href = `/products?category=${encodeURIComponent(cat)}`;
+            } else {
+                window.location.href = `/products`;
+            }
         });
     });
+
+
     const preferencesBtn = document.querySelector('.category-nav .category-btn:not([data-cat])');
     if (preferencesBtn) {
         preferencesBtn.addEventListener('click', async function () {
@@ -336,60 +368,63 @@ window.addEventListener("DOMContentLoaded", function () {
             }
             try {
                 const resp = await fetch('/api/profile/preferences', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await resp.json();
-                if (!data.success) {
-                    alert('Nu s-au putut prelua preferințele!');
-                    return;
-                }
                 const prefs = data.preferences || {};
 
-                let query = '';
-                if (prefs.categories && prefs.categories.length > 0) {
-                    // FĂRĂ .toLowerCase() (folosește exact denumirea din Mongo)
-                    const cats = prefs.categories.map(cat => cat.trim());
-                    query += 'category=' + encodeURIComponent(cats.join(',')) + '&';
+                let queryArr = [];
+                if (prefs.categories && Array.isArray(prefs.categories)) {
+                    const cats = prefs.categories.map(cat => cat && cat.trim()).filter(Boolean);
+                    if (cats.length > 0) queryArr.push('category=' + encodeURIComponent(cats.join(',')));
                 }
-                if (prefs.brands && prefs.brands.length > 0) {
-                    // FĂRĂ .toLowerCase() (folosește exact denumirea din Mongo)
-                    const brs = prefs.brands.map(brand => brand.trim());
-                    query += 'brand=' + encodeURIComponent(brs.join(',')) + '&';
+                if (prefs.brands && Array.isArray(prefs.brands)) {
+                    const brs = prefs.brands.map(brand => brand && brand.trim()).filter(Boolean);
+                    if (brs.length > 0) queryArr.push('brand=' + encodeURIComponent(brs.join(',')));
                 }
                 if (prefs.priceRange) {
                     let prices = Array.isArray(prefs.priceRange) ? prefs.priceRange : [prefs.priceRange];
-                    prices = prices.map(p => p.trim().toLowerCase());
-                    query += 'price=' + encodeURIComponent(prices.join(',')) + '&';
+                    prices = prices.map(p => p && p.trim().toLowerCase()).filter(Boolean);
+                    if (prices.length > 0) queryArr.push('price=' + encodeURIComponent(prices.join(',')));
                 }
-
-                window.location.href = '/products?' + query.slice(0, -1);
+                const finalQuery = queryArr.join('&');
+                if (finalQuery.length === 0) {
+                    alert("Nu ai preferințe setate!");
+                    return;
+                }
+                window.location.href = '/products?' + finalQuery;
             } catch (err) {
                 alert('Eroare la preluarea preferințelor!');
             }
         });
     }
 
-
     sortSelect.addEventListener("change", () => {
-        currentSort = sortSelect.value;
-        loadProducts(1);
+        const params = new URLSearchParams(window.location.search);
+        const sortVal = sortSelect.value;
+        if (sortVal) params.set("sort", sortVal);
+        else params.delete("sort");
+        params.delete("page");
+        window.location.search = params.toString();
     });
 
     searchBtn.addEventListener("click", () => {
         const inputValue = searchInput.value.trim();
-        if (inputValue) {
-            window.location.href = `/products?search=${encodeURIComponent(inputValue)}`;
-        }
+        const params = new URLSearchParams(window.location.search);
+        if (inputValue) params.set("search", inputValue);
+        else params.delete("search");
+        params.delete("page");
+        window.location.search = params.toString();
     });
 
     searchInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
             const inputValue = searchInput.value.trim();
-            if (inputValue) {
-                window.location.href = `/products?search=${encodeURIComponent(inputValue)}`;
-            }
+            const params = new URLSearchParams(window.location.search);
+            if (inputValue) params.set("search", inputValue);
+            else params.delete("search");
+            params.delete("page");
+            window.location.search = params.toString();
         }
     });
 

@@ -139,7 +139,7 @@ const server = http.createServer(async (req, res) => {
                         verifyToken(req, res, async () => {
                             isAdmin(req, res, async () => {
                                 try {
-                                    const users = await User.find({}, '-password'); // exclude parola
+                                    const users = await User.find({}, '-password');
                                     res.writeHead(200, { 'Content-Type': 'application/json' });
                                     res.end(JSON.stringify({ success: true, users }));
                                 } catch (error) {
@@ -164,11 +164,18 @@ const server = http.createServer(async (req, res) => {
                                 return;
                             }
                             const user = await User.findById(req.user.id);
+                            console.log("USER GASIT:", user);
+                            if (!user) {
+                                res.writeHead(404, { 'Content-Type': 'application/json' });
+                                res.end(JSON.stringify({ success: false, message: 'User inexistent!' }));
+                                return;
+                            }
                             res.writeHead(200, { 'Content-Type': 'application/json' });
                             res.end(JSON.stringify({ success: true, preferences: user.preferences || {} }));
                         });
                     });
                 }
+
                 else if (pathName === '/api/profile') {
                     console.log("=== INTRAT PE /api/profile ===");
                     securityHeaders(req, res, async () => {
@@ -180,7 +187,6 @@ const server = http.createServer(async (req, res) => {
                                 res.end(JSON.stringify({ success: false, message: 'Neautentificat' }));
                                 return;
                             }
-                            // Ia userul complet din baza de date pentru preferințe și eventual avatar actualizat
                             const userDB = await User.findById(req.user.id);
 
                             console.log("USER LOGAT:", req.user);
@@ -204,40 +210,57 @@ const server = http.createServer(async (req, res) => {
                     securityHeaders(req, res, async () => {
                         try {
                             const { category, brand, price, sort, limit = 20, page = 1, search } = parsedUrl.query;
-                            const filter = {};
+
+                            console.log('category:', category, typeof category);
+                            console.log('brand:', brand, typeof brand);
+                            console.log('price:', price, typeof price);
+
+                            const cats = category ? category.split(',').map(cat => cat.trim()).filter(Boolean) : [];
+                            console.log('cats:', cats);
+
+                            const brandsArr = brand ? brand.split(',').map(b => b.trim()).filter(Boolean) : [];
+                            console.log('brandsArr:', brandsArr);
+
+                            const filter = { $and: [] };
 
                             if (category) {
-                                const categories = category.split(',').map(c =>
-                                    new RegExp('^' + c.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i')
-                                );
-                                filter.category = { $in: categories };
+                                const cats = category.split(',').map(cat => cat.trim()).filter(Boolean);
+                                if (cats.length) {
+                                    filter.$and.push({
+                                        $or: cats.map(cat => ({
+                                            category: { $regex: new RegExp(`^${cat}$`, 'i') }
+                                        }))
+                                    });
+                                }
                             }
+
                             if (brand) {
-                                const brands = brand.split(',').map(b =>
-                                    new RegExp('^' + b.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i')
-                                );
-                                filter.brand = { $in: brands };
+                                const brandsArr = brand.split(',').map(b => b.trim()).filter(Boolean);
+                                if (brandsArr.length) {
+                                    filter.$and.push({
+                                        $or: brandsArr.map(b => ({
+                                            brand: { $regex: new RegExp(`^${b}$`, 'i') }
+                                        }))
+                                    });
+                                }
                             }
+
                             if (price) {
                                 let priceQuery = [];
-                                for (const p of price.split(',')) {
-                                    if (p.trim().toLowerCase() === "low") {
-                                        priceQuery.push({ price: { $gte: 0, $lt: 200 } });
-                                    } else if (p.trim().toLowerCase() === "mid") {
-                                        priceQuery.push({ price: { $gte: 200, $lt: 600 } });
-                                    } else if (p.trim().toLowerCase() === "high") {
-                                        priceQuery.push({ price: { $gte: 600 } });
-                                    }
+                                for (const p of price.split(',').map(p => p.trim().toLowerCase())) {
+                                    if (p === "low") priceQuery.push({ price: { $gte: 0, $lt: 200 } });
+                                    else if (p === "mid") priceQuery.push({ price: { $gte: 200, $lt: 600 } });
+                                    else if (p === "high") priceQuery.push({ price: { $gte: 600 } });
                                 }
-                                if (priceQuery.length === 1) {
-                                    Object.assign(filter, priceQuery[0]);
-                                } else if (priceQuery.length > 1) {
-                                    filter.$or = priceQuery;
-                                }
+                                if (priceQuery.length)
+                                    filter.$and.push({ $or: priceQuery });
                             }
 
-                            const { normalizeSearchTerm, getSynonyms, buildSearchPipeline } = require('./utils/searchEnhancer');
+                            if (!filter.$and.length) delete filter.$and;
 
+                            console.log("=== FILTER FINAL ===\n", JSON.stringify(filter, null, 2));
+
+                            const { normalizeSearchTerm, getSynonyms, buildSearchPipeline } = require('./utils/searchEnhancer');
                             const normalizedSearch = normalizeSearchTerm(search);
                             const synonyms = getSynonyms(normalizedSearch);
 
@@ -249,7 +272,6 @@ const server = http.createServer(async (req, res) => {
                             let products2 = await mongoose.connection.db.collection('amazonproducts').aggregate(pipeline).toArray();
                             let products = [...products1, ...products2];
 
-                            // Shuffle array-ul pentru a randomiza ordinea produselor pentru orice categorie
                             for (let i = products.length - 1; i > 0; i--) {
                                 const j = Math.floor(Math.random() * (i + 1));
                                 [products[i], products[j]] = [products[j], products[i]];
@@ -269,18 +291,15 @@ const server = http.createServer(async (req, res) => {
                                         }
                                     }
                                 ];
-
                                 const fb1 = await mongoose.connection.db.collection('products').aggregate(fallbackPipeline).toArray();
                                 const fb2 = await mongoose.connection.db.collection('amazonproducts').aggregate(fallbackPipeline).toArray();
                                 products = [...fb1, ...fb2];
-
-                                // Shuffle array-ul pentru a randomiza ordinea produselor pentru orice categorie
                                 for (let i = products.length - 1; i > 0; i--) {
                                     const j = Math.floor(Math.random() * (i + 1));
                                     [products[i], products[j]] = [products[j], products[i]];
                                 }
-
                             }
+
                             if (sort) {
                                 const [field, order] = sort.split(':');
                                 products = products.sort((a, b) => {
@@ -290,11 +309,9 @@ const server = http.createServer(async (req, res) => {
                                 });
                             } else if (search) {
                                 const lowerTerms = synonyms.map(t => t.toLowerCase());
-
                                 products = products.map(p => {
                                     let score = 0;
                                     const fields = [p.name, p.title, p.description, p.brand, p.category];
-
                                     for (const field of fields) {
                                         if (!field) continue;
                                         const text = field.toLowerCase();
@@ -303,7 +320,6 @@ const server = http.createServer(async (req, res) => {
                                             else if (text.split(' ').some(w => w.startsWith(term))) score += 1;
                                         }
                                     }
-
                                     return { ...p, _score: score };
                                 }).sort((a, b) => b._score - a._score);
                             }
@@ -333,6 +349,7 @@ const server = http.createServer(async (req, res) => {
                         }
                     });
                 }
+
                 else if (pathName.match(/^\/api\/products\/[a-zA-Z0-9]+\/recommendations$/)) {
                     const productId = pathName.split('/')[3];
                     const { getSimilarProducts } = require('./services/recommendationService');
