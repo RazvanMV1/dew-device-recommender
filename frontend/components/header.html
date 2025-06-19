@@ -1,0 +1,67 @@
+<header class="main-header">
+    <div class="container">
+        <div class="header-content">
+            <div class="logo">
+                <span class="icon-chip" aria-label="microchip">💻</span>
+                <h1>ElectroRecommender</h1>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/">Acasă</a></li>
+                    <li><a href="/#categorii">Categorii</a></li>
+                    <li><a href="/#noutati">Noutăți</a></li>
+                    <li><a href="/products">Produse</a></li>
+                    <li><a href="/stats" id="stats-link">Statistici</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Caută dispozitive...">
+                    <button id="search-btn" aria-label="Caută">🔍</button>
+                </div>
+                <div class="user-menu" id="user-menu">
+                    <div class="user-menu-trigger" id="user-menu-trigger">
+                        <span class="avatar-header" id="header-avatar"></span>
+                        <span class="user-name">admin</span>
+                        <span class="icon-chevron">▼</span>
+                    </div>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-menu-header">
+                            <div class="user-info">
+                                <h4 id="dropdown-user-name">Oaspete</h4>
+                                <span id="dropdown-user-role">Neautentificat</span>
+                            </div>
+                        </div>
+                        <div class="dropdown-menu-body">
+                            <a href="/login" id="auth-link" class="dropdown-item">
+                                <span class="icon">🔑</span>
+                                <span>Autentificare</span>
+                            </a>
+                            <a href="/register" class="dropdown-item" id="register-link">
+                                <span class="icon">➕</span>
+                                <span>Înregistrare</span>
+                            </a>
+                            <a href="/profile" class="dropdown-item" id="profile-link" style="display: none;">
+                                <span class="icon">🪪</span>
+                                <span>Profilul meu</span>
+                            </a>
+                            <a href="/preferences" class="dropdown-item" id="preferences-link" style="display: none;">
+                                <span class="icon">⚙️</span>
+                                <span>Preferințe</span>
+                            </a>
+                            <a href="#" class="dropdown-item" id="logout-link" style="display: none;">
+                                <span class="icon">🚪</span>
+                                <span>Deconectare</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </div>
+</header>

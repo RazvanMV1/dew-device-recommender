@@ -5,36 +5,349 @@
     <title>Statistici Produse</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="css/main.css" />
-    <link rel="stylesheet" href="css/stats.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="components/header.css" />
     <script src="js/chart.umd.js"></script>
 </head>
+<style>
+    /* ======= Bază ======= */
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  background: #f5f7fa;
+  color: #1e293b;
+}
+
+.container {
+  max-width: 1200px;
+  width: 90%;
+  margin: 0 auto;
+}
+
+/* ======= Header ======= */
+.main-header {
+  background: #fff;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e5e7eb;
+  position: relative;
+  z-index: 100;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.logo-link {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1e293b;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  line-height: 1;
+}
+
+/* ======= Nav & Butoane ======= */
+.main-nav {
+  position: relative;
+}
+
+.main-nav ul {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.main-nav ul li a {
+  text-decoration: none;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-outline {
+  border: 1px solid #3a0ca3;
+  background: transparent;
+  color: #3a0ca3;
+}
+
+.btn-outline:hover {
+  background-color: #e0e7ff;
+}
+
+/* ======= Conținut ======= */
+.stats-wrapper {
+  margin: 3rem auto;
+  text-align: center;
+}
+
+.chart-box {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+  padding: 1.2rem;
+  margin-bottom: 2rem;
+  max-width: 480px;      /* <-- GRAFIC MAI MIC */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+h1, h2 {
+  color: #3a0ca3;
+}
+
+.chart-box canvas {
+  width: 100% !important;
+  height: 240px !important;        /* <-- GRAFIC MAI MIC */
+  max-width: 100%;
+  max-height: 240px !important;
+  display: block;
+  margin: 0 auto;
+}
+
+/* ======= Footer ======= */
+.main-footer {
+  background-color: #1a1a1a;
+  color: #fff;
+  padding: 2rem 0;
+  margin-top: 4rem;
+}
+
+.footer-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: space-between;
+}
+
+.footer-column {
+  flex: 1 1 220px;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-column ul li {
+  margin-bottom: 0.5rem;
+}
+
+.footer-column ul li a {
+  color: #ffffffcc;
+  text-decoration: none;
+}
+
+.footer-column ul li a:hover {
+  text-decoration: underline;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.footer-bottom {
+  width: 100%;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #ccc;
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ======= Meniu Responsiv ======= */
+.mobile-menu-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.mobile-menu-toggle span {
+  width: 25px;
+  height: 3px;
+  background-color: #1e293b;
+  border-radius: 2px;
+}
+
+/* ======= Responsive ======= */
+@media (max-width: 1024px) {
+  .container {
+    max-width: 98vw;
+    width: 98vw;
+    padding: 0 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    width: 98%;
+    max-width: 100vw;
+    padding: 0 8px;
+  }
+
+  .stats-wrapper {
+    margin-top: 1.3rem;
+    margin-bottom: 1.3rem;
+  }
+
+  .chart-box {
+    padding: 0.7rem;
+    max-width: 99vw;
+  }
+
+  .main-header {
+    padding: 0.6rem 0;
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem !important;
+  }
+
+  .logo-link {
+    font-size: 1.3rem;
+    margin-bottom: 0.1rem;
+  }
+
+  .mobile-menu-toggle {
+    display: flex;
+    align-self: flex-end;
+    margin-bottom: 0.4rem;
+  }
+
+  .main-nav {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(100,100,100,0.1);
+    position: absolute;
+    top: 56px;
+    left: 0;
+    z-index: 99;
+  }
+  .main-nav.open {
+    display: flex !important;
+  }
+  .main-nav ul {
+    flex-direction: column;
+    gap: 0;
+    margin: 0.5rem 0;
+    width: 100%;
+  }
+  .main-nav ul li {
+    width: 100%;
+  }
+  .main-nav ul li a {
+    display: block;
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid #f1f1f1;
+    width: 100%;
+    background: #fff;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 10px;
+  }
+
+  .header-actions .btn {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .main-header .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .main-nav.open .header-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  .btn, .btn-outline {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+  }
+
+  .main-footer {
+    padding: 1.2rem 0;
+  }
+  .footer-content {
+    flex-direction: column;
+    gap: 1.3rem;
+    align-items: flex-start;
+  }
+  .footer-column {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  .chart-box {
+    max-width: 99vw;
+    padding: 0.3rem;
+  }
+  .chart-box canvas {
+    height: 140px !important;
+    max-height: 140px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-box {
+    padding: 0.2rem;
+    max-width: 99vw;
+  }
+  .chart-box canvas {
+    height: 110px !important;
+    max-height: 110px !important;
+  }
+  h1, h2 {
+    font-size: 1.1rem;
+  }
+  .logo-link {
+    font-size: 1.05rem;
+  }
+  .footer-bottom {
+    font-size: 0.74rem;
+  }
+}
+
+</style>
 <body>
 
-<header class="main-header">
-    <div class="container">
-        <div class="header-content">
-            <a href="/" class="logo-link">ElectroRecommender</a>
-            <button class="mobile-menu-toggle" id="mobile-menu-toggle">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-            <nav class="main-nav" id="main-nav">
-                <ul>
-                    <li><a href="/#categorii">Categorii</a></li>
-                    <li><a href="/#noutati">Noutăți</a></li>
-                    <li><a href="/products">Produse</a></li>
-                    <li><a href="/stats">Statistici</a></li>
-                </ul>
-                <div class="header-actions">
-                    <a href="/profile" class="btn btn-outline">Profilul meu</a>
-                    <button id="logout-btn" class="btn btn-outline">Deconectare</button>
-                </div>
-            </nav>
-        </div>
-    </div>
-</header>
+<div id="header-placeholder"></div>
+
 
 <main class="container stats-wrapper">
     <h1>Statistici Produse Recomandate</h1>
@@ -89,6 +402,16 @@
     </div>
 </footer>
 
+<script src="components/header.js"></script>
 <script src="js/stats.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        loadHeader('header-placeholder', function() {
+            // Inițializează funcții suplimentare dacă ai nevoie
+            if (typeof initUI === 'function') initUI();
+        });
+    });
+</script>
+
 </body>
 </html>

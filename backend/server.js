@@ -99,6 +99,15 @@ const server = http.createServer(async (req, res) => {
                 } else if (pathName === '/news-management' || pathName === '/news-management.html') {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/news-management.html'), 'text/html');
                 }
+                else if (pathName === '/components/header.html') {
+                    serveStaticFile(req, res, path.join(__dirname, '../frontend/components/header.html'), 'text/html');
+                }
+                else if (pathName === '/components/header.css') {
+                    serveStaticFile(req, res, path.join(__dirname, '../frontend/components/header.css'), 'text/css');
+                }
+                else if (pathName === '/components/header.js') {
+                    serveStaticFile(req, res, path.join(__dirname, '../frontend/components/header.js'), 'text/javascript');
+                }
                 else if (pathName === '/login' || pathName === '/login.html') {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/login.html'), 'text/html');
                 } else if (pathName === '/register' || pathName === '/register.html') {

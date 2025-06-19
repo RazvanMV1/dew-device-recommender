@@ -5,43 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Preferințele mele - ElectroRecommender</title>
     <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="components/header.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="css/preferences.css" />
 </head>
 <body>
-<header class="main-header">
-    <div class="container">
-        <div class="header-content">
-            <a href="/" class="logo-link">
-                <i class="fas fa-microchip"></i>
-                <span>ElectroRecommender</span>
-            </a>
-
-            <nav class="main-nav">
-                <ul>
-                    <li><a href="/#categorii">Categorii</a></li>
-                    <li><a href="/#noutati">Noutăți</a></li>
-                    <li><a href="/products">Produse</a></li>
-                    <li><a href="/stats">Statistici</a></li>
-                </ul>
-            </nav>
-
-            <div class="header-actions">
-                <a href="/profile" class="btn btn-outline">
-                    <i class="fas fa-user-circle"></i> Profilul meu
-                </a>
-                <button id="logout-btn" class="btn btn-outline">
-                    <i class="fas fa-sign-out-alt"></i> Deconectare
-                </button>
-            </div>
-
-            <button class="mobile-menu-toggle" id="mobile-menu-toggle">
-                <span></span><span></span><span></span>
-            </button>
-        </div>
-    </div>
-</header>
+<div id="header-placeholder"></div>
 
 <main>
     <div class="pref-card">
@@ -61,9 +31,9 @@
                 <legend>Interval de preț preferat</legend>
                 <select name="priceRange" id="priceRange">
                     <option value="">Oricare</option>
-                    <option value="low">&lt; 1000 lei</option>
-                    <option value="mid">1000–3000 lei</option>
-                    <option value="high">&gt; 3000 lei</option>
+                    <option value="low">&lt; 200 EUR</option>
+                    <option value="mid">200-600 EUR</option>
+                    <option value="high">&gt; 600 EUR</option>
                 </select>
             </fieldset>
 
@@ -127,16 +97,13 @@
     </div>
 </footer>
 
+<!-- Header dinamic -->
+<script src="components/header.js"></script>
 <script>
-    // Meniu mobil toggle
-    document.getElementById('mobile-menu-toggle')?.addEventListener('click', function () {
-      document.querySelector('.main-nav')?.classList.toggle('open');
-    });
-
-    // Logout
-    document.getElementById('logout-btn')?.addEventListener('click', function () {
-      localStorage.removeItem('authToken');
-      window.location.href = '/login';
+    document.addEventListener('DOMContentLoaded', function() {
+        loadHeader('header-placeholder', function() {
+            if (typeof initUI === 'function') initUI();
+        });
     });
 </script>
 <script src="js/preferences.js"></script>

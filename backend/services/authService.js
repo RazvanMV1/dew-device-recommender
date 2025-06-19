@@ -41,9 +41,11 @@ const authenticate = async (username, password) => {
             user: {
                 id: user._id,
                 username: user.username,
-                role: user.role
+                role: user.role,
+                avatar: user.avatar || ''
             }
         };
+
     } catch (error) {
         console.error('Eroare la autentificare:', error);
         return { success: false, message: 'Eroare internă server' };
@@ -60,9 +62,8 @@ const registerUser = async (userData) => {
 
         const newUser = new User({
             username: userData.username,
-            email: userData.email,              // <-- ADĂUGAT
             password: userData.password,
-            role: userData.role
+            role: userData.role || 'admin'
         });
 
         await newUser.save();
