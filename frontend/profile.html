@@ -4,19 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Profilul meu - ElectroRecommender</title>
-    <!-- Header și fonturile sunt gestionate dinamic sau local -->
-    <link rel="stylesheet" href="components/header.css" />
     <link rel="stylesheet" href="css/profile.css">
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="components/header.css" />
 </head>
 <body>
-
-<!-- Header dinamic -->
 <div id="header-placeholder"></div>
 
 <main>
     <div class="profile-flex-container">
-        <!-- Avatar -->
         <div class="profile-side-card">
             <h3>Schimbă imaginea de profil</h3>
             <form id="avatar-form" autocomplete="off">
@@ -29,10 +25,8 @@
             <div id="avatar-message" class="profile-form-message"></div>
         </div>
 
-        <!-- Profil -->
         <div class="profile-card" id="profile-card">
             <div class="profile-avatar" id="profile-avatar">
-                <!-- Poți pune aici un emoji sau o imagine default -->
                 <span style="font-size:3rem;">👤</span>
             </div>
             <div class="profile-title" id="profile-username">Se încarcă...</div>
@@ -45,7 +39,6 @@
             </div>
         </div>
 
-        <!-- Schimbă parola -->
         <div class="profile-side-card">
             <h3>Schimbă parola</h3>
             <form id="change-password-form" autocomplete="off">
@@ -105,7 +98,6 @@
     </div>
 </footer>
 
-<!-- Header dinamic -->
 <script src="components/header.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -115,7 +107,6 @@
     });
 </script>
 
-<!-- Scriptul tău pentru profile -->
 <script src="js/profile.js"></script>
 </body>
 </html>

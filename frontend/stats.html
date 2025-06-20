@@ -9,7 +9,6 @@
     <script src="js/chart.umd.js"></script>
 </head>
 <style>
-    /* ======= Bază ======= */
 body {
   font-family: 'Poppins', sans-serif;
   margin: 0;
@@ -21,38 +20,6 @@ body {
   max-width: 1200px;
   width: 90%;
   margin: 0 auto;
-}
-
-/* ======= Header ======= */
-.main-header {
-  background: #fff;
-  padding: 1rem 0;
-  border-bottom: 1px solid #e5e7eb;
-  position: relative;
-  z-index: 100;
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.logo-link {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #1e293b;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  line-height: 1;
-}
-
-/* ======= Nav & Butoane ======= */
-.main-nav {
-  position: relative;
 }
 
 .main-nav ul {
@@ -92,7 +59,6 @@ body {
   background-color: #e0e7ff;
 }
 
-/* ======= Conținut ======= */
 .stats-wrapper {
   margin: 3rem auto;
   text-align: center;
@@ -104,7 +70,7 @@ body {
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
   padding: 1.2rem;
   margin-bottom: 2rem;
-  max-width: 480px;      /* <-- GRAFIC MAI MIC */
+  max-width: 480px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -115,14 +81,13 @@ h1, h2 {
 
 .chart-box canvas {
   width: 100% !important;
-  height: 240px !important;        /* <-- GRAFIC MAI MIC */
+  height: 240px !important;
   max-width: 100%;
   max-height: 240px !important;
   display: block;
   margin: 0 auto;
 }
 
-/* ======= Footer ======= */
 .main-footer {
   background-color: #1a1a1a;
   color: #fff;
@@ -176,7 +141,6 @@ h1, h2 {
   align-items: center;
 }
 
-/* ======= Meniu Responsiv ======= */
 .mobile-menu-toggle {
   display: none;
   flex-direction: column;
@@ -193,7 +157,6 @@ h1, h2 {
   border-radius: 2px;
 }
 
-/* ======= Responsive ======= */
 @media (max-width: 1024px) {
   .container {
     max-width: 98vw;
@@ -407,7 +370,6 @@ h1, h2 {
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         loadHeader('header-placeholder', function() {
-            // Inițializează funcții suplimentare dacă ai nevoie
             if (typeof initUI === 'function') initUI();
         });
     });

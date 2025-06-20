@@ -9,7 +9,6 @@
 </head>
 <body>
 <div class="dashboard-container">
-    <!-- Sidebar Navigation -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="logo">
@@ -74,7 +73,6 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="main-content">
         <header class="main-header">
             <div class="header-left">
@@ -90,9 +88,7 @@
             </div>
         </header>
 
-        <!-- Dashboard Content -->
         <div class="content-container">
-            <!-- Dashboard Overview -->
             <section id="dashboard-overview" class="section active">
                 <div class="section-header">
                     <h2>Prezentare generală</h2>
@@ -102,7 +98,6 @@
                     </div>
                 </div>
 
-                <!-- Stats Cards -->
                 <div class="stats-container">
                     <div class="stat-card">
                         <div class="stat-icon bg-blue">
@@ -168,8 +163,6 @@
                             </span>
                     </div>
                 </div>
-
-                <!-- Recent Activity -->
                 <div class="card">
                     <div class="card-header">
                         <h3>Activitate recentă</h3>
@@ -212,7 +205,6 @@
                 </div>
             </section>
 
-            <!-- Products Section -->
             <section id="products-section" class="section">
                 <div class="section-header">
                     <h2>Managementul Produselor</h2>
@@ -260,7 +252,6 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <!-- Produsele vor fi încărcate dinamic -->
                                 </tbody>
                             </table>
                         </div>
@@ -279,7 +270,6 @@
                 </div>
             </section>
 
-            <!-- Sources Section -->
             <section id="sources-section" class="section">
                 <div class="section-header">
                     <h2>Managementul Surselor</h2>
@@ -324,7 +314,6 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <!-- Sursele vor fi încărcate dinamic -->
                                 </tbody>
                             </table>
                         </div>
@@ -340,8 +329,6 @@
                 </div>
             </section>
 
-            <!-- News Section (laconic) -->
-            <!-- News Section (modificat) -->
             <section id="news-section" class="section">
 
                 <div class="card">
@@ -349,7 +336,7 @@
                         <table class="user-table">
                             <thead>
                             <tr>
-                                <th></th> <!-- Coloana pentru butonul de ștergere -->
+                                <th></th>
                                 <th>Imagine</th>
                                 <th>Titlu</th>
                                 <th>Sursă</th>
@@ -360,22 +347,16 @@
                             <tbody id="newsTableBody"></tbody>
                         </table>
 
-                        <!-- PAGINARE -->
                         <div id="newsPagination" class="pagination"></div>
                     </div>
                 </div>
             </section>
 
-
-
-
-            <!-- Users Section (complet) -->
             <section id="users-section" class="section">
                 <div class="section-header">
                     <h2>Managementul Utilizatorilor</h2>
                 </div>
 
-                <!-- Formular creare utilizator -->
                 <div class="card">
                     <div class="card-body">
                         <form id="adminCreateUserForm" class="form-grid">
@@ -411,15 +392,13 @@
                         <div class="alert" id="userFormAlert" style="display: none; margin-top: 1rem;"></div>
                     </div>
                 </div>
-
-                <!-- Tabel utilizatori -->
                 <div class="card" style="margin-top: 2rem;">
                     <div class="card-body">
                         <h3>Utilizatori existenți</h3>
                         <table class="user-table">
                             <thead>
                             <tr>
-                                <th></th> <!-- coloană pentru buton delete -->
+                                <th></th>
                                 <th>Nume utilizator</th>
                                 <th>Email</th>
                                 <th>Rol</th>
@@ -427,7 +406,6 @@
                             </tr>
                             </thead>
                             <tbody id="userTableBody">
-                            <!-- Populat din JS -->
                             </tbody>
                         </table>
                     </div>
@@ -437,7 +415,6 @@
     </main>
 </div>
 
-<!-- Modals -->
 <div class="modal" id="product-modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -496,7 +473,6 @@
     </div>
 </div>
 
-<!-- Source Modal -->
 <div class="modal" id="source-modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -552,7 +528,6 @@
     </div>
 </div>
 
-<!-- Confirmation Modal -->
 <div class="modal" id="confirm-modal">
     <div class="modal-content">
         <div class="modal-header">

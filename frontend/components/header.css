@@ -83,3 +83,16 @@
     object-fit: cover;
 }
 
+body.profile-page .main-header {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    z-index: 1024 !important;
+    background: #fff;
+}
+body.profile-page {
+    padding-top: 80px;
+}
+
+
