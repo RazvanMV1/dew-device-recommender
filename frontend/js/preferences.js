@@ -1,17 +1,14 @@
-// frontend/js/preferences.js
 
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('preferences-form');
     const msg = document.getElementById('preferences-message');
     const token = localStorage.getItem('authToken');
 
-    // ✅ Protecție: dacă nu există token, redirect la login
     if (!token) {
         window.location.href = '/login';
         return;
     }
 
-    // ✅ Încarcă preferințele existente
     fetch('/api/profile/preferences', {
         headers: {
             'Authorization': `Bearer ${token}`
@@ -26,17 +23,14 @@ document.addEventListener('DOMContentLoaded', function () {
     })
     .then(data => {
         if (data.success && data.preferences) {
-            // Bifează categoriile
             (data.preferences.categories || []).forEach(cat => {
                 const el = form.querySelector(`input[name="category"][value="${cat}"]`);
                 if (el) el.checked = true;
             });
 
-            // Selectează intervalul de preț
             if (data.preferences.priceRange)
                 form.priceRange.value = data.preferences.priceRange;
 
-            // Bifează brandurile
             (data.preferences.brands || []).forEach(brand => {
                 const el = form.querySelector(`input[name="brand"][value="${brand}"]`);
                 if (el) el.checked = true;
@@ -48,7 +42,6 @@ document.addEventListener('DOMContentLoaded', function () {
         msg.style.color = "red";
     });
 
-    // ✅ La submit salvează preferințele
     form.addEventListener('submit', function (e) {
         e.preventDefault();
 

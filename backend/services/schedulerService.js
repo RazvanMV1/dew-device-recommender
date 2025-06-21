@@ -1,18 +1,11 @@
-// backend/services/schedulerService.js
 const cron = require('node-cron');
 const { processSourcesDueForUpdate } = require('./rssService');
 
-// Stare job-uri
 let scheduledJobs = {};
 
-/**
- * Inițializează job-urile programate pentru actualizarea RSS
- */
 const initScheduledJobs = () => {
-    // Eliberează resursele job-urilor existente
     stopAllJobs();
 
-    // Programează job-ul principal pentru verificarea surselor la fiecare 10 minute
     scheduledJobs.rssFeedUpdate = cron.schedule('*/10 * * * *', async () => {
         console.log('🕒 [Scheduled Job] Verificare surse RSS pentru actualizare...');
         try {
@@ -28,7 +21,6 @@ const initScheduledJobs = () => {
                 console.log(`📰 [Scheduled Job] S-au adăugat ${totalAdded} știri noi și s-au actualizat ${totalUpdated} știri`);
             }
 
-            // Înregistrează surse care au eșuat
             const failedSources = results.filter(r => !r.success);
             if (failedSources.length > 0) {
                 console.error(`❌ [Scheduled Job] Surse cu erori: ${failedSources.map(s => s.sourceName).join(', ')}`);
@@ -38,18 +30,16 @@ const initScheduledJobs = () => {
         }
     });
 
-    // Programează job pentru curățarea știrilor vechi - zilnic la 3 dimineața
     scheduledJobs.cleanOldNews = cron.schedule('0 3 * * *', async () => {
         console.log('🕒 [Scheduled Job] Curățare știri vechi...');
         try {
-            // Păstrează știrile din ultimele 60 de zile
             const cutoffDate = new Date();
             cutoffDate.setDate(cutoffDate.getDate() - 60);
 
             const News = require('../models/News');
             const result = await News.deleteMany({
                 publishDate: { $lt: cutoffDate },
-                isProcessed: false // Șterge doar știrile neprocesate
+                isProcessed: false
             });
 
             console.log(`🧹 [Scheduled Job] S-au șters ${result.deletedCount} știri vechi`);
@@ -61,9 +51,6 @@ const initScheduledJobs = () => {
     console.log('📅 Job-uri programate inițializate cu succes');
 };
 
-/**
- * Oprește toate job-urile programate
- */
 const stopAllJobs = () => {
     Object.values(scheduledJobs).forEach(job => {
         if (job && typeof job.stop === 'function') {
@@ -73,10 +60,6 @@ const stopAllJobs = () => {
     scheduledJobs = {};
 };
 
-/**
- * Pornește un job particular după nume
- * @param {String} jobName - Numele job-ului
- */
 const startJob = (jobName) => {
     const job = scheduledJobs[jobName];
     if (job) {
@@ -87,10 +70,6 @@ const startJob = (jobName) => {
     }
 };
 
-/**
- * Oprește un job particular după nume
- * @param {String} jobName - Numele job-ului
- */
 const stopJob = (jobName) => {
     const job = scheduledJobs[jobName];
     if (job) {
@@ -101,15 +80,8 @@ const stopJob = (jobName) => {
     }
 };
 
-/**
- * Actualizează frecvența unui job programat
- * @param {String} jobName - Numele job-ului
- * @param {String} cronExpression - Expresia cron pentru programare
- */
 const updateJobSchedule = (jobName, cronExpression) => {
     stopJob(jobName);
-    // Recreează job-ul cu noua programare - aici ar trebui logica specifică pentru fiecare job
-    // Pentru simplitate, reinițializăm toate job-urile
     initScheduledJobs();
 };
 

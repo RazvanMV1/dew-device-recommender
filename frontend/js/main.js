@@ -21,21 +21,17 @@ initUI();
 });
 
 function initUI() {
-    // Verifică statusul de autentificare (dacă există funcția)
     if (typeof checkAuthStatus === 'function') checkAuthStatus();
 
-    // User menu dropdown
     const userMenuTrigger = document.getElementById('user-menu-trigger');
     const userMenu = document.getElementById('user-menu');
     if (userMenuTrigger && userMenu) {
-        // Elimină orice event listener anterior (opțional, pentru siguranță)
         userMenuTrigger.onclick = null;
         userMenuTrigger.addEventListener('click', function(e) {
             e.stopPropagation();
             userMenu.classList.toggle('active');
         });
 
-        // Event global pentru închiderea meniului când dai click pe altceva
         document.addEventListener('click', function(event) {
             if (!userMenu.contains(event.target) && !userMenuTrigger.contains(event.target)) {
                 userMenu.classList.remove('active');
@@ -43,11 +39,9 @@ function initUI() {
         }, { once: true });
     }
 
-    // Mobile menu toggle
     const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
     const mainNav = document.querySelector('.main-nav');
     if (mobileMenuToggle && mainNav) {
-        // Elimină orice event listener anterior (opțional)
         mobileMenuToggle.onclick = null;
         mobileMenuToggle.addEventListener('click', function() {
             this.classList.toggle('active');
@@ -55,10 +49,8 @@ function initUI() {
         });
     }
 
-    // Inițializează modalul de produs dacă funcția există
     if (typeof initProductModal === 'function') initProductModal();
 
-    // Logout
     const logoutLink = document.getElementById('logout-link');
     if (logoutLink) {
         logoutLink.onclick = null;

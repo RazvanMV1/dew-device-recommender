@@ -2,12 +2,6 @@
 const News = require('../models/News');
 const mongoose = require('mongoose');
 
-/**
- * Obține lista de știri cu filtrare și paginare
- * @param {Object} filters - Filtre pentru știri
- * @param {Object} options - Opțiuni de paginare și sortare
- * @returns {Promise<Array>} Lista de știri
- */
 const getNews = async (filters = {}, options = {}) => {
     try {
         const limit = options.limit || 20;
@@ -30,11 +24,6 @@ const getNews = async (filters = {}, options = {}) => {
     }
 };
 
-/**
- * Obține o știre după ID
- * @param {String} id - ID-ul știrii
- * @returns {Promise<Object>} Obiectul știre
- */
 const getNewsById = async (id) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -48,11 +37,6 @@ const getNewsById = async (id) => {
     }
 };
 
-/**
- * Obține cele mai recente știri
- * @param {Number} limit - Numărul de știri de returnat
- * @returns {Promise<Array>} Lista de știri recente
- */
 const getLatestNews = async (limit = 10) => {
     try {
         return await News.find()
@@ -65,12 +49,6 @@ const getLatestNews = async (limit = 10) => {
     }
 };
 
-/**
- * Obține știri după sursă
- * @param {String} sourceId - ID-ul sursei
- * @param {Object} options - Opțiuni de paginare și sortare
- * @returns {Promise<Array>} Lista de știri
- */
 const getNewsBySource = async (sourceId, options = {}) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(sourceId)) {
@@ -92,12 +70,6 @@ const getNewsBySource = async (sourceId, options = {}) => {
     }
 };
 
-/**
- * Obține știri după categorie
- * @param {String} category - Categoria știrilor
- * @param {Object} options - Opțiuni de paginare și sortare
- * @returns {Promise<Array>} Lista de știri
- */
 const getNewsByCategory = async (category, options = {}) => {
     try {
         const limit = options.limit || 20;
@@ -115,19 +87,12 @@ const getNewsByCategory = async (category, options = {}) => {
     }
 };
 
-/**
- * Caută știri după cuvinte cheie
- * @param {String} searchQuery - Textul de căutare
- * @param {Object} options - Opțiuni de paginare și sortare
- * @returns {Promise<Array>} Lista de știri
- */
 const searchNews = async (searchQuery, options = {}) => {
     try {
         const limit = options.limit || 20;
         const page = options.page || 1;
         const skip = (page - 1) * limit;
 
-        // Creează un regex pentru căutare case-insensitive
         const regexSearch = new RegExp(searchQuery.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'i');
 
         return await News.find({
@@ -149,19 +114,12 @@ const searchNews = async (searchQuery, options = {}) => {
     }
 };
 
-/**
- * Marchează o știre ca procesată și adaugă produse asociate
- * @param {String} newsId - ID-ul știrii
- * @param {Array} relatedProducts - Lista de ID-uri de produse asociate
- * @returns {Promise<Object>} Știrea actualizată
- */
 const markNewsAsProcessed = async (newsId, relatedProducts = []) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(newsId)) {
             throw new Error('ID știre invalid');
         }
 
-        // Validează ID-urile produselor
         for (const productId of relatedProducts) {
             if (!mongoose.Types.ObjectId.isValid(productId)) {
                 throw new Error(`ID produs invalid: ${productId}`);
@@ -183,10 +141,6 @@ const markNewsAsProcessed = async (newsId, relatedProducts = []) => {
     }
 };
 
-/**
- * Generează raport cu distribuția știrilor pe surse
- * @returns {Promise<Array>} Raport de distribuție
- */
 const getSourcesDistributionReport = async () => {
     try {
         return await News.aggregate([
@@ -236,10 +190,6 @@ const getSourcesDistributionReport = async () => {
     }
 };
 
-/**
- * Obține statistici pentru știri
- * @returns {Promise<Object>} Statistici
- */
 const getNewsStats = async () => {
     try {
         const [totalCount, processedCount, sourcesCount, categoriesStats] = await Promise.all([

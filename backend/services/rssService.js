@@ -1,4 +1,3 @@
-// backend/services/rssService.js
 const RSSParser = require('rss-parser');
 const axios = require('axios');
 const sanitizeHtml = require('sanitize-html');
@@ -6,7 +5,6 @@ const { parse } = require('node-html-parser');
 const Source = require('../models/Source');
 const News = require('../models/News');
 
-// Configurare custom pentru RSS Parser
 const parser = new RSSParser({
     customFields: {
         item: [
@@ -19,11 +17,6 @@ const parser = new RSSParser({
     }
 });
 
-/**
- * Parsează un feed RSS și returnează itemele
- * @param {String} feedUrl - URL-ul feed-ului RSS
- * @returns {Promise<Array>} Lista de iteme din feed
- */
 const parseFeed = async (feedUrl) => {
     try {
         const feed = await parser.parseURL(feedUrl);
@@ -39,11 +32,6 @@ const parseFeed = async (feedUrl) => {
     }
 };
 
-/**
- * Extrage prima imagine dintr-un HTML
- * @param {String} html - Conținutul HTML
- * @returns {String|null} URL-ul imaginii sau null dacă nu există
- */
 const extractImageFromHtml = (html) => {
     if (!html) return null;
 
@@ -57,13 +45,7 @@ const extractImageFromHtml = (html) => {
     }
 };
 
-/**
- * Extrage URL-ul imaginii din item RSS
- * @param {Object} item - Item RSS
- * @returns {String|null} URL-ul imaginii sau null dacă nu există
- */
 const extractImageUrl = (item) => {
-    // Încearcă să extragă din diferite câmpuri posibile
     if (item.media && item.media.$ && item.media.$.url) {
         return item.media.$.url;
     }
@@ -79,7 +61,6 @@ const extractImageUrl = (item) => {
         }
     }
 
-    // Încearcă să extragă din conținut
     if (item.contentEncoded) {
         const imgUrl = extractImageFromHtml(item.contentEncoded);
         if (imgUrl) return imgUrl;
@@ -93,11 +74,6 @@ const extractImageUrl = (item) => {
     return null;
 };
 
-/**
- * Curăță și sanitizează conținut HTML
- * @param {String} content - Conținutul HTML
- * @returns {String} Conținut sanitizat
- */
 const sanitizeContent = (content) => {
     if (!content) return '';
 
@@ -110,11 +86,6 @@ const sanitizeContent = (content) => {
     });
 };
 
-/**
- * Extrage categoriile din item RSS
- * @param {Object} item - Item RSS
- * @returns {Array} Lista de categorii
- */
 const extractCategories = (item) => {
     const categories = [];
 
@@ -129,12 +100,6 @@ const extractCategories = (item) => {
     return categories;
 };
 
-/**
- * Transformă un item RSS în format știre
- * @param {Object} item - Item RSS
- * @param {Object} source - Sursa RSS
- * @returns {Object} Obiect format știre
- */
 const transformItemToNews = (item, source) => {
     const publishDate = item.isoDate ? new Date(item.isoDate) : new Date();
     const imageUrl = extractImageUrl(item);
@@ -142,28 +107,23 @@ const transformItemToNews = (item, source) => {
     const author = item.creator || item.author || 'Unknown';
     const content = item.contentEncoded || item.content || item.description || '';
 
-    // Asigură-te că există întotdeauna o descriere
     let description = '';
     if (item.description && item.description.trim()) {
-        // Folosește descrierea din feed dacă există
         description = sanitizeHtml(item.description, { allowedTags: [] });
     } else if (content) {
-        // Extrage o descriere scurtă din conținut dacă descrierea nu există
         const plainContent = sanitizeHtml(content, { allowedTags: [] });
         description = plainContent.substring(0, 250) + (plainContent.length > 250 ? '...' : '');
     } else {
-        // Folosește titlul ca descriere dacă nici conținutul nu există
         description = item.title ? `${item.title} - știre din ${source.name}` : `Știre din ${source.name}`;
     }
 
-    // Ne asigurăm că descrierea nu este goală
     if (!description.trim()) {
         description = `Știre de pe ${source.name} publicată la ${publishDate.toLocaleString()}`;
     }
 
     return {
         title: item.title || `Știre din ${source.name}`,
-        description: description,  // Asigură-te că avem întotdeauna o descriere
+        description: description,
         content: sanitizeContent(content),
         url: item.link || '',
         imageUrl,
@@ -175,11 +135,6 @@ const transformItemToNews = (item, source) => {
     };
 };
 
-/**
- * Procesează și salvează știri dintr-un feed RSS
- * @param {Object} source - Sursa RSS
- * @returns {Promise<Object>} Rezultatul procesării
- */
 const processRssFeed = async (source) => {
     if (source.type !== 'rss') {
         throw new Error(`Sursa ${source.name} nu este de tip RSS`);
@@ -202,11 +157,9 @@ const processRssFeed = async (source) => {
                 continue;
             }
 
-            // Verifică dacă știrea există deja
             const existingNews = await News.findOne({ url: item.link });
 
             if (existingNews) {
-                // Doar actualizează anumite câmpuri dacă e necesar
                 const transformedItem = transformItemToNews(item, source);
 
                 if (!existingNews.imageUrl && transformedItem.imageUrl) {
@@ -217,7 +170,6 @@ const processRssFeed = async (source) => {
                     skipped++;
                 }
             } else {
-                // Creează știre nouă
                 const newsData = transformItemToNews(item, source);
                 const newNews = new News(newsData);
                 await newNews.save();
@@ -225,7 +177,6 @@ const processRssFeed = async (source) => {
             }
         }
 
-        // Actualizează timestamp-ul ultimei actualizări a sursei
         await Source.findByIdAndUpdate(source._id, {
             lastUpdated: new Date()
         });
@@ -250,13 +201,8 @@ const processRssFeed = async (source) => {
     }
 };
 
-/**
- * Procesează toate sursele RSS active
- * @returns {Promise<Array>} Rezultatele procesării
- */
 const processAllRssFeeds = async () => {
     try {
-        // Obține toate sursele RSS active
         const sources = await Source.find({
             type: 'rss',
             active: true
@@ -266,7 +212,6 @@ const processAllRssFeeds = async () => {
 
         const results = [];
 
-        // Procesează fiecare sursă
         for (const source of sources) {
             try {
                 const result = await processRssFeed(source);
@@ -289,13 +234,8 @@ const processAllRssFeeds = async () => {
     }
 };
 
-/**
- * Verifică și procesează sursele care necesită actualizare
- * @returns {Promise<Array>} Rezultatele procesării
- */
 const processSourcesDueForUpdate = async () => {
     try {
-        // Obține sursele RSS active care necesită actualizare
         const now = new Date();
         const sources = await Source.find({
             type: 'rss',
@@ -306,7 +246,7 @@ const processSourcesDueForUpdate = async () => {
                     $expr: {
                         $gte: [
                             { $subtract: [now, '$lastUpdated'] },
-                            { $multiply: ['$updateFrequency', 60 * 1000] } // convertire minute în ms
+                            { $multiply: ['$updateFrequency', 60 * 1000] }
                         ]
                     }
                 }
@@ -317,7 +257,6 @@ const processSourcesDueForUpdate = async () => {
 
         const results = [];
 
-        // Procesează fiecare sursă
         for (const source of sources) {
             try {
                 const result = await processRssFeed(source);
@@ -340,14 +279,8 @@ const processSourcesDueForUpdate = async () => {
     }
 };
 
-/**
- * Detectează formatul imaginii (MIME type) dintr-o imagine URL
- * @param {String} imageUrl - URL-ul imaginii
- * @returns {Promise<String|null>} MIME type-ul imaginii sau null în caz de eroare
- */
 const detectImageMimeType = async (imageUrl) => {
     try {
-        // Verifică doar headerul pentru a determina tipul de conținut
         const response = await axios.head(imageUrl);
         return response.headers['content-type'];
     } catch (error) {
@@ -356,11 +289,6 @@ const detectImageMimeType = async (imageUrl) => {
     }
 };
 
-/**
- * Verifică dacă un URL este valid
- * @param {String} url - URL-ul de verificat
- * @returns {Boolean} - true dacă URL-ul este valid
- */
 const isValidUrl = (url) => {
     try {
         new URL(url);
@@ -370,35 +298,24 @@ const isValidUrl = (url) => {
     }
 };
 
-/**
- * Corectează URL-uri relative
- * @param {String} url - URL-ul de corectat
- * @param {String} baseUrl - URL-ul de bază
- * @returns {String} - URL-ul corectat
- */
 const fixRelativeUrl = (url, baseUrl) => {
     try {
         if (!url) return null;
 
-        // Verifică dacă URL-ul este deja absolut
         if (url.match(/^(http|https):\/\//i)) {
             return url;
         }
 
-        // Creează URL-ul de bază
         const base = new URL(baseUrl);
 
-        // Dacă URL-ul începe cu //, adaugă doar protocolul
         if (url.startsWith('//')) {
             return `${base.protocol}${url}`;
         }
 
-        // Dacă URL-ul începe cu /, adaugă doar domeniul
         if (url.startsWith('/')) {
             return `${base.origin}${url}`;
         }
 
-        // Pentru alte URL-uri relative
         return new URL(url, baseUrl).href;
     } catch (error) {
         console.warn(`Nu s-a putut corecta URL-ul relativ ${url}:`, error.message);
@@ -406,10 +323,6 @@ const fixRelativeUrl = (url, baseUrl) => {
     }
 };
 
-/**
- * Obține statistici despre sursele RSS
- * @returns {Promise<Object>} Statistici despre surse
- */
 const getRssSourcesStats = async () => {
     try {
         const [totalSources, activeSources, sourcesByType, newsCountBySource] = await Promise.all([
@@ -424,13 +337,11 @@ const getRssSourcesStats = async () => {
             ])
         ]);
 
-        // Construiește un map pentru numărul de știri pe sursă
         const newsCountMap = {};
         newsCountBySource.forEach(item => {
             newsCountMap[item._id] = item.count;
         });
 
-        // Obține detaliile surselor active
         const activeSourcesDetails = await Source.find({ type: 'rss', active: true })
             .sort({ name: 1 })
             .lean();
@@ -456,7 +367,6 @@ const getRssSourcesStats = async () => {
     }
 };
 
-// Exportă toate funcțiile
 module.exports = {
     parseFeed,
     processRssFeed,

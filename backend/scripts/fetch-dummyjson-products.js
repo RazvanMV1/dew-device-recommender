@@ -8,7 +8,7 @@ mongoose.connect(dbConfig.mongoUri || 'mongodb+srv://dew-admin:parola123@cluster
 }).then(async () => {
     console.log("Conectat la MongoDB!");
 
-    const query = process.argv[2] || 'laptop'; // Poți apela scriptul cu un query custom
+    const query = process.argv[2] || 'laptop';
     const count = await importDummyJsonProducts(query);
     console.log(`Gata! Am importat ${count} produse pentru căutarea: ${query}`);
 

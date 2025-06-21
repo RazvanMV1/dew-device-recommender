@@ -2,13 +2,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const token = localStorage.getItem('authToken');
     const logoutBtn = document.getElementById('logout-btn');
 
-    // ✅ Redirect imediat dacă tokenul nu există
     if (!token) {
         window.location.href = '/login';
         return;
     }
 
-    // ✅ Cerere profil
     fetch('/api/profile', {
         headers: {
             'Authorization': `Bearer ${token}`
@@ -27,7 +25,6 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // ✅ Elemente din DOM
         const usernameEl = document.getElementById('profile-username');
         const roleEl = document.getElementById('profile-role');
         const infoEl = document.getElementById('profile-info');
@@ -37,7 +34,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (usernameEl) usernameEl.textContent = data.user.username;
         if (roleEl) roleEl.textContent = data.user.role === 'admin' ? 'Administrator' : 'Membru';
 
-        // ✅ Info profil
         let html = '';
         if (data.user.email) {
             html += `<p><b>Email:</b> ${data.user.email}</p>`;
@@ -54,7 +50,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (infoEl) infoEl.innerHTML = html;
 
-        // ✅ Avatar
         if (avatarEl) {
             if (data.user.avatar) {
                 avatarEl.innerHTML = `<img src="${data.user.avatar}" alt="Avatar" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(data.user.username)}';">`;
@@ -63,7 +58,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // ✅ Preferințe
         if (prefDiv && data.user.preferences) {
             const prefs = data.user.preferences;
             let prefHtml = '';
@@ -98,7 +92,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // ✅ Formular avatar
     const avatarForm = document.getElementById('avatar-form');
     if (avatarForm) {
         avatarForm.addEventListener('submit', function (e) {
@@ -134,7 +127,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ✅ Logout
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function () {
             localStorage.removeItem('authToken');
@@ -142,7 +134,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ✅ Formular schimbare parolă
     const form = document.getElementById('change-password-form');
     if (form) {
         form.addEventListener('submit', function (e) {

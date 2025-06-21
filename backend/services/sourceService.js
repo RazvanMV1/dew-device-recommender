@@ -1,26 +1,16 @@
-// services/sourceService.js
 const Source = require('../models/Source');
 const { sanitizeText } = require('../utils/validator');
 
-/**
- * Preia toate sursele din baza de date, cu filtrare opțională
- * @param {Object} filters - Filtre opționale (tip, activ, etc.)
- * @param {Object} options - Opțiuni pentru paginare și sortare
- * @returns {Promise<Array>} Lista de surse
- */
 const getSources = async (filters = {}, options = {}) => {
     try {
         const query = Source.find(filters);
 
-        // Aplicare opțiuni de sortare
         if (options.sort) {
             query.sort(options.sort);
         } else {
-            // Sortare implicită după data creării, descrescător
             query.sort({ createdAt: -1 });
         }
 
-        // Aplicare paginare
         if (options.page && options.limit) {
             const page = parseInt(options.page);
             const limit = parseInt(options.limit);
@@ -36,11 +26,6 @@ const getSources = async (filters = {}, options = {}) => {
     }
 };
 
-/**
- * Preia o sursă după ID
- * @param {String} id - ID-ul sursei
- * @returns {Promise<Object>} Sursa găsită sau null
- */
 const getSourceById = async (id) => {
     try {
         return await Source.findById(id);
@@ -50,11 +35,6 @@ const getSourceById = async (id) => {
     }
 };
 
-/**
- * Preia surse după tip
- * @param {String} type - Tipul sursei (rss, api, scraping, manual)
- * @returns {Promise<Array>} Lista de surse de tipul specificat
- */
 const getSourcesByType = async (type) => {
     try {
         return await Source.find({ type, active: true });
@@ -64,14 +44,8 @@ const getSourcesByType = async (type) => {
     }
 };
 
-/**
- * Creează o sursă nouă
- * @param {Object} sourceData - Datele sursei
- * @returns {Promise<Object>} Sursa creată
- */
 const createSource = async (sourceData) => {
     try {
-        // Sanitizare date sensibile
         const sanitizedData = {
             ...sourceData,
             name: sanitizeText(sourceData.name),
@@ -88,15 +62,8 @@ const createSource = async (sourceData) => {
     }
 };
 
-/**
- * Actualizează o sursă existentă
- * @param {String} id - ID-ul sursei
- * @param {Object} updateData - Datele pentru actualizare
- * @returns {Promise<Object>} Sursa actualizată
- */
 const updateSource = async (id, updateData) => {
     try {
-        // Sanitizare date sensibile
         const sanitizedData = { ...updateData };
         if (updateData.name) sanitizedData.name = sanitizeText(updateData.name);
         if (updateData.description) sanitizedData.description = sanitizeText(updateData.description);
@@ -114,11 +81,6 @@ const updateSource = async (id, updateData) => {
     }
 };
 
-/**
- * Marchează o sursă ca fiind actualizată
- * @param {String} id - ID-ul sursei
- * @returns {Promise<Object>} Sursa actualizată
- */
 const markSourceAsUpdated = async (id) => {
     try {
         return await Source.findByIdAndUpdate(
@@ -132,12 +94,6 @@ const markSourceAsUpdated = async (id) => {
     }
 };
 
-/**
- * Activează sau dezactivează o sursă
- * @param {String} id - ID-ul sursei
- * @param {Boolean} isActive - Starea activă (true) sau inactivă (false)
- * @returns {Promise<Object>} Sursa actualizată
- */
 const toggleSourceActive = async (id, isActive) => {
     try {
         return await Source.findByIdAndUpdate(
@@ -151,11 +107,6 @@ const toggleSourceActive = async (id, isActive) => {
     }
 };
 
-/**
- * Șterge o sursă
- * @param {String} id - ID-ul sursei
- * @returns {Promise<Object>} Rezultatul operațiunii de ștergere
- */
 const deleteSource = async (id) => {
     try {
         return await Source.findByIdAndDelete(id);
@@ -165,11 +116,6 @@ const deleteSource = async (id) => {
     }
 };
 
-/**
- * Obține surse care trebuie actualizate
- * @param {String} type - Tipul surselor (opțional)
- * @returns {Promise<Array>} Lista de surse care necesită actualizare
- */
 const getSourcesDueForUpdate = async (type = null) => {
     try {
         const now = new Date();
@@ -181,7 +127,7 @@ const getSourcesDueForUpdate = async (type = null) => {
                     $expr: {
                         $gte: [
                             { $subtract: [now, '$lastUpdated'] },
-                            { $multiply: ['$updateFrequency', 60 * 1000] } // convertire minute în ms
+                            { $multiply: ['$updateFrequency', 60 * 1000] }
                         ]
                     }
                 }

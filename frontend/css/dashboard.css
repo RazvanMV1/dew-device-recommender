@@ -1,4 +1,4 @@
-/* Import de fonturi și resetare CSS */
+
 * {
     margin: 0;
     padding: 0;
@@ -7,7 +7,6 @@
 }
 
 :root {
-    /* Schemă de culori */
     --primary: #4361ee;
     --primary-dark: #3a0ca3;
     --primary-light: #7209b7;
@@ -29,14 +28,12 @@
     --gray-900: #212529;
     --white: #ffffff;
 
-    /* Culori de fundal pentru elemente de statistici */
     --bg-blue: linear-gradient(135deg, #4361ee, #3f37c9);
     --bg-green: linear-gradient(135deg, #06d6a0, #1b9aaa);
     --bg-purple: linear-gradient(135deg, #7209b7, #560bad);
     --bg-orange: linear-gradient(135deg, #f9c74f, #f3722c);
     --bg-red: linear-gradient(135deg, #ef476f, #d90429);
 
-    /* Mărimi și spațiere */
     --sidebar-width: 280px;
     --sidebar-collapsed-width: 80px;
     --header-height: 70px;
@@ -53,14 +50,12 @@ body {
     overflow-x: hidden;
 }
 
-/* Layout principal */
 .dashboard-container {
     display: flex;
     min-height: 100vh;
     position: relative;
 }
 
-/* Sidebar */
 .sidebar {
     width: var(--sidebar-width);
     background-color: var(--white);
@@ -258,7 +253,6 @@ body {
         display: none;
     }
 
-    /* Main Content */
     .main-content {
         flex: 1;
         margin-left: var(--sidebar-width);
@@ -272,7 +266,6 @@ body {
         margin-left: var(--sidebar-collapsed-width);
     }
 
-    /* Header */
     .main-header {
         height: var(--header-height);
         background-color: var(--white);
@@ -456,13 +449,11 @@ body {
         margin: 0.5rem 0;
     }
 
-    /* Content Container */
     .content-container {
         flex: 1;
         padding: 2rem;
     }
 
-    /* Sections */
     .section {
         display: none;
         animation: fadeIn 0.3s ease;
@@ -522,7 +513,6 @@ body {
         color: var(--primary);
     }
 
-    /* Stats Cards */
     .stats-container {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -630,7 +620,6 @@ body {
         color: var(--danger);
     }
 
-    /* Cards */
     .card {
         background-color: var(--white);
         border-radius: var(--card-border-radius);
@@ -663,7 +652,6 @@ body {
         padding: 1.5rem;
     }
 
-    /* Activity List */
     .activity-list {
         display: flex;
         flex-direction: column;
@@ -710,7 +698,6 @@ body {
         color: var(--gray-500);
     }
 
-    /* Buttons */
     .btn-primary {
         padding: 0.6rem 1.25rem;
         background: var(--primary);
@@ -773,7 +760,6 @@ body {
         box-shadow: 0 4px 10px rgba(239, 71, 111, 0.3);
     }
 
-    /* Search and Filter Controls */
     .search-filter {
         display: flex;
         flex-wrap: wrap;
@@ -808,7 +794,6 @@ body {
         box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
     }
 
-    /* Tables */
     .table-responsive {
         overflow-x: auto;
         border-radius: var(--border-radius);
@@ -844,7 +829,6 @@ body {
         border-bottom: none;
     }
 
-    /* Status Tags */
     .status {
         display: inline-flex;
         align-items: center;
@@ -864,7 +848,6 @@ body {
         color: var(--danger);
     }
 
-    /* Table Actions */
     .table-actions {
         display: flex;
         gap: 0.5rem;
@@ -897,7 +880,6 @@ body {
         color: var(--danger);
     }
 
-    /* Pagination */
     .pagination {
         display: flex;
         align-items: center;
@@ -972,7 +954,6 @@ body {
         width: 36px;
     }
 
-    /* Modals */
     .modal {
         position: fixed;
         top: 0;
@@ -1064,7 +1045,6 @@ body {
         gap: 1rem;
     }
 
-    /* Forms in Modals */
     .form-group {
         margin-bottom: 1.25rem;
     }
@@ -1119,7 +1099,6 @@ body {
         resize: vertical;
     }
 
-    /* Placeholder content for sections in development */
     .placeholder-content {
         display: flex;
         flex-direction: column;
@@ -1147,7 +1126,6 @@ body {
         max-width: 450px;
     }
 
-    /* Responsive Design */
     @media (max-width: 992px) {
         .stats-container {
             grid-template-columns: repeat(2, 1fr);

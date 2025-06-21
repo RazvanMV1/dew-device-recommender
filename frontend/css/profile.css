@@ -1,4 +1,3 @@
-/* ====== Layout & Fonts ====== */
 * {
   box-sizing: border-box;
 }
@@ -16,7 +15,6 @@ body {
   margin: 0 auto;
 }
 
-/* ====== Profile Section ====== */
 .profile-flex-container {
   display: flex;
   justify-content: center;
@@ -144,7 +142,6 @@ body {
   font-size: 1rem;
 }
 
-/* ====== Footer ====== */
 .main-footer {
   background-color: #1a1a1a;
   color: #fff;
@@ -194,7 +191,6 @@ body {
   color: #ccc;
 }
 
-/* ====== Responsive ====== */
 @media (max-width: 768px) {
   .profile-flex-container {
     flex-direction: column;

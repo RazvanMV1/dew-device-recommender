@@ -1,4 +1,4 @@
-/* ========== FORMULAR ========== */
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -30,7 +30,6 @@
   margin-top: 0.3rem;
 }
 
-/* ========== ALERTĂ ========== */
 .alert {
   padding: 0.75rem 1rem;
   border-radius: 5px;
@@ -49,7 +48,6 @@
   border: 1px solid #f5c2c2;
 }
 
-/* ========== TABEL UTILIZATORI ========== */
 .user-table {
   width: 100%;
   border-collapse: collapse;
@@ -78,7 +76,6 @@
   background-color: #f1f1f1;
 }
 
-/* ========== BUTON ========== */
 .btn.btn-primary {
   padding: 0.6rem 1.2rem;
   background-color: #007bff;

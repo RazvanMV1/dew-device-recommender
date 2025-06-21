@@ -1,16 +1,7 @@
-// backend/services/rssFeedGeneratorService.js
 const xml2js = require('xml2js');
 const Product = require('../models/Product');
 const News = require('../models/News');
 
-/**
- * Generează un feed RSS cu produse recomandate
- * @param {Array} products - Lista de produse pentru feed
- * @param {String} title - Titlul feed-ului
- * @param {String} description - Descrierea feed-ului
- * @param {String} baseUrl - URL-ul de bază al site-ului
- * @returns {Promise<String>} XML feed RSS
- */
 const generateProductRssFeed = async (products, title, description, baseUrl) => {
     const now = new Date();
 
@@ -70,14 +61,6 @@ const generateProductRssFeed = async (products, title, description, baseUrl) => 
     return builder.buildObject(feedObj);
 };
 
-/**
- * Generează un feed RSS cu știri
- * @param {Array} news - Lista de știri pentru feed
- * @param {String} title - Titlul feed-ului
- * @param {String} description - Descrierea feed-ului
- * @param {String} baseUrl - URL-ul de bază al site-ului
- * @returns {Promise<String>} XML feed RSS
- */
 const generateNewsRssFeed = async (news, title, description, baseUrl) => {
     const now = new Date();
 

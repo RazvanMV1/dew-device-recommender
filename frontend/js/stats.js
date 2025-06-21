@@ -1,21 +1,17 @@
-// Meniu mobil toggle
 document.getElementById('mobile-menu-toggle')?.addEventListener('click', () => {
   document.getElementById('main-nav')?.classList.toggle('open');
 });
-// Închide meniul la click pe un link (pe mobil)
 document.querySelectorAll('#main-nav a').forEach(link => {
   link.addEventListener('click', () => {
     document.getElementById('main-nav').classList.remove('open');
   });
 });
 
-// Logout
 document.getElementById('logout-btn')?.addEventListener('click', () => {
   localStorage.removeItem('authToken');
   window.location.href = '/login';
 });
 
-// Grafic statistici
 fetch('/api/products/stats')
   .then(res => res.json())
   .then(data => {
@@ -23,7 +19,6 @@ fetch('/api/products/stats')
       document.body.innerHTML += "<p style='color:red;'>Eroare la încărcarea statisticilor!</p>";
       return;
     }
-    // Top produse
     const tpLabels = (data.topProducts || []).map(p => p.name);
     const tpData = (data.topProducts || []).map(p => p.reviewsCount || 0);
     new Chart(document.getElementById('topProductsChart'), {
@@ -56,7 +51,6 @@ fetch('/api/products/stats')
       }
     });
 
-    // Categorii
     const catLabels = (data.categories || []).map(c => c._id || "Necunoscut");
     const catData = (data.categories || []).map(c => c.count);
     new Chart(document.getElementById('categoriesChart'), {
@@ -76,7 +70,6 @@ fetch('/api/products/stats')
       }
     });
 
-    // Culori
     const colorLabels = (data.colors || []).map(c => c._id || "Necunoscut");
     const colorData = (data.colors || []).map(c => c.count);
     new Chart(document.getElementById('colorsChart'), {

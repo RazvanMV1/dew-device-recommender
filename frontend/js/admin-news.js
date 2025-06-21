@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
         currentPage = data.page;
         totalPages = data.totalPages;
 
-        // Afișează știrile
         tableBody.innerHTML = '';
         data.news.forEach(article => {
           const tr = document.createElement('tr');
@@ -62,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const result = await res.json();
 
           if (result.success) {
-            loadNews(currentPage); // reîncarcă pagina curentă
+            loadNews(currentPage);
           } else {
             alert(result.message || 'Eroare la ștergere.');
           }
@@ -98,5 +97,5 @@ document.addEventListener('DOMContentLoaded', () => {
     pagination.appendChild(nextBtn);
   }
 
-  loadNews(); // inițial
+  loadNews();
 });

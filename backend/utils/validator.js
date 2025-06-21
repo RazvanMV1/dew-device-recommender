@@ -1,22 +1,16 @@
-// 🔍 Funcții pentru validarea datelor de intrare
-
-// Validare email
 function isValidEmail(email) {
     const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     return regex.test(email);
 }
 
-// Validare nume produs
 function isValidProductName(name) {
     return name && name.length >= 2 && name.length <= 100;
 }
 
-// Validare preț
 function isValidPrice(price) {
     return price !== undefined && !isNaN(price) && price >= 0;
 }
 
-// Sanitizare text (elimină HTML și script tags)
 function sanitizeText(text) {
     if (!text) return text;
     return text
@@ -28,7 +22,6 @@ function sanitizeText(text) {
         .replace(/\//g, '&#x2F;');
 }
 
-// Validare produs complet
 function validateProduct(product) {
     const errors = [];
 

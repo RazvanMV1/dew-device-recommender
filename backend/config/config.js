@@ -5,6 +5,6 @@ module.exports = {
     JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '24h',
     PORT: process.env.PORT || 3000,
     MONGODB_URI: process.env.MONGODB_URI,
-    RATE_LIMIT_WINDOW_MS: 15 * 60 * 1000, // 15 minute
-    RATE_LIMIT_MAX_REQUESTS: 100, // maxim 100 de cereri per window
+    RATE_LIMIT_WINDOW_MS: 15 * 60 * 1000,
+    RATE_LIMIT_MAX_REQUESTS: 1000,
 };

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const { importBestBuyProductsFromApify } = require('../services/scrapers/bestBuyScraper');
-const dbConfig = require('../config/config'); // dacă ai așa ceva, altfel modifică cu connection string
+const dbConfig = require('../config/config');
 
 mongoose.connect(dbConfig.mongoUri || 'mongodb+srv://dew-admin:parola123@cluster0.4wjx28g.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
     useNewUrlParser: true,

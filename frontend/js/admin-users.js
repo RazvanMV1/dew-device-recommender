@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const tableBody = document.getElementById('userTableBody');
     const token = localStorage.getItem('authToken');
 
-    // Încarcă lista de utilizatori
     function loadUsers() {
         fetch('/api/users', {
             method: 'GET',
@@ -30,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         tableBody.appendChild(tr);
                     });
 
-                    // Activează butoanele de ștergere
                     document.querySelectorAll('.btn-delete').forEach(button => {
                         button.addEventListener('click', async () => {
                             const userId = button.getAttribute('data-id');
@@ -49,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const result = await res.json();
 
                                 if (result.success) {
-                                    loadUsers(); // reîncarcă lista
+                                    loadUsers();
                                 } else {
                                     alert(result.message || 'Eroare la ștergere.');
                                 }
@@ -70,9 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    loadUsers(); // inițial
+    loadUsers();
 
-    // Creează utilizator nou
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -105,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (result.success) {
                 form.reset();
-                loadUsers(); // actualizează tabelul
+                loadUsers();
             }
         } catch (err) {
             console.error('Eroare:', err);

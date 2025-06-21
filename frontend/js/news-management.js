@@ -1,6 +1,5 @@
-// frontend/js/news-management.js
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Verifică dacă utilizatorul este autentificat
     const checkAuth = () => {
         const authToken = localStorage.getItem('authToken');
         if (!authToken) {
@@ -10,10 +9,8 @@ document.addEventListener('DOMContentLoaded', function() {
         return true;
     };
 
-    // Verifică autentificarea
     if (!checkAuth()) return;
 
-    // State pentru pagină
     const state = {
         news: {
             currentPage: 1,
@@ -50,22 +47,16 @@ document.addEventListener('DOMContentLoaded', function() {
         currentNewsId: null
     };
 
-    // Inițializează pagina
     initPage();
 
-    // Funcție pentru inițializarea paginii
     function initPage() {
-        // Încarcă datele inițiale
         loadNewsStats();
         loadRssSources();
         loadNewsCategories();
         loadNews();
-
-        // Atașează event handlers
         attachEventHandlers();
     }
 
-    // Funcție pentru încărcarea statisticilor despre știri
     async function loadNewsStats() {
         try {
             const response = await fetch('/api/news/stats', {
@@ -82,7 +73,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Funcție pentru actualizarea UI-ului cu statistici
     function updateStatsUI() {
         document.getElementById('total-news-count').textContent = state.stats.totalNews;
         document.getElementById('processed-news-count').textContent = state.stats.processedNews;
@@ -90,7 +80,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('categories-count').textContent = state.stats.categories;
     }
 
-    // Funcție pentru încărcarea surselor RSS
     async function loadRssSources() {
         try {
             state.sources.loading = true;
@@ -113,7 +102,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Funcție pentru actualizarea UI-ului cu surse RSS
     function updateSourcesUI() {
         const sourcesGrid = document.getElementById('rss-sources-grid');
 
@@ -137,7 +125,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Construiește grid-ul de surse
         sourcesGrid.innerHTML = '';
         state.sources.items.forEach(source => {
             if (source.active) {
@@ -177,7 +164,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Adaugă event handlers pentru butoanele de actualizare
         const updateButtons = document.querySelectorAll('.update-source-btn');
         updateButtons.forEach(button => {
             button.addEventListener('click', async function() {
@@ -187,12 +173,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Funcție pentru popularea dropdown-ului de surse
     function populateSourceFilter() {
         const sourceFilter = document.getElementById('news-source-filter');
         sourceFilter.innerHTML = '<option value="">Toate sursele</option>';
 
-        // Adaugă doar sursele active
         state.sources.items
             .filter(source => source.active)
             .forEach(source => {
@@ -203,7 +187,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // Funcție pentru încărcarea categoriilor de știri
     async function loadNewsCategories() {
         try {
             state.categories.loading = true;
@@ -225,7 +208,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Funcție pentru popularea dropdown-ului de categorii
     function populateCategoryFilter() {
         const categoryFilter = document.getElementById('news-category-filter');
         categoryFilter.innerHTML = '<option value="">Toate categoriile</option>';
@@ -238,7 +220,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Funcție pentru încărcarea știrilor
     async function loadNews() {
         try {
             state.news.loading = true;
@@ -247,7 +228,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const { currentPage, filters } = state.news;
             const { search, source, category, processed, sort } = filters;
 
-            // Construiește query string-ul pentru filtre
             let queryParams = `page=${currentPage}&limit=10&sort=${sort}`;
             if (search) queryParams += `&search=${encodeURIComponent(search)}`;
             if (source) queryParams += `&source=${source}`;
@@ -264,11 +244,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 state.news.totalPages = data.totalPages;
                 state.news.currentPage = data.page;
 
-                // Actualizează UI-ul
                 updateNewsTable();
                 updateNewsPagination();
 
-                // Actualizează contorul total
                 document.getElementById('news-total-count').textContent = `${data.total} știri`;
             } else {
                 console.error('Eroare la încărcarea știrilor:', data.message);
@@ -283,7 +261,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Funcție pentru actualizarea stării de încărcare a știrilor în UI
     function updateNewsLoadingState(isLoading) {
         const loadingIndicator = document.getElementById('news-loading');
         const newsTable = document.getElementById('news-table');
@@ -297,7 +274,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Funcție pentru actualizarea tabelului de știri
     function updateNewsTable() {
         const tableBody = document.getElementById('news-table-body');
         tableBody.innerHTML = '';
@@ -319,7 +295,6 @@ document.addEventListener('DOMContentLoaded', function() {
         state.news.items.forEach(news => {
             const row = document.createElement('tr');
 
-            // Formatare dată
             const publishDate = new Date(news.publishDate);
             const formattedDate = publishDate.toLocaleDateString('ro-RO', {
                 day: 'numeric',
@@ -329,12 +304,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 minute: '2-digit'
             });
 
-            // Formatare categorii
             const categories = news.categories && news.categories.length > 0
                 ? news.categories.map(cat => `<span class="category-tag">${cat}</span>`).join('')
                 : '<span class="text-muted">Fără categorii</span>';
 
-            // Status procesat/neprocesat
             const statusClass = news.isProcessed ? 'status-active' : 'status-inactive';
             const statusText = news.isProcessed ? 'Procesat' : 'Neprocesat';
 
@@ -375,7 +348,6 @@ document.addEventListener('DOMContentLoaded', function() {
             tableBody.appendChild(row);
         });
 
-        // Adaugă event handlers pentru butoane
         const viewButtons = tableBody.querySelectorAll('.action-btn.view');
         viewButtons.forEach(button => {
             button.addEventListener('click', function() {
@@ -401,24 +373,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Funcție pentru actualizarea paginației
     function updateNewsPagination() {
         const { currentPage, totalPages } = state.news;
 
         document.getElementById('news-current-page').textContent = currentPage;
         document.getElementById('news-total-pages').textContent = totalPages;
 
-        // Actualizează starea butoanelor
         document.getElementById('news-prev-page').disabled = currentPage <= 1;
         document.getElementById('news-next-page').disabled = currentPage >= totalPages;
     }
 
-    // Funcție pentru actualizarea unei surse RSS
     async function updateRssSource(sourceId) {
         try {
             const button = document.querySelector(`.update-source-btn[data-id="${sourceId}"]`);
 
-            // Dezactivează butonul și afișează indicator de încărcare
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Actualizare...';
 
@@ -434,25 +402,19 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
 
             if (data.success) {
-                // Reactualizează sursele și știrile
                 loadRssSources();
                 loadNews();
                 loadNewsStats();
-
-                // Afișează mesaj de succes
                 showToast('Sursă actualizată cu succes!', 'success');
             } else {
                 showToast('Eroare la actualizarea sursei: ' + data.message, 'error');
             }
 
-            // Resetează butonul
             button.disabled = false;
             button.innerHTML = '<i class="fas fa-sync"></i> Actualizează';
         } catch (error) {
             console.error('Eroare la actualizarea sursei RSS:', error);
             showToast('Eroare la actualizarea sursei!', 'error');
-
-            // Resetează butonul în caz de eroare
             const button = document.querySelector(`.update-source-btn[data-id="${sourceId}"]`);
             if (button) {
                 button.disabled = false;
@@ -461,16 +423,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Funcție pentru deschiderea modalului cu detalii despre o știre
     async function openNewsDetailModal(newsId) {
-        // Salvează ID-ul știrii curente
         state.currentNewsId = newsId;
 
-        // Deschide modal-ul
         const modal = document.getElementById('news-detail-modal');
         modal.classList.add('active');
 
-        // Afișează indicator de încărcare
         const modalContent = document.getElementById('news-detail-content');
         modalContent.innerHTML = `
             <div class="loading-indicator">
@@ -488,7 +446,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success && data.news) {
                 const news = data.news;
 
-                // Formatare dată
                 const publishDate = new Date(news.publishDate);
                 const formattedDate = publishDate.toLocaleDateString('ro-RO', {
                     day: 'numeric',
@@ -498,12 +455,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     minute: '2-digit'
                 });
 
-                // Formatare categorii
                 const categories = news.categories && news.categories.length > 0
                     ? news.categories.map(cat => `<span class="category-tag">${cat}</span>`).join('')
                     : '<span class="text-muted">Fără categorii</span>';
 
-                // Construiește HTML-ul pentru detaliile știrii
                 modalContent.innerHTML = `
                     <div class="news-detail">
                         <div class="news-detail-header">
@@ -557,7 +512,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
 
-                // Actualizează starea butonului de procesare
                 const processButton = document.getElementById('mark-processed-btn');
                 if (news.isProcessed) {
                     processButton.textContent = 'Editează produse asociate';
@@ -591,14 +545,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Funcție pentru renderarea produselor asociate unei știri
     async function renderRelatedProducts(productIds) {
         if (!productIds || productIds.length === 0) {
             return `<p class="no-items-message">Nu există produse asociate</p>`;
         }
 
         try {
-            // Obține detaliile produselor
             const products = await Promise.all(
                 productIds.map(async id => {
                     try {
@@ -614,7 +566,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
             );
 
-            // Filtrează produsele valide
             const validProducts = products.filter(p => p !== null);
 
             if (validProducts.length === 0) {
@@ -642,52 +593,38 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Funcție pentru deschiderea modalului de selecție a produselor asociate
     async function openRelatedProductsModal(newsId) {
-        // Salvează ID-ul știrii curente
         state.currentNewsId = newsId;
 
-        // Deschide modal-ul
         const modal = document.getElementById('related-products-modal');
         modal.classList.add('active');
 
-        // Resetează lista de produse selectate
         state.products.selected = [];
 
-        // Încarcă produsele disponibile
         await loadAvailableProducts();
 
-        // Actualizează UI-ul pentru produsele selectate
         updateSelectedProductsUI();
     }
 
-    // Funcție pentru editarea produselor asociate unei știri
     async function editRelatedProducts(newsId) {
-        // Salvează ID-ul știrii curente
         state.currentNewsId = newsId;
 
         try {
-            // Încarcă detaliile știrii pentru a obține produsele asociate
             const response = await fetch(`/api/news/${newsId}`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
             });
             const data = await response.json();
 
             if (data.success && data.news) {
-                // Salvează produsele asociate în state
                 state.products.selected = data.news.relatedProducts || [];
 
-                // Deschide modal-ul
                 const modal = document.getElementById('related-products-modal');
                 modal.classList.add('active');
 
-                // Încarcă produsele disponibile
                 await loadAvailableProducts();
 
-                // Actualizează UI-ul pentru produsele selectate
                 updateSelectedProductsUI();
 
-                // Marchează produsele asociate ca selectate în tabel
                 updateProductsSelectionUI();
             } else {
                 showToast('Eroare la încărcarea detaliilor știrii', 'error');
@@ -698,12 +635,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Funcție pentru încărcarea produselor disponibile
     async function loadAvailableProducts() {
         try {
             state.products.loading = true;
 
-            // Afișează indicator de încărcare în tabel
             const tableBody = document.getElementById('products-selection-body');
             tableBody.innerHTML = `
                 <tr>
@@ -716,7 +651,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 </tr>
             `;
 
-            // Încarcă produsele de la API
             const response = await fetch('/api/products?limit=50', {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
             });
@@ -756,7 +690,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Funcție pentru actualizarea UI-ului de selecție a produselor
     function updateProductsSelectionUI() {
         const tableBody = document.getElementById('products-selection-body');
         tableBody.innerHTML = '';
@@ -775,7 +708,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Filtrează produsele în funcție de textul de căutare
         const searchText = document.getElementById('product-search-input').value.toLowerCase();
         const filteredProducts = state.products.items.filter(product => {
             return product.name.toLowerCase().includes(searchText) ||
@@ -797,11 +729,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                         return;
                                     }
 
-                                    // Populează tabelul cu produse
                                     filteredProducts.forEach(product => {
                                         const row = document.createElement('tr');
 
-                                        // Verifică dacă produsul este selectat
                                         const isSelected = state.products.selected.includes(product._id);
 
                                         row.innerHTML = `
@@ -816,29 +746,24 @@ document.addEventListener('DOMContentLoaded', function() {
                                         tableBody.appendChild(row);
                                     });
 
-                                    // Adaugă event handlers pentru checkboxuri
                                     const checkboxes = tableBody.querySelectorAll('.product-checkbox');
                                     checkboxes.forEach(checkbox => {
                                         checkbox.addEventListener('change', function() {
                                             const productId = this.getAttribute('data-id');
 
                                             if (this.checked) {
-                                                // Adaugă produsul la selecție dacă nu există deja
                                                 if (!state.products.selected.includes(productId)) {
                                                     state.products.selected.push(productId);
                                                 }
                                             } else {
-                                                // Elimină produsul din selecție
                                                 state.products.selected = state.products.selected.filter(id => id !== productId);
                                             }
 
-                                            // Actualizează UI-ul pentru produsele selectate
                                             updateSelectedProductsUI();
                                         });
                                     });
                                 }
 
-                                // Funcție pentru actualizarea UI-ului produselor selectate
                                 function updateSelectedProductsUI() {
                                     const container = document.getElementById('selected-products-container');
 
@@ -847,7 +772,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                         return;
                                     }
 
-                                    // Obține detaliile produselor selectate
                                     const selectedProducts = state.products.items.filter(product =>
                                         state.products.selected.includes(product._id)
                                     );
@@ -857,7 +781,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                         return;
                                     }
 
-                                    // Construiește lista de produse selectate
                                     container.innerHTML = '';
                                     selectedProducts.forEach(product => {
                                         const item = document.createElement('div');
@@ -876,33 +799,27 @@ document.addEventListener('DOMContentLoaded', function() {
                                         container.appendChild(item);
                                     });
 
-                                    // Adaugă event handlers pentru butoanele de eliminare
                                     const removeButtons = container.querySelectorAll('.remove-product');
                                     removeButtons.forEach(button => {
                                         button.addEventListener('click', function() {
                                             const productId = this.getAttribute('data-id');
 
-                                            // Elimină produsul din selecție
                                             state.products.selected = state.products.selected.filter(id => id !== productId);
 
-                                            // Actualizează checkbox-ul din tabel
                                             const checkbox = document.querySelector(`.product-checkbox[data-id="${productId}"]`);
                                             if (checkbox) {
                                                 checkbox.checked = false;
                                             }
 
-                                            // Actualizează UI-ul pentru produsele selectate
                                             updateSelectedProductsUI();
                                         });
                                     });
                                 }
 
-                                // Funcție pentru salvarea produselor asociate
                                 async function saveRelatedProducts() {
                                     try {
                                         const saveButton = document.getElementById('save-related-products');
 
-                                        // Dezactivează butonul și afișează indicator de încărcare
                                         saveButton.disabled = true;
                                         saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Se salvează...';
 
@@ -920,36 +837,28 @@ document.addEventListener('DOMContentLoaded', function() {
                                         const data = await response.json();
 
                                         if (data.success) {
-                                            // Închide modal-ul
                                             closeModal('related-products-modal');
 
-                                            // Actualizează lista de știri și statisticile
                                             loadNews();
                                             loadNewsStats();
 
-                                            // Afișează mesaj de succes
                                             showToast('Asocierile au fost salvate cu succes!', 'success');
                                         } else {
                                             showToast('Eroare la salvarea asocierilor: ' + data.message, 'error');
                                         }
-
-                                        // Resetează butonul
                                         saveButton.disabled = false;
                                         saveButton.innerHTML = 'Salvează asocieri';
                                     } catch (error) {
                                         console.error('Eroare la salvarea produselor asociate:', error);
                                         showToast('Eroare la salvarea asocierilor!', 'error');
 
-                                        // Resetează butonul
                                         const saveButton = document.getElementById('save-related-products');
                                         saveButton.disabled = false;
                                         saveButton.innerHTML = 'Salvează asocieri';
                                     }
                                 }
 
-                                // Funcție pentru atașarea event handler-ilor
                                 function attachEventHandlers() {
-                                    // Event handler pentru închiderea modal-urilor
                                     document.querySelectorAll('.close-modal, button[data-dismiss="modal"]').forEach(element => {
                                         element.addEventListener('click', function() {
                                             const modal = this.closest('.modal');
@@ -957,38 +866,36 @@ document.addEventListener('DOMContentLoaded', function() {
                                         });
                                     });
 
-                                    // Event handler pentru filtrele de știri
                                     document.getElementById('news-search').addEventListener('input', debounce(() => {
                                         state.news.filters.search = document.getElementById('news-search').value;
-                                        state.news.currentPage = 1; // Resetează pagina
+                                        state.news.currentPage = 1;
                                         loadNews();
                                     }, 500));
 
                                     document.getElementById('news-source-filter').addEventListener('change', function() {
                                         state.news.filters.source = this.value;
-                                        state.news.currentPage = 1; // Resetează pagina
+                                        state.news.currentPage = 1;
                                         loadNews();
                                     });
 
                                     document.getElementById('news-category-filter').addEventListener('change', function() {
                                         state.news.filters.category = this.value;
-                                        state.news.currentPage = 1; // Resetează pagina
+                                        state.news.currentPage = 1;
                                         loadNews();
                                     });
 
                                     document.getElementById('news-processed-filter').addEventListener('change', function() {
                                         state.news.filters.processed = this.value;
-                                        state.news.currentPage = 1; // Resetează pagina
+                                        state.news.currentPage = 1;
                                         loadNews();
                                     });
 
                                     document.getElementById('news-sort-filter').addEventListener('change', function() {
                                         state.news.filters.sort = this.value;
-                                        state.news.currentPage = 1; // Resetează pagina
+                                        state.news.currentPage = 1;
                                         loadNews();
                                     });
 
-                                    // Event handler pentru paginație
                                     document.getElementById('news-prev-page').addEventListener('click', function() {
                                         if (state.news.currentPage > 1) {
                                             state.news.currentPage--;
@@ -1003,7 +910,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                         }
                                     });
 
-                                    // Event handler pentru butonul de actualizare RSS
                                     document.getElementById('refresh-rss-btn').addEventListener('click', async function() {
                                         this.disabled = true;
                                         this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Se actualizează...';
@@ -1015,18 +921,16 @@ document.addEventListener('DOMContentLoaded', function() {
                                                     'Content-Type': 'application/json',
                                                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`
                                                 },
-                                                body: JSON.stringify({}) // Actualizează toate sursele
+                                                body: JSON.stringify({})
                                             });
 
                                             const data = await response.json();
 
                                             if (data.success) {
-                                                // Actualizează datele
                                                 loadRssSources();
                                                 loadNews();
                                                 loadNewsStats();
 
-                                                // Afișează mesaj de succes
                                                 showToast('Sursele RSS au fost actualizate cu succes!', 'success');
                                             } else {
                                                 showToast('Eroare la actualizarea surselor RSS: ' + data.message, 'error');
@@ -1035,18 +939,15 @@ document.addEventListener('DOMContentLoaded', function() {
                                             console.error('Eroare la actualizarea surselor RSS:', error);
                                             showToast('Eroare la actualizarea surselor RSS!', 'error');
                                         } finally {
-                                            // Resetează butonul
                                             this.disabled = false;
                                             this.innerHTML = '<i class="fas fa-sync"></i> Actualizează RSS';
                                         }
                                     });
 
-                                    // Event handler pentru căutarea produselor
                                     document.getElementById('product-search-input').addEventListener('input', debounce(() => {
                                         updateProductsSelectionUI();
                                     }, 300));
 
-                                    // Event handler pentru selectarea/deselectarea tuturor produselor
                                     document.getElementById('select-all-products').addEventListener('change', function() {
                                         const checkboxes = document.querySelectorAll('.product-checkbox');
 
@@ -1056,38 +957,30 @@ document.addEventListener('DOMContentLoaded', function() {
                                             const productId = checkbox.getAttribute('data-id');
 
                                             if (this.checked) {
-                                                // Adaugă produsul la selecție dacă nu există deja
                                                 if (!state.products.selected.includes(productId)) {
                                                     state.products.selected.push(productId);
                                                 }
                                             } else {
-                                                // Elimină produsul din selecție
                                                 state.products.selected = state.products.selected.filter(id => id !== productId);
                                             }
                                         });
 
-                                        // Actualizează UI-ul pentru produsele selectate
                                         updateSelectedProductsUI();
                                     });
 
-                                    // Event handler pentru salvarea produselor asociate
                                     document.getElementById('save-related-products').addEventListener('click', saveRelatedProducts);
                                 }
 
-                                // Funcție pentru închiderea unui modal
                                 function closeModal(modalId) {
                                     document.getElementById(modalId).classList.remove('active');
                                 }
 
-                                // Funcție utilitară pentru truncarea textului
                                 function truncateText(text, length) {
                                     if (!text || text.length <= length) return text;
                                     return text.substring(0, length) + '...';
                                 }
 
-                                // Funcție pentru afișarea unui mesaj toast
                                 function showToast(message, type = 'info') {
-                                    // Verifică dacă containerul de toast-uri există, dacă nu, îl creează
                                     let toastContainer = document.querySelector('.toast-container');
 
                                     if (!toastContainer) {
@@ -1096,11 +989,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                         document.body.appendChild(toastContainer);
                                     }
 
-                                    // Creează elementul toast
                                     const toast = document.createElement('div');
                                     toast.className = `toast toast-${type}`;
 
-                                    // Adaugă iconița în funcție de tip
                                     let icon = 'info-circle';
                                     if (type === 'success') icon = 'check-circle';
                                     if (type === 'error') icon = 'exclamation-circle';
@@ -1112,10 +1003,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <button class="toast-close">&times;</button>
                                     `;
 
-                                    // Adaugă toast-ul în container
                                     toastContainer.appendChild(toast);
 
-                                    // Adaugă event listener pentru închiderea manuală
                                     toast.querySelector('.toast-close').addEventListener('click', () => {
                                         toast.classList.add('toast-hiding');
                                         setTimeout(() => {
@@ -1123,7 +1012,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                         }, 300);
                                     });
 
-                                    // Elimină toast-ul automat după un timp
                                     setTimeout(() => {
                                         toast.classList.add('toast-hiding');
                                         setTimeout(() => {
@@ -1132,7 +1020,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                     }, 5000);
                                 }
 
-                                // Funcție utilitară pentru debounce
                                 function debounce(func, wait) {
                                     let timeout;
                                     return function() {

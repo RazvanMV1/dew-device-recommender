@@ -10,7 +10,7 @@ const predefinedSources = [
         type: 'rss',
         url: 'https://www.gadget.ro/feed/',
         description: 'Noutăți despre tehnologie și gadgeturi',
-        updateFrequency: 60,  // minute
+        updateFrequency: 60,
         tags: ['tech', 'gadgets', 'reviews'],
         active: true
     },
@@ -19,7 +19,7 @@ const predefinedSources = [
         type: 'rss',
         url: 'https://www.go4it.ro/rss/',
         description: 'Știri despre IT, gadgeturi și jocuri',
-        updateFrequency: 90,  // minute
+        updateFrequency: 90,
         tags: ['tech', 'games', 'IT'],
         active: true
     },
@@ -28,7 +28,7 @@ const predefinedSources = [
         type: 'rss',
         url: 'https://www.startupcafe.ro/rss',
         description: 'Știri despre startup-uri și antreprenoriat',
-        updateFrequency: 120, // minute
+        updateFrequency: 120,
         tags: ['business', 'startups'],
         active: true
     },
@@ -37,7 +37,7 @@ const predefinedSources = [
         type: 'rss',
         url: 'https://playtech.ro/feed',
         description: 'Știri despre tehnologie și recenzii',
-        updateFrequency: 60,  // minute
+        updateFrequency: 60,
         tags: ['tech', 'reviews'],
         active: true
     },
