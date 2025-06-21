@@ -3,13 +3,11 @@ const config = require('../config/config');
 const User = require('../models/User');
 
 const verifyToken = async (req, res, next) => {
-    console.log("=== INTRAT IN verifyToken ===");
     try {
         const authHeader = req.headers['authorization'];
         const token = authHeader && authHeader.split(' ')[1];
 
         if (!token) {
-            console.log("LIPSESTE TOKENUL!");
             return res.writeHead(401, { 'Content-Type': 'application/json' });
             return res.end(JSON.stringify({
                 success: false,
@@ -27,8 +25,6 @@ const verifyToken = async (req, res, next) => {
                 message: 'Token invalid. Utilizator inexistent.'
             }));
         }
-
-        console.log("TOKEN VALID, setez req.user si apelez next()");
         req.user = {
             id: user._id,
             username: user.username,

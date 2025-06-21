@@ -229,7 +229,6 @@
         window.location.href = '/login';
     }
     document.addEventListener('DOMContentLoaded', function() {
-        // doar după ce headerul e în DOM
         setTimeout(function() {
             const logoutLink = document.getElementById('logout-link');
             if (logoutLink) {
@@ -239,7 +238,7 @@
                     logout();
                 });
             }
-        }, 500); // mic delay ca să fim siguri că headerul e încărcat (nu e elegant, dar merge)
+        }, 500);
     });
 </script>
 
@@ -247,7 +246,6 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // așteaptă puțin ca headerul să fie inserat dinamic în DOM
         function updateHeaderAvatar() {
             const userData = JSON.parse(localStorage.getItem('userData') || '{}');
             const avatarHeader = document.getElementById('header-avatar');
@@ -260,11 +258,10 @@
             }
         }
 
-        // Încercăm să actualizăm avatarul la fiecare 100ms până headerul e gata, apoi ne oprim
         let attempts = 0;
         const interval = setInterval(() => {
             const avatarHeader = document.getElementById('header-avatar');
-            if (avatarHeader || attempts > 30) { // max 3 secunde
+            if (avatarHeader || attempts > 30) {
                 updateHeaderAvatar();
                 clearInterval(interval);
             }
@@ -278,7 +275,6 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         loadHeader('header-placeholder', function() {
-            // Inițializează funcții suplimentare dacă ai nevoie
         });
     });
 </script>

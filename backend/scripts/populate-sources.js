@@ -55,7 +55,7 @@ const predefinedSources = [
 async function populateSources() {
     try {
         await connectDB();
-        console.log('✅ Conectat la baza de date');
+        console.log('Conectat la baza de date');
 
         let created = 0;
         let skipped = 0;
@@ -65,34 +65,34 @@ async function populateSources() {
                 const existingSource = await Source.findOne({ url: source.url });
 
                 if (existingSource) {
-                    console.log(`⚠️ Sursa ${source.name} există deja, se sare peste.`);
+                    console.log(`Sursa ${source.name} există deja, se sare peste.`);
                     skipped++;
                 } else {
                     await Source.create(source);
-                    console.log(`✅ Sursa "${source.name}" a fost creată.`);
+                    console.log(` Sursa "${source.name}" a fost creată.`);
                     created++;
                 }
             } catch (error) {
-                console.error(`❌ Eroare la procesarea sursei "${source.name}":`, error);
+                console.error(` Eroare la procesarea sursei "${source.name}":`, error);
             }
         }
 
-        console.log('\n📊 Sumar:');
-        console.log(`✅ Surse create: ${created}`);
-        console.log(`⚠️ Surse sărite (deja existente): ${skipped}`);
+        console.log('\n Sumar:');
+        console.log(` Surse create: ${created}`);
+        console.log(` Surse sărite (deja existente): ${skipped}`);
 
     } catch (error) {
-        console.error('❌ Eroare la popularea surselor:', error);
+        console.error(' Eroare la popularea surselor:', error);
     } finally {
         await mongoose.connection.close();
-        console.log('🔌 Conexiune închisă.');
+        console.log(' Conexiune închisă.');
     }
 }
 
 populateSources().then(() => {
-    console.log('🎯 Populare surse finalizată');
+    console.log(' Populare surse finalizată');
     process.exit(0);
 }).catch(err => {
-    console.error('❌ Eroare finală:', err);
+    console.error(' Eroare finală:', err);
     process.exit(1);
 });

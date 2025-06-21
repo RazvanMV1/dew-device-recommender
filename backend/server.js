@@ -19,13 +19,14 @@ const sourceService = require('./services/sourceService');
 const rssService = require('./services/rssService');
 const newsService = require('./services/newsService');
 const schedulerService = require('./services/schedulerService');
+const Activity = require('./models/Activity');
 
 connectDB().then(() => {
     createDefaultAdmin();
     schedulerService.initScheduledJobs();
-    console.log('📅 Job-uri programate pentru actualizare RSS inițializate');
+    console.log('Job-uri programate pentru actualizare RSS inițializate');
 }).catch(err => {
-    console.error('❌ Eroare la conectarea la MongoDB:', err);
+    console.error('Eroare la conectarea la MongoDB:', err);
 });
 async function createDefaultAdmin() {
     try {
@@ -37,10 +38,10 @@ async function createDefaultAdmin() {
                 password: 'admin123SecureP@ss',
                 role: 'admin'
             });
-            console.log('✅ Utilizator admin implicit creat');
+            console.log('Utilizator admin implicit creat');
         }
     } catch (error) {
-        console.error('❌ Eroare la crearea utilizatorului admin implicit:', error);
+        console.error('Eroare la crearea utilizatorului admin implicit:', error);
     }
 }
 
@@ -71,6 +72,19 @@ async function parseRequestBody(req) {
             }
         });
         req.on('error', reject);
+    });
+}
+
+function escapeXML(str) {
+    if (!str) return '';
+    return str.replace(/[<>&'"]/g, function (c) {
+        switch (c) {
+            case '<': return '&lt;';
+            case '>': return '&gt;';
+            case '&': return '&amp;';
+            case '\'': return '&apos;';
+            case '"': return '&quot;';
+        }
     });
 }
 const server = http.createServer(async (req, res) => {
@@ -115,6 +129,60 @@ const server = http.createServer(async (req, res) => {
                 } else if (pathName === '/register-admin' || pathName === '/register-admin.html') {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/register-admin.html'), 'text/html');
                 }
+                else if (pathName === '/rss/popular-products.xml') {
+                    try {
+                        const topProducts = await Product.find({})
+                            .sort({ reviewsCount: -1 })
+                            .limit(20);
+
+                        let rss = `<?xml version="1.0" encoding="UTF-8" ?>
+                <rss version="2.0">
+                <channel>
+                  <title>Top Produse Populare</title>
+                  <link>http://localhost:3004/</link>
+                  <description>Top produse după numărul de recenzii</description>
+                  <language>ro-ro</language>
+                `;
+
+                        topProducts.forEach(prod => {
+                            rss += `
+                          <item>
+                            <title>${escapeXML(prod.name)}</title>
+                            <link>http://localhost:3004/products/${prod._id}</link>
+                            <description><![CDATA[
+                              <b>Brand:</b> ${escapeXML(prod.brand || '-')}<br/>
+                              <b>Model:</b> ${escapeXML(prod.model || '-')}<br/>
+                              <b>Preț:</b> ${prod.price ? prod.price + ' ' + (prod.currency || '') : '-'}<br/>
+                              <b>Culoare:</b> ${escapeXML(prod.color || '-')}<br/>
+                              <b>Autonomie:</b> ${escapeXML(prod.autonomy || '-')}<br/>
+                              <b>Categorie:</b> ${escapeXML(prod.category || '-')}<br/>
+                              <b>ASIN:</b> ${escapeXML(prod.asin || '-')}<br/>
+                              <b>URL produs:</b> <a href="${escapeXML(prod.url || '')}">${escapeXML(prod.url || '')}</a><br/>
+                              <b>Număr recenzii:</b> ${prod.reviewsCount || 0}<br/>
+                              <b>Stele:</b> ${prod.stars || '-'}<br/>
+                              <b>În stoc:</b> ${prod.inStock ? 'Da' : 'Nu'}<br/>
+                              <b>Descriere:</b> ${escapeXML(prod.description || '-')}<br/>
+                              <b>Caracteristici:</b> ${(prod.features && prod.features.length) ? prod.features.map(escapeXML).join('; ') : '-'}<br/>
+                              <b>Imagine:</b> ${prod.image ? `<img src="${prod.image}" style="max-width:120px;max-height:100px;" />` : '-'}<br/>
+                            ]]></description>
+                            <pubDate>${new Date(prod.createdAt).toUTCString()}</pubDate>
+                          </item>
+                        `;
+                        });
+
+                        rss += `
+                </channel>
+                </rss>`;
+
+                        res.writeHead(200, { 'Content-Type': 'application/rss+xml; charset=utf-8' });
+                        res.end(rss);
+
+                    } catch (err) {
+                        console.error('Eroare la generarea RSS:', err);
+                        res.writeHead(500, { 'Content-Type': 'text/plain' });
+                        res.end('Eroare la generarea RSS');
+                    }
+                }
                 else if (pathName === '/api/check-admin-exists') {
                     securityHeaders(req, res, async () => {
                         try {
@@ -134,14 +202,122 @@ const server = http.createServer(async (req, res) => {
                         }
                     });
                 }
+                else if (pathName === '/rss/recommended-products.xml') {
+                    try {
+                        const username = parsedUrl.query.username;
+                        let filter = { $and: [] };
+
+                        if (username) {
+                            const user = await User.findOne({ username: username });
+                            if (user && user.preferences) {
+
+                                if (user.preferences.categories && user.preferences.categories.length) {
+                                    filter.$and.push({
+                                        $or: user.preferences.categories.map(cat => ({
+                                            category: { $regex: new RegExp(`^${cat}$`, 'i') }
+                                        }))
+                                    });
+                                }
+
+                                if (user.preferences.brands && user.preferences.brands.length) {
+                                    filter.$and.push({
+                                        $or: user.preferences.brands.map(b => ({
+                                            brand: { $regex: new RegExp(`^${b}$`, 'i') }
+                                        }))
+                                    });
+                                }
+
+                                if (user.preferences.priceRange) {
+                                    let priceQuery = [];
+                                    const p = user.preferences.priceRange.trim().toLowerCase();
+                                    if (p === "low") priceQuery.push({ price: { $gte: 0, $lt: 200 } });
+                                    else if (p === "mid") priceQuery.push({ price: { $gte: 200, $lt: 600 } });
+                                    else if (p === "high") priceQuery.push({ price: { $gte: 600 } });
+                                    if (priceQuery.length)
+                                        filter.$and.push({ $or: priceQuery });
+                                }
+                            }
+                        }
+                        if (!filter.$and.length) delete filter.$and;
+
+
+                        const recommendedProducts = await Product.find(filter)
+                            .sort({ stars: -1, reviewsCount: -1 })
+                            .limit(20);
+
+                        let rss = `<?xml version="1.0" encoding="UTF-8" ?>
+                <rss version="2.0">
+                <channel>
+                  <title>Recomandări pentru ${escapeXML(username || 'utilizator')}</title>
+                  <link>http://localhost:3004/</link>
+                  <description>Feed RSS cu produse recomandate pentru ${escapeXML(username || 'utilizator')}</description>
+                  <language>ro-ro</language>
+                `;
+
+                        recommendedProducts.forEach(prod => {
+                            rss += `
+                  <item>
+                    <title>${escapeXML(prod.name)}</title>
+                    <link>http://localhost:3004/products/${prod._id}</link>
+                    <description><![CDATA[
+                <b>Brand:</b> ${escapeXML(prod.brand || '-')}<br/>
+                <b>Model:</b> ${escapeXML(prod.model || '-')}<br/>
+                <b>Preț:</b> ${prod.price ? prod.price + ' ' + (prod.currency || '') : '-'}<br/>
+                <b>Categorie:</b> ${escapeXML(prod.category || '-')}<br/>
+                <b>Stele:</b> ${prod.stars || '-'}<br/>
+                <b>Număr recenzii:</b> ${prod.reviewsCount || 0}<br/>
+                <b>Descriere:</b> ${escapeXML(prod.description || '-')}<br/>
+                <b>Imagine:</b> ${prod.image ? `<img src="${prod.image}" style="max-width:120px;max-height:100px;" />` : '-'}<br/>
+                ]]></description>
+                    <pubDate>${new Date(prod.createdAt).toUTCString()}</pubDate>
+                  </item>
+                `;
+                        });
+
+                        rss += `
+                </channel>
+                </rss>`;
+
+                        res.writeHead(200, { 'Content-Type': 'application/rss+xml; charset=utf-8' });
+                        res.end(rss);
+
+                    } catch (err) {
+                        console.error('Eroare la generarea RSS recomandate:', err);
+                        res.writeHead(500, { 'Content-Type': 'text/plain' });
+                        res.end('Eroare la generarea RSS recomandate');
+                    }
+                }
+                else if (pathName === '/api/activity') {
+                    try {
+                        const activities = await Activity.find().sort({ time: -1 }).limit(20);
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({
+                            success: true,
+                            activities
+                        }));
+                    } catch (err) {
+                        res.writeHead(500, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({
+                            success: false,
+                            message: 'Eroare la încărcarea activităților'
+                        }));
+                    }
+                    return;
+                }
                 else if (pathName === '/api/users') {
                     securityHeaders(req, res, async () => {
                         verifyToken(req, res, async () => {
                             isAdmin(req, res, async () => {
                                 try {
                                     const users = await User.find({}, '-password');
+                                    const total = await User.countDocuments();
+
                                     res.writeHead(200, { 'Content-Type': 'application/json' });
-                                    res.end(JSON.stringify({ success: true, users }));
+                                    res.end(JSON.stringify({
+                                        success: true,
+                                        users,
+                                        total
+                                    }));
                                 } catch (error) {
                                     console.error('Eroare la obținerea utilizatorilor:', error);
                                     res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -164,7 +340,6 @@ const server = http.createServer(async (req, res) => {
                                 return;
                             }
                             const user = await User.findById(req.user.id);
-                            console.log("USER GASIT:", user);
                             if (!user) {
                                 res.writeHead(404, { 'Content-Type': 'application/json' });
                                 res.end(JSON.stringify({ success: false, message: 'User inexistent!' }));
@@ -177,19 +352,15 @@ const server = http.createServer(async (req, res) => {
                 }
 
                 else if (pathName === '/api/profile') {
-                    console.log("=== INTRAT PE /api/profile ===");
                     securityHeaders(req, res, async () => {
                         verifyToken(req, res, async () => {
-                            console.log("=== verifyToken CALLBACK ===");
                             if (!req.user) {
-                                console.log("NU E USER LOGAT");
                                 res.writeHead(401, { 'Content-Type': 'application/json' });
                                 res.end(JSON.stringify({ success: false, message: 'Neautentificat' }));
                                 return;
                             }
                             const userDB = await User.findById(req.user.id);
 
-                            console.log("USER LOGAT:", req.user);
                             res.writeHead(200, { 'Content-Type': 'application/json' });
                             res.end(JSON.stringify({
                                 success: true,
@@ -257,8 +428,6 @@ const server = http.createServer(async (req, res) => {
                             }
 
                             if (!filter.$and.length) delete filter.$and;
-
-                            console.log("=== FILTER FINAL ===\n", JSON.stringify(filter, null, 2));
 
                             const { normalizeSearchTerm, getSynonyms, buildSearchPipeline } = require('./utils/searchEnhancer');
                             const normalizedSearch = normalizeSearchTerm(search);
@@ -982,6 +1151,12 @@ const server = http.createServer(async (req, res) => {
                                             );
 
                                             if (result.success) {
+                                                await Activity.create({
+                                                        type: 'user',
+                                                        icon: 'fas fa-sign-in-alt',
+                                                        title: 'Autentificare',
+                                                        description: `Utilizatorul "${credentials.username}" s-a autentificat în sistem.`
+                                                    });
                                                 res.writeHead(200, { 'Content-Type': 'application/json' });
                                                 res.end(JSON.stringify(result));
                                             } else {
@@ -1043,6 +1218,12 @@ const server = http.createServer(async (req, res) => {
                                                 }
                                                 user.avatar = avatar;
                                                 await user.save();
+                                                await Activity.create({
+                                                    type: 'update',
+                                                    icon: 'fas fa-user-circle',
+                                                    title: 'Avatar schimbat',
+                                                    description: `Utilizatorul "${user.username}" și-a schimbat avatarul.`
+                                                });
                                                 res.writeHead(200, { 'Content-Type': 'application/json' });
                                                 res.end(JSON.stringify({ success: true, message: 'Avatar actualizat!' }));
                                             } catch (error) {
@@ -1081,6 +1262,12 @@ const server = http.createServer(async (req, res) => {
                                                 }
                                                 user.password = newPassword;
                                                 await user.save();
+                                                await Activity.create({
+                                                    type: 'update',
+                                                    icon: 'fas fa-key',
+                                                    title: 'Parolă schimbată',
+                                                    description: `Utilizatorul "${user.username}" și-a schimbat parola.`
+                                                });
                                                 res.writeHead(200, { 'Content-Type': 'application/json' });
                                                 res.end(JSON.stringify({ success: true, message: 'Parola a fost schimbată cu succes.' }));
                                             } catch (error) {
@@ -1125,6 +1312,12 @@ const server = http.createServer(async (req, res) => {
                                             });
 
                                             if (result.success) {
+                                                await Activity.create({
+                                                    type: 'user',
+                                                    icon: 'fas fa-user-plus',
+                                                    title: 'Utilizator nou înregistrat',
+                                                    description: `Utilizatorul "${userData.username}" a fost creat.`
+                                                });
                                                 res.writeHead(201, { 'Content-Type': 'application/json' });
                                                 res.end(JSON.stringify(result));
                                             } else {
@@ -1223,6 +1416,13 @@ const server = http.createServer(async (req, res) => {
                                                         const newProduct = new Product(sanitizedProduct);
                                                         const savedProduct = await newProduct.save();
 
+                                                        await Activity.create({
+                                                            type: 'add',
+                                                            icon: 'fas fa-plus',
+                                                            title: 'Produs nou adăugat',
+                                                            description: `${savedProduct.name} a fost adăugat în baza de date`
+                                                        });
+
                                                         res.writeHead(201, { 'Content-Type': 'application/json' });
                                                         res.end(JSON.stringify({
                                                             success: true,
@@ -1267,6 +1467,13 @@ const server = http.createServer(async (req, res) => {
                                                         }
 
                                                         const newSource = await sourceService.createSource(sourceData);
+
+                                                        await Activity.create({
+                                                            type: 'add',
+                                                            icon: 'fas fa-plus',
+                                                            title: 'Sursă nouă adăugată',
+                                                            description: `${newSource.name} a fost adăugată în baza de date`
+                                                        });
 
                                                         res.writeHead(201, { 'Content-Type': 'application/json' });
                                                         res.end(JSON.stringify({
@@ -1822,55 +2029,22 @@ const server = http.createServer(async (req, res) => {
                                                         });
 
                                                         server.listen(config.PORT, () => {
-                                                            console.log(`📡 Serverul rulează la http://localhost:${config.PORT}`);
-                                                            console.log(`🧪 Rutele API disponibile pentru surse și știri:
-                                                            // Surse
-                                                            - GET    /api/sources                    - Listează toate sursele
-                                                            - GET    /api/sources/:id                - Detalii sursă
-                                                            - GET    /api/sources/by-type/:type      - Surse după tip (rss/api/scraping/manual)
-                                                            - POST   /api/sources                    - Creează sursă nouă (necesită autentificare)
-                                                            - PUT    /api/sources/:id                - Actualizează sursă (necesită autentificare)
-                                                            - PATCH  /api/sources/:id/toggle-active  - Activează/dezactivează sursă (necesită autentificare)
-                                                            - DELETE /api/sources/:id                - Șterge sursă (necesită autentificare)
+                                                            console.log(`Serverul rulează la http://localhost:${config.PORT}`);
 
-                                                            // Știri și RSS
-                                                            - GET    /api/news                       - Listează toate știrile, cu filtrare și paginare
-                                                            - GET    /api/news/categories            - Obține toate categoriile de știri
-                                                            - GET    /api/news/stats                 - Obține statistici despre știri
-                                                            - GET    /api/news/distribution          - Obține raport despre distribuția știrilor pe surse
-                                                            - GET    /api/news/:id                   - Detalii știre
-                                                            - GET    /api/news/latest/:limit         - Cele mai recente știri
-                                                            - GET    /api/news/by-source/:sourceId   - Știri după sursă
-                                                            - GET    /api/news/by-category/:category - Știri după categorie
-                                                            - GET    /api/feed/products              - Feed RSS cu produse
-                                                            - GET    /api/feed/news                  - Feed RSS cu știri
-                                                            - POST   /api/rss/process                - Procesează manual feed-uri RSS (necesită autentificare)
-                                                            - POST   /api/rss/schedule               - Configurare job-uri programate pentru RSS
-                                                            - GET    /api/rss/stats                  - Obține statistici despre sursele RSS
-                                                            - GET    /api/rss/schedule               - Obține starea job-urilor programate pentru RSS
-                                                            - PATCH  /api/news/:id/process           - Marchează știre ca procesată (necesită autentificare)
-
-                                                            // Autentificare
-                                                            - GET    /login                          - Pagina de autentificare
-                                                            - GET    /register                       - Pagina de înregistrare membri
-                                                            - GET    /register-admin                 - Pagina de înregistrare administratori
-                                                            - POST   /api/login                      - Endpoint autentificare
-                                                            - POST   /api/register                   - Endpoint înregistrare (membri sau primul admin)
-                                                            - POST   /api/admin/users                - Endpoint creare utilizatori (necesită autentificare admin)
-                                                            - GET    /api/check-admin-exists         - Verifică existența administratorilor
-
-                                                            // Pagini administrative pentru RSS
-                                                            - GET    /news-management                - Pagina de management a știrilor
-                                                            `);
                                                         });
 
                                                         process.on('SIGINT', () => {
                                                             console.log('Închidere server...');
-                                                            server.close(() => {
+                                                            server.close(async () => {
                                                                 console.log('Server oprit.');
-                                                                mongoose.connection.close(false, () => {
+                                                                try {
+                                                                    await mongoose.connection.close(false);
                                                                     console.log('Conexiune MongoDB închisă.');
                                                                     process.exit(0);
-                                                                });
+                                                                } catch (err) {
+                                                                    console.error('Eroare la închiderea conexiunii MongoDB:', err);
+                                                                    process.exit(1);
+                                                                }
                                                             });
                                                         });
+

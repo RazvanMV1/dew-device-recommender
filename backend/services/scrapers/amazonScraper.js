@@ -10,7 +10,7 @@ async function importAmazonProductsFromApify(apifyUrl, categoryName) {
 
     for (const prod of products) {
         if (!prod.url || !prod.title || !prod.price?.value) {
-            console.log(`⚠️ Sare produs invalid (lipsă URL/titlu/preț):`, prod.title);
+            console.log(`Sare produs invalid (lipsă URL/titlu/preț):`, prod.title);
             continue;
         }
 

@@ -34,10 +34,10 @@ const validSources = [
 async function updateSources() {
     try {
         await connectDB();
-        console.log('✅ Conectat la baza de date');
+        console.log('Conectat la baza de date');
 
         await Source.updateMany({}, { active: false });
-        console.log('✅ Toate sursele existente au fost dezactivate');
+        console.log('Toate sursele existente au fost dezactivate');
 
         for (const sourceData of validSources) {
             const existingSource = await Source.findOne({ url: sourceData.url });
@@ -52,7 +52,7 @@ async function updateSources() {
                         lastUpdated: null
                     }
                 );
-                console.log(`✅ Sursa "${sourceData.name}" a fost actualizată`);
+                console.log(`Sursa "${sourceData.name}" a fost actualizată`);
             } else {
                 await Source.create({
                     ...sourceData,
@@ -61,25 +61,25 @@ async function updateSources() {
                     updateFrequency: 60,
                     tags: ['tech', 'news']
                 });
-                console.log(`✅ Sursa "${sourceData.name}" a fost creată`);
+                console.log(`Sursa "${sourceData.name}" a fost creată`);
             }
         }
 
         const activeSourcesCount = await Source.countDocuments({ active: true });
-        console.log(`\n📊 Sumar: ${activeSourcesCount} surse active`);
+        console.log(`\nSumar: ${activeSourcesCount} surse active`);
 
     } catch (error) {
-        console.error('❌ Eroare la actualizarea surselor:', error);
+        console.error('Eroare la actualizarea surselor:', error);
     } finally {
         await mongoose.connection.close();
-        console.log('🔌 Conexiune închisă.');
+        console.log('Conexiune închisă.');
     }
 }
 
 updateSources().then(() => {
-    console.log('🎯 Actualizare surse finalizată');
+    console.log('Actualizare surse finalizată');
     process.exit(0);
 }).catch(err => {
-    console.error('❌ Eroare finală:', err);
+    console.error('Eroare finală:', err);
     process.exit(1);
 });

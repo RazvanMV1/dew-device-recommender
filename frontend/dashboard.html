@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - ElectroRecommender</title>
     <link rel="stylesheet" href="css/dashboard.css">
-    <link rel="stylesheet" href="css/admin-users.css">
 </head>
 <body>
 <div class="dashboard-container">
@@ -15,15 +14,13 @@
                 <i class="fas fa-microchip"></i>
                 <span>ElectroRecommender</span>
             </div>
-            <button class="toggle-sidebar" id="toggle-sidebar">
-                <i class="fas fa-bars"></i>
+            <button class="toggle-sidebar" id="toggle-sidebar" aria-label="Deschide meniul">
+                ☰
             </button>
         </div>
 
         <div class="user-profile">
-            <div class="avatar">
-                <i class="fas fa-user-circle"></i>
-            </div>
+            <div class="avatar" id="user-avatar"></div>
             <div class="user-info">
                 <h4 id="user-name">Administrator</h4>
                 <p id="user-role">Admin</p>
@@ -208,7 +205,9 @@
             <section id="products-section" class="section">
                 <div class="section-header">
                     <h2>Managementul Produselor</h2>
-
+                    <button id="add-product-btn" class="btn btn-primary" style="margin-left: 1rem;">
+                        <i class="fas fa-plus"></i> Adaugă produs nou
+                    </button>
                 </div>
 
                 <div class="card">
@@ -255,17 +254,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="pagination" id="products-pagination">
-                            <button class="btn-page prev" disabled><i class="fas fa-chevron-left"></i></button>
-                            <div class="page-numbers">
-                                <span class="page-number active">1</span>
-                                <span class="page-number">2</span>
-                                <span class="page-number">3</span>
-                                <span class="dots">...</span>
-                                <span class="page-number">10</span>
-                            </div>
-                            <button class="btn-page next"><i class="fas fa-chevron-right"></i></button>
-                        </div>
+                        <div class="pagination" id="products-pagination"></div>
                     </div>
                 </div>
             </section>
@@ -273,7 +262,9 @@
             <section id="sources-section" class="section">
                 <div class="section-header">
                     <h2>Managementul Surselor</h2>
-
+                    <button id="add-source-btn" class="btn btn-primary" style="margin-left: 1rem;">
+                        <span style="font-size:1.2em;"></span> Adaugă sursă nouă
+                    </button>
                 </div>
 
                 <div class="card">
@@ -317,40 +308,40 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="pagination" id="sources-pagination">
-                            <button class="btn-page prev" disabled><i class="fas fa-chevron-left"></i></button>
-                            <div class="page-numbers">
-                                <span class="page-number active">1</span>
-                                <span class="page-number">2</span>
-                            </div>
-                            <button class="btn-page next"><i class="fas fa-chevron-right"></i></button>
-                        </div>
+                        <div class="pagination" id="sources-pagination"></div>
                     </div>
                 </div>
             </section>
 
             <section id="news-section" class="section">
-
+                <div class="section-header">
+                    <h2>Managementul Știrilor</h2>
+                </div>
                 <div class="card">
                     <div class="card-body">
-                        <table class="user-table">
-                            <thead>
-                            <tr>
-                                <th></th>
-                                <th>Imagine</th>
-                                <th>Titlu</th>
-                                <th>Sursă</th>
-                                <th>Autor</th>
-                                <th>Publicat</th>
-                            </tr>
-                            </thead>
-                            <tbody id="newsTableBody"></tbody>
-                        </table>
-
-                        <div id="newsPagination" class="pagination"></div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="news-table">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Imagine</th>
+                                    <th>Titlu</th>
+                                    <th>Sursă</th>
+                                    <th>Autor</th>
+                                    <th>Publicat</th>
+                                    <th>Acțiuni</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <!-- Dinamic din JS -->
+                                </tbody>
+                            </table>
+                            <div class="pagination" id="news-pagination"></div>
+                        </div>
                     </div>
                 </div>
             </section>
+
 
             <section id="users-section" class="section">
                 <div class="section-header">
@@ -394,20 +385,20 @@
                 </div>
                 <div class="card" style="margin-top: 2rem;">
                     <div class="card-body">
-                        <h3>Utilizatori existenți</h3>
-                        <table class="user-table">
+                        <table class="data-table" id="users-table">
                             <thead>
                             <tr>
-                                <th></th>
-                                <th>Nume utilizator</th>
+                                <th>ID</th>
+                                <th>Username</th>
                                 <th>Email</th>
                                 <th>Rol</th>
-                                <th>Creat la</th>
+                                <th>Data Creării</th>
+                                <th>Acțiuni</th>
                             </tr>
                             </thead>
-                            <tbody id="userTableBody">
-                            </tbody>
+                            <tbody></tbody>
                         </table>
+                        <div class="pagination" id="users-pagination"></div>
                     </div>
                 </div>
             </section>
@@ -467,7 +458,7 @@
             </form>
         </div>
         <div class="modal-footer">
-            <button class="btn-outline" id="cancel-product">Anulează</button>
+            <button class="btn-outline" id="cancel-product" onclick="closeModal('product-modal')">Anulează</button>
             <button class="btn-primary" id="save-product">Salvează</button>
         </div>
     </div>
@@ -545,7 +536,5 @@
 </div>
 
 <script src="js/dashboard.js"></script>
-<script src="js/admin-users.js"></script>
-<script src="js/admin-news.js"></script>
 </body>
 </html>

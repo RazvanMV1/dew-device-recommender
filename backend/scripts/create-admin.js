@@ -19,7 +19,7 @@ function question(query) {
 async function createAdmin() {
     try {
         await connectDB();
-        console.log('✅ Conectat la baza de date');
+        console.log('Conectat la baza de date');
 
         const username = await question('Numele de utilizator admin: ');
         const password = await question('Parola admin (minim 8 caractere): ');
@@ -33,15 +33,14 @@ async function createAdmin() {
         const existingUser = await User.findOne({ username });
 
         if (existingUser) {
-            console.log('⚠️ Utilizatorul există deja. Doriți să actualizați parola? (da/nu)');
             const answer = await question('Răspuns: ');
 
             if (answer.toLowerCase() === 'da') {
                 existingUser.password = password;
                 await existingUser.save();
-                console.log('✅ Parola administratorului a fost actualizată cu succes');
+                console.log('Parola administratorului a fost actualizată cu succes');
             } else {
-                console.log('❌ Operațiune anulată');
+                console.log('Operațiune anulată');
             }
         } else {
             const newAdmin = new User({
@@ -51,12 +50,12 @@ async function createAdmin() {
             });
 
             await newAdmin.save();
-            console.log('✅ Administrator creat cu succes');
+            console.log('Administrator creat cu succes');
         }
 
         rl.close();
     } catch (error) {
-        console.error('❌ Eroare:', error);
+        console.error('Eroare:', error);
         rl.close();
     }
 }
