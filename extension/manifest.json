@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "ElectroRecommender",
+  "version": "1.0",
+  "description": "Extensie care îți recomandă rapid electronice direct în browser.",
+  "icons": {
+    "48": "icon.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
+  },
+  "permissions": ["storage", "activeTab", "scripting"]
+}
