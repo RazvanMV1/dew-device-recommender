@@ -11,12 +11,12 @@ async function fetchProducts(category) {
         return;
     }
     document.getElementById('products-list').innerHTML = data.products.map(prod => `
-    <div class="product-item">
-      <img src="${prod.imageUrl || prod.image || ''}" alt="" />
-      <div class="product-title">${prod.name || prod.title}</div>
-      <div class="product-price">${prod.price ? prod.price + " EUR" : ''}</div>
-    </div>
-  `).join('');
+      <a class="product-item" href="${prod.url || '#'}" target="_blank" rel="noopener noreferrer" title="${prod.name || prod.title}">
+        <img src="${prod.imageUrl || prod.image || ''}" alt="" />
+        <div class="product-title">${prod.name || prod.title}</div>
+        <div class="product-price">${prod.price ? prod.price + " EUR" : ''}</div>
+      </a>
+    `).join('');
 }
 
 document.getElementById('category-select').addEventListener('change', function() {
