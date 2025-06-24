@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:3004/api/products";
+const API_BASE = "http://34.53.53.108:3004/api/products";
 
 async function fetchProducts(category) {
     let url = API_BASE;
