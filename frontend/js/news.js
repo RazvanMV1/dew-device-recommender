@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('news-list');
     const paginationContainer = document.getElementById('pagination');
     const limit = 6;
+    const API_BASE_URL = window.API_BASE_URL || "http://localhost:3004";
 
     document.getElementById('logout-btn')?.addEventListener('click', () => {
         localStorage.removeItem('authToken');
@@ -9,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function fetchNews(page = 1) {
-        fetch(`http://localhost:3004/api/news?page=${page}&limit=${limit}`)
+        fetch(`${API_BASE_URL}/api/news?page=${page}&limit=${limit}`)
             .then(res => res.json())
             .then(data => {
                 container.innerHTML = '';
