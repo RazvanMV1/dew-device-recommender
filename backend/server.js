@@ -110,6 +110,8 @@ const server = http.createServer(async (req, res) => {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/products.html'), 'text/html');
                 } else if (pathName === '/srs') {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/srs.html'), 'text/html');
+                } else if (pathName === '/extension/extension.zip') {
+                    serveStaticFile(req, res, path.join(__dirname, '../frontend/extension/extension.zip'), 'application/zip');
                 } else if (pathName === '/preferences' || pathName === '/preferences.html') {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/preferences.html'), 'text/html');
                 } else if (pathName === '/news-management' || pathName === '/news-management.html') {

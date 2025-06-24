@@ -54,7 +54,7 @@
                 </ul>
             </div>
             <div class="footer-column footer-docs">
-                <h4>Documentație</h4>
+                <h4>Documentație & Bonus</h4>
                 <ul>
                     <li>
                         <a href="/srs" target="_blank" class="srs-link">
@@ -68,8 +68,29 @@
                             <span style="margin-left:7px;">Cod sursă GitHub</span>
                         </a>
                     </li>
+                    <li>
+                        <!-- Asigură-te că /extension/extension.zip există și se servește corect -->
+                        <a href="/extension/extension.zip" download class="srs-link">
+                            <span style="font-size:1.2rem;vertical-align:middle;">🧩</span>
+                            <span style="margin-left:7px;">Descarcă extensia browser (ZIP)</span>
+                        </a>
+                    </li>
                 </ul>
-                <div class="academic-badge">
+                <!-- Pași extensie -->
+                <details style="margin-top:1em;">
+                    <summary style="cursor:pointer;font-weight:500;">Cum instalezi extensia în browser?</summary>
+                    <ol style="margin-top:0.5em;font-size:0.97em;">
+                        <li>Descarcă arhiva <b>extension.zip</b> folosind linkul de mai sus.</li>
+                        <li>Dezarhivează conținutul într-un folder pe calculatorul tău.</li>
+                        <li>Deschide <b>Chrome</b> sau <b>Edge</b> și accesează <code>chrome://extensions</code> sau <code>edge://extensions</code>.</li>
+                        <li>Activează modul <b>Developer</b> (dreapta sus).</li>
+                        <li>Apasă pe <b>Load unpacked</b> (sau „Încarcă extensie neambalată”).</li>
+                        <li>Selectează folderul cu fișierele extensiei.</li>
+                        <li>Extensia va apărea în bară și e gata de folosit!</li>
+                    </ol>
+                    <small style="color:#888">Notă: Extensia se poate folosi local, nu apare în Chrome Web Store.</small>
+                </details>
+                <div class="academic-badge" style="margin-top:1em;">
                     <span style="font-size:1.1rem;">🎓</span>
                     <span>Proiect universitar 2025</span>
                 </div>
@@ -80,6 +101,7 @@
         </div>
     </div>
 </footer>
+
 
 <script src="components/header.js"></script>
 <script>
