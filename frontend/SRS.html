@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IEEE SRS - ElectroRecommender</title>
+    <meta name="description" content="System Requirements Specification pentru ElectroRecommender - Sistem Web de Recomandare Dispozitive Electronice">
+    <meta name="keywords" content="IEEE SRS, System Requirements, ElectroRecommender, Device Recommendation, Web, API, RSS">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .scholarly-body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.7;
+            color: #21272A;
+            background: #F6F8FA;
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 45px 16px;
+            border-radius: 14px;
+            box-shadow: 0 6px 32px 0 rgba(22,36,54,0.13);
+        }
+        .academic-header {
+            background: #E9F6F6;
+            border-bottom: 4px solid #16BAC5;
+            padding: 35px 0 28px 0;
+            margin-bottom: 44px;
+            border-radius: 16px 16px 0 0;
+        }
+        .academic-header h1 {
+            font-size: 32px;
+            color: #109CB4;
+            letter-spacing: 0.02em;
+            font-weight: 800;
+            margin-bottom: 9px;
+        }
+        .academic-header h2 {
+            font-size: 21px;
+            color: #FF8400;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        .metadata {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin: 16px 0 6px 0;
+            font-size: 15px;
+            color: #377D6A;
+        }
+        .abstract {
+            background: #FFF7EC;
+            padding: 21px;
+            border-left: 5px solid #FFA756;
+            margin-top: 20px;
+            border-radius: 8px;
+            color: #64450D;
+            font-size: 1.05em;
+        }
+        .abstract h3 {
+            color: #FFA756;
+            margin-bottom: 9px;
+            font-weight: bold;
+        }
+        .toc {
+            background: #F3FAFB;
+            padding: 27px 27px 18px 27px;
+            border-radius: 14px;
+            border-left: 6px solid #109CB4;
+            margin-bottom: 47px;
+            box-shadow: 0 2px 12px 0 rgba(16,156,180,0.04);
+        }
+        .toc h3 {
+            color: #109CB4;
+            margin-bottom: 14px;
+            font-size: 19px;
+            font-weight: 700;
+        }
+        .toc li {
+            margin: 9px 0;
+            font-size: 1.01em;
+        }
+        .toc a {
+            text-decoration: none;
+            color: #1A3246;
+            padding: 2px 4px;
+            border-radius: 5px;
+            transition: background 0.23s, color 0.23s;
+        }
+        .toc a:hover, .toc a.current {
+            background: #16BAC520;
+            color: #FF8400;
+        }
+        .srs-section {
+            margin-bottom: 63px;
+            page-break-inside: avoid;
+        }
+        .srs-section h2 {
+            color: #109CB4;
+            font-size: 25px;
+            margin-bottom: 15px;
+            padding-bottom: 9px;
+            border-bottom: 2px dashed #FFA75660;
+            letter-spacing: 0.01em;
+        }
+        .srs-subsection {
+            margin: 26px 0 23px 17px;
+        }
+        .srs-subsection h3 {
+            color: #FF8400;
+            font-size: 19px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        .srs-subsection h4 {
+            color: #16BAC5;
+            font-size: 16px;
+            margin: 14px 0 7px 0;
+            font-weight: 500;
+        }
+        .srs-subsection p {
+            margin-bottom: 13px;
+            text-align: justify;
+        }
+        .requirements-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 21px 0;
+            background: #F8FFFF;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px 0 rgba(22,186,197,0.07);
+        }
+        .requirements-table th {
+            background: #109CB4;
+            color: white;
+            padding: 13px 9px;
+            text-align: left;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            font-size: 1em;
+        }
+        .requirements-table td {
+            padding: 10px 13px;
+            border-bottom: 1.5px solid #EAEDF1;
+            font-size: 0.98em;
+        }
+        .requirements-table tr:last-child td {
+            border-bottom: none;
+        }
+        .requirements-table tr:hover td {
+            background: #FFF0E5;
+        }
+        ul, ol {
+            margin: 12px 0 12px 35px;
+        }
+        li {
+            margin: 6px 0;
+        }
+        .diagram-container {
+            background: #F9F9FB;
+            border: 1.5px solid #FFA75690;
+            border-radius: 18px;
+            padding: 32px;
+            margin: 30px 0;
+            box-shadow: 0 4px 15px 0 rgba(255,132,0,0.05);
+        }
+        .diagram-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 23px;
+            border-bottom: 2px solid #16BAC5;
+        }
+        .tab-button {
+            padding: 13px 26px;
+            background: linear-gradient(90deg, #16BAC5 10%, #FF8400 120%);
+            color: #fff;
+            border: none;
+            border-radius: 10px 10px 0 0;
+            font-family: inherit;
+            font-size: 15px;
+            letter-spacing: 0.03em;
+            cursor: pointer;
+            transition: box-shadow 0.2s, background 0.2s;
+            box-shadow: 0 2px 8px #109CB420;
+            font-weight: 700;
+            opacity: 0.55;
+        }
+        .tab-button.active {
+            background: #FF8400;
+            color: #fff;
+            box-shadow: 0 6px 14px #16BAC540;
+            opacity: 1;
+        }
+        .tab-button:hover:not(.active) {
+            background: #16BAC5;
+            color: #fff;
+        }
+        .diagram {
+            display: none;
+        }
+        .diagram.active {
+            display: block;
+            animation: fadein 0.4s;
+        }
+        @keyframes fadein {
+            from { opacity: 0; transform: translateY(32px);}
+            to   { opacity: 1; transform: none;}
+        }
+        .diagram h4 {
+            text-align: left;
+            margin-bottom: 21px;
+            color: #109CB4;
+            font-size: 19px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+        .context-diagram, .container-diagram, .component-diagram {
+            max-width: 930px;
+            margin: 34px auto;
+            text-align: center;
+        }
+        .diagram-row, .containers-row {
+            display: flex;
+            justify-content: space-around;
+            margin: 25px 0;
+            flex-wrap: wrap;
+            gap: 35px;
+        }
+        .user-box, .container-box, .component-box {
+            background: #fff;
+            border: 2.5px solid #FFA756;
+            border-radius: 15px;
+            padding: 23px 17px;
+            margin: 13px;
+            min-width: 210px;
+            min-height: 105px;
+            box-shadow: 0 5px 15px 0 rgba(16,156,180,0.11);
+            position: relative;
+            transition: box-shadow 0.18s;
+        }
+        .user-box::after, .container-box::after, .component-box::after {
+            content: '';
+            position: absolute;
+            top: 13px; right: 18px;
+            width: 11px; height: 11px;
+            border-radius: 50%;
+            background: #FF8400;
+            box-shadow: 0 0 0 3px #109CB4;
+        }
+        .user-box.guest-user::after  { background: #bbb; box-shadow: 0 0 0 3px #bbb;}
+        .user-box.auth-user::after   { background: #16BAC5;}
+        .user-box.admin-user::after  { background: #FFA756; }
+        .component-box { border-color: #109CB4;}
+        .frontend-box  { border-color: #16BAC5; background: #E9F6F6;}
+        .backend-box   { border-color: #FF8400; background: #FFF7EC;}
+        .database-box, .database-simple { border-color: #00B070; background: #D6F5EB;}
+        .rss-box { border-color: #00BFF0; background: #E6F7FF;}
+        .users-box, .readers-box { border-color: #444; background: #F5F5F5;}
+        .user-icon, .system-icon, .external-icon, .container-icon, .component-icon {
+            font-size: 29px;
+            margin-bottom: 7px;
+            color: #FFA756;
+        }
+        .user-box.auth-user .user-icon { color: #16BAC5;}
+        .user-box.admin-user .user-icon { color: #FFA756;}
+        .user-box.guest-user .user-icon { color: #888;}
+        .system-box {
+            background: linear-gradient(120deg,#16BAC5 60%, #FF8400 150%);
+            color: #fff;
+            border: 3.5px solid #109CB4;
+            border-radius: 20px;
+            padding: 29px 10px;
+            margin: 29px auto;
+            max-width: 420px;
+            font-size: 1.05em;
+            box-shadow: 0 8px 34px #16BAC540;
+            position: relative;
+        }
+        .system-box::after {
+            display: none;
+        }
+        .external-box, .readers-box {
+            background: #E2E2E2;
+            border-color: #00BFF0;
+        }
+        .routes-box   { border-color: #109CB4; background: #E6F7FF;}
+        .middleware-box { border-color: #00B070; background: #D6F5EB;}
+        .utils-box { border-color: #FF8400; background: #FFF0E5;}
+        .user-title, .system-title, .external-title, .container-title, .component-title {
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 7px;
+            letter-spacing: 0.01em;
+        }
+        .user-desc, .system-desc, .external-desc, .container-desc, .component-desc {
+            font-size: 12.7px;
+            line-height: 1.35;
+            color: #44607B;
+        }
+        .system-desc { color: #fff;}
+        .arrows-down, .arrow-down, .arrow-right {
+            font-size: 27px;
+            font-weight: bold;
+            color: #16BAC5;
+            margin: 15px 0;
+        }
+        .arrow-down.small {
+            font-size: 19px;
+            margin: 10px 0;
+        }
+        .system-boundary, .backend-boundary {
+            border: 2.5px dashed #FF8400;
+            border-radius: 16px;
+            padding: 21px 14px;
+            margin: 16px 0;
+            background: #FDF8F2;
+            box-shadow: 0 2px 10px #FFA75618;
+        }
+        .boundary-title {
+            font-weight: bold;
+            color: #16BAC5;
+            margin-bottom: 12px;
+            font-size: 17px;
+        }
+        .external-container, .component-container {
+            margin: 18px 0;
+        }
+        .components-flow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        @media (max-width: 850px) {
+            .diagram-row, .containers-row {
+                flex-direction: column;
+                align-items: center;
+                gap: 22px;
+            }
+            .user-box, .container-box, .component-box {
+                min-width: 180px;
+            }
+        }
+        @media (max-width: 650px) {
+            .scholarly-body {
+                padding: 13px 2vw;
+            }
+            .diagram-container {
+                padding: 12px 4px;
+            }
+        }
+        .academic-footer {
+            text-align: center;
+            margin-top: 70px;
+            padding-top: 26px;
+            border-top: 2px solid #FF8400;
+            color: #777;
+            font-size: 15px;
+            background: #F6F8FA;
+            border-radius: 0 0 12px 12px;
+        }
+    </style>
+</head>
+<body class="scholarly-body">
+<header class="academic-header">
+    <h1>Specificația Cerințelor de Sistem</h1>
+    <h2>ElectroRecommender – Platformă Web de Recomandare a Dispozitivelor Electronice</h2>
+    <div class="metadata">
+        <div><strong>Autori:</strong> Baciu Leonard-Matei și Marin Vasile Răzvan</div>
+    </div>
+    <div class="abstract">
+        <h3>Rezumat</h3>
+        <p>
+            Acest document specifică cerințele de sistem pentru ElectroRecommender, o platformă web care recomandă utilizatorilor dispozitive electronice (telefoane, tablete, laptopuri, smartwatch-uri, drone etc.) pe baza caracteristicilor, prețului, recenziilor și a surselor multiple (API-uri, scraping, RSS). Platforma integrează motor de recomandare, management centralizat al produselor și surselor, fluxuri RSS pentru noutăți/statistici și o extensie de browser bonus. Specificația respectă structura IEEE SRS pentru aplicații software web.
+        </p>
+    </div>
+</header>
+
+<nav class="toc">
+    <h3>Cuprins</h3>
+    <ol>
+        <li><a href="#intro">1. Introducere</a>
+            <ol>
+                <li><a href="#purpose">1.1 Scop</a></li>
+                <li><a href="#scope">1.2 Domeniu de aplicare</a></li>
+                <li><a href="#definitions">1.3 Definiții, acronime și abrevieri</a></li>
+                <li><a href="#references">1.4 Referințe</a></li>
+                <li><a href="#overview">1.5 Prezentare generală</a></li>
+            </ol>
+        </li>
+        <li><a href="#overall">2. Descriere generală</a>
+            <ol>
+                <li><a href="#product-perspective">2.1 Perspectiva produsului</a></li>
+                <li><a href="#product-functions">2.2 Funcționalitățile produsului</a></li>
+                <li><a href="#user-characteristics">2.3 Caracteristici utilizatori</a></li>
+                <li><a href="#constraints">2.4 Constrângeri</a></li>
+                <li><a href="#assumptions">2.5 Presupuneri și dependențe</a></li>
+            </ol>
+        </li>
+        <li><a href="#requirements">3. Cerințe specifice</a>
+            <ol>
+                <li><a href="#functional-req">3.1 Cerințe funcționale</a></li>
+                <li><a href="#performance-req">3.2 Cerințe de performanță</a></li>
+                <li><a href="#design-constraints">3.3 Constrângeri de proiectare</a></li>
+                <li><a href="#system-attributes">3.4 Atributele sistemului software</a></li>
+            </ol>
+        </li>
+        <li><a href="#architecture">4. Arhitectura sistemului</a>
+            <ol>
+                <li><a href="#c4-diagrams">4.1 Diagrame arhitectură C4</a></li>
+                <li><a href="#development-stages">4.2 Etape dezvoltare</a></li>
+            </ol>
+        </li>
+    </ol>
+</nav>
+
+<main class="srs-content">
+
+    <section id="intro" class="srs-section">
+        <h2>1. Introducere</h2>
+        <div id="purpose" class="srs-subsection">
+            <h3>1.1 Scop</h3>
+            <p>
+                Scopul acestui document este de a specifica cerințele platformei ElectroRecommender, un sistem web care centralizează și recomandă dispozitive electronice folosind date din surse variate, cu motor de recomandare inteligent și funcționalități de administrare, filtrare, statistică și export RSS.
+            </p>
+        </div>
+        <div id="scope" class="srs-subsection">
+            <h3>1.2 Domeniu de aplicare</h3>
+            <p><strong>Sistemul ElectroRecommender VA oferi:</strong></p>
+            <ul>
+                <li>Autentificare utilizatori și roluri (guest, membru, admin)</li>
+                <li>Recomandare dispozitive pe baza prețului, caracteristicilor și preferințelor</li>
+                <li>Integrare cu surse multiple: scraping, API, RSS</li>
+                <li>Management complet al produselor, surselor, știrilor și utilizatorilor</li>
+                <li>Căutare, filtrare, sortare avansată pe criterii diverse</li>
+                <li>Generare de fluxuri RSS pentru noutăți, top produse/statistici</li>
+                <li>UI responsive și extensie de browser pentru recomandări rapide (bonus)</li>
+            </ul>
+            <p><strong>Sistemul NU VA oferi:</strong></p>
+            <ul>
+                <li>Procesare plăți sau integrare cu magazine (doar linkuri externe)</li>
+                <li>Funcționalități de chat, forum sau recenzii proprii</li>
+                <li>Notificări push/email</li>
+            </ul>
+        </div>
+        <div id="definitions" class="srs-subsection">
+            <h3>1.3 Definiții, acronime și abrevieri</h3>
+            <table class="requirements-table">
+                <thead>
+                <tr><th>Termen</th><th>Definiție</th></tr>
+                </thead>
+                <tbody>
+                <tr><td>CRUD</td><td>Create, Read, Update, Delete (operații de bază pe date)</td></tr>
+                <tr><td>RSS</td><td>Really Simple Syndication – flux web pentru știri/statistici</td></tr>
+                <tr><td>API</td><td>Application Programming Interface – interfață programatică</td></tr>
+                <tr><td>JWT</td><td>JSON Web Token – autentificare web</td></tr>
+                <tr><td>Frontend</td><td>Interfața utilizator HTML/CSS/JS</td></tr>
+                <tr><td>Backend</td><td>Server Node.js, logica de business</td></tr>
+                <tr><td>Extensie browser</td><td>Mic modul Chrome/Edge ce afișează rapid recomandări</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="references" class="srs-subsection">
+            <h3>1.4 Referințe</h3>
+            <ul>
+                <li>IEEE Std 830-1998, Standardul pentru Specificațiile Cerințelor Software</li>
+                <li>Documentație Node.js, MongoDB</li>
+                <li>Specificație HTML5, CSS3, EcmaScript</li>
+                <li>Documentație RSS 2.0</li>
+            </ul>
+        </div>
+        <div id="overview" class="srs-subsection">
+            <h3>1.5 Prezentare generală</h3>
+            <p>
+                Acest document definește funcționalitățile principale, interacțiunea utilizatorilor, arhitectura tehnică și etapele dezvoltării proiectului ElectroRecommender.
+            </p>
+        </div>
+    </section>
+
+    <section id="overall" class="srs-section">
+        <h2>2. Descriere generală</h2>
+        <div id="product-perspective" class="srs-subsection">
+            <h3>2.1 Perspectiva produsului</h3>
+            <p>
+                ElectroRecommender este o aplicație web multi-layer, ce integrează:
+            <ul>
+                <li><strong>Frontend:</strong> UI HTML5/CSS3/JS fără framework-uri, design responsive</li>
+                <li><strong>Backend:</strong> Node.js + API REST custom (fără framework), logică de recomandare și admin</li>
+                <li><strong>Bază de date:</strong> MongoDB NoSQL (produs/surse/știri/utilizatori)</li>
+                <li><strong>Extensie browser (bonus):</strong> Recomandări rapide direct din orice site</li>
+            </ul>
+            </p>
+        </div>
+        <div id="product-functions" class="srs-subsection">
+            <h3>2.2 Funcționalitățile produsului</h3>
+            <ul>
+                <li>Autentificare/înregistrare, profile, roluri</li>
+                <li>Recomandare personalizată și generală (home, pagini categorii, detalii)</li>
+                <li>CRUD complet pe produse, surse, știri, utilizatori (panel admin)</li>
+                <li>Interfață căutare, filtrare, sortare avansată</li>
+                <li>Statistici și generare feed RSS dinamic (cele mai populare, noutăți)</li>
+                <li>Import automat din surse externe (API, RSS, scraping)</li>
+                <li>UI complet responsive pentru desktop, tabletă, mobil</li>
+                <li>Extensie browser: afisează lista celor mai noi/top produse pe orice site</li>
+            </ul>
+        </div>
+        <div id="user-characteristics" class="srs-subsection">
+            <h3>2.3 Caracteristici utilizatori</h3>
+            <ul>
+                <li><b>Vizitator:</b> Poate vizualiza recomandări, căuta și filtra produse, citi știri și statistici</li>
+                <li><b>Membru:</b> Salvează preferințe, poate primi recomandări personalizate</li>
+                <li><b>Admin:</b> Controlează produse, surse, utilizatori, importuri și rapoarte</li>
+            </ul>
+        </div>
+        <div id="constraints" class="srs-subsection">
+            <h3>2.4 Constrângeri</h3>
+            <ul>
+                <li>Frontend-ul nu folosește framework-uri (doar vanilla JS/HTML/CSS)</li>
+                <li>Backend custom Node.js fără framework web</li>
+                <li>Baza de date MongoDB, persistă totul server-side</li>
+                <li>Respectarea GDPR, prevenire XSS/SQL injection (input validation, output encoding)</li>
+            </ul>
+        </div>
+        <div id="assumptions" class="srs-subsection">
+            <h3>2.5 Presupuneri și dependențe</h3>
+            <ul>
+                <li>Utilizatorii folosesc un browser modern</li>
+                <li>Acces la internet stabil</li>
+                <li>Acces la API-urile și RSS-urile surselor externe</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="requirements" class="srs-section">
+        <h2>3. Cerințe specifice</h2>
+        <div id="functional-req" class="srs-subsection">
+            <h3>3.1 Cerințe funcționale</h3>
+            <table class="requirements-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cerință</th>
+                    <th>Prioritate</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr><td>FR-1</td><td>Autentificare și înregistrare utilizatori</td><td>Ridicată</td><td>✅ Implementat</td></tr>
+                <tr><td>FR-2</td><td>Recomandare dispozitive pe bază de criterii (preț, caracteristici)</td><td>Ridicată</td><td>✅ Implementat</td></tr>
+                <tr><td>FR-3</td><td>Import automat și manual produse din surse externe</td><td>Ridicată</td><td>✅ Implementat</td></tr>
+                <tr><td>FR-4</td><td>Management produse, surse, știri, utilizatori (admin)</td><td>Ridicată</td><td>✅ Implementat</td></tr>
+                <tr><td>FR-5</td><td>Export statistică și produse în fluxuri RSS</td><td>Medie</td><td>✅ Implementat</td></tr>
+                <tr><td>FR-6</td><td>Căutare, filtrare, sortare avansată</td><td>Ridicată</td><td>✅ Implementat</td></tr>
+                <tr><td>FR-7</td><td>UI responsive și extensie browser (bonus)</td><td>Medie</td><td>✅ Implementat</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="performance-req" class="srs-subsection">
+            <h3>3.2 Cerințe de performanță</h3>
+            <ul>
+                <li>Timp încărcare pagină &lt; 3 secunde</li>
+                <li>Timp răspuns API &lt; 2 secunde</li>
+                <li>Import automat produse la fiecare 6-12 ore</li>
+                <li>Funcționează corect cu cel puțin 10 utilizatori simultan</li>
+            </ul>
+        </div>
+        <div id="design-constraints" class="srs-subsection">
+            <h3>3.3 Constrângeri de proiectare</h3>
+            <ul>
+                <li>Nu se folosesc framework-uri JS (React, Vue etc.)</li>
+                <li>Design complet responsive, valid HTML5/CSS3</li>
+                <li>Separare clară UI, API și logică business</li>
+                <li>Baza de date doar MongoDB (NU SQL)</li>
+            </ul>
+        </div>
+        <div id="system-attributes" class="srs-subsection">
+            <h3>3.4 Atributele sistemului software</h3>
+            <ul>
+                <li><strong>Securitate:</strong> parolele criptate, JWT, rate-limiting, validare XSS</li>
+                <li><strong>Fiabilitate:</strong> backup periodic, error handling detaliat</li>
+                <li><strong>Ușurință utilizare:</strong> navigare intuitivă, feedback UI vizibil</li>
+                <li><strong>Mentenenabilitate:</strong> cod modular, comentat, cu fișiere separate pe funcționalitate</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="architecture" class="srs-section">
+        <h2>4. Arhitectura sistemului</h2>
+        <div id="c4-diagrams" class="srs-subsection">
+            <h3>4.1 Diagrame arhitectură C4</h3>
+            <div class="diagram-container">
+                <div class="diagram-tabs">
+                    <button class="tab-button active" onclick="showDiagram('context')">Context (Nivel 1)</button>
+                    <button class="tab-button" onclick="showDiagram('container')">Containere (Nivel 2)</button>
+                    <button class="tab-button" onclick="showDiagram('component')">Componente (Nivel 3)</button>
+                </div>
+
+                <div id="context" class="diagram active">
+                    <h4>Context</h4>
+                    <div class="context-diagram">
+                        <div class="diagram-row">
+                            <div class="user-box auth-user"><div class="user-icon">👤</div><div class="user-title">Utilizator Autentificat</div></div>
+                            <div class="user-box guest-user"><div class="user-icon">👤</div><div class="user-title">Guest</div></div>
+                            <div class="user-box admin-user"><div class="user-icon">👤</div><div class="user-title">Admin</div></div>
+                        </div>
+                        <div class="arrows-down">↓ ↓ ↓</div>
+                        <div class="system-box"><div class="system-icon">🖥️</div><div class="system-title">ElectroRecommender</div><div class="system-desc">Web + API + RSS + Extensie browser</div></div>
+                        <div class="arrow-down">↓</div>
+                        <div class="external-box"><div class="external-icon">📡</div><div class="external-title">Cititoare RSS</div></div>
+                    </div>
+                </div>
+                <div id="container" class="diagram">
+                    <h4>Containere</h4>
+                    <div class="container-diagram">
+                        <div class="external-container"><div class="container-box users-box"><div class="container-icon">👥</div><div class="container-title">Utilizatori</div></div></div>
+                        <div class="arrow-down">↓</div>
+                        <div class="system-boundary">
+                            <div class="boundary-title">Sistemul ElectroRecommender</div>
+                            <div class="containers-row">
+                                <div class="container-box frontend-box"><div class="container-icon">🌐</div><div class="container-title">Frontend</div><div class="container-desc">HTML, CSS, JS</div></div>
+                                <div class="arrow-right">→</div>
+                                <div class="container-box backend-box"><div class="container-icon">⚙️</div><div class="container-title">Backend API</div><div class="container-desc">Node.js, motor recomandare</div></div>
+                            </div>
+                            <div class="containers-row">
+                                <div class="container-box database-box"><div class="container-icon">🗄️</div><div class="container-title">MongoDB</div></div>
+                                <div class="container-box rss-box"><div class="container-icon">📄</div><div class="container-title">RSS Feed</div></div>
+                            </div>
+                        </div>
+                        <div class="arrow-down">↓</div>
+                        <div class="external-container"><div class="container-box readers-box"><div class="container-icon">📡</div><div class="container-title">Cititoare RSS</div></div></div>
+                    </div>
+                </div>
+                <div id="component" class="diagram">
+                    <h4>Componente backend</h4>
+                    <div class="component-diagram">
+                        <div class="component-container"><div class="container-box frontend-simple"><div class="container-icon">🌐</div><div class="container-title">Frontend</div></div></div>
+                        <div class="arrow-down">↓ Cereri HTTP</div>
+                        <div class="backend-boundary">
+                            <div class="boundary-title">Componente API Backend</div>
+                            <div class="components-flow">
+                                <div class="component-box routes-box"><div class="component-icon">🛣️</div><div class="component-title">Rute API</div></div>
+                                <div class="arrow-down small">↓</div>
+                                <div class="component-box middleware-box"><div class="component-icon">🔒</div><div class="component-title">Middleware: auth, rate-limiting</div></div>
+                                <div class="arrow-down small">↓</div>
+                                <div class="component-box utils-box"><div class="component-icon">🔧</div><div class="component-title">Servicii: Recomandare, Import, RSS, Statistică</div></div>
+                            </div>
+                        </div>
+                        <div class="arrow-down">↓ Interogări DB</div>
+                        <div class="component-container"><div class="container-box database-simple"><div class="container-icon">🗄️</div><div class="container-title">MongoDB</div></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="development-stages" class="srs-subsection">
+            <h3>4.2 Etape dezvoltare</h3>
+            <ul>
+                <li><b>Etapa 1:</b> Setup repo, structura backend/frontend, primele surse produse, UI minimalist (finalizată)</li>
+                <li><b>Etapa 2:</b> Import, mapare, categorii, UI filtrare/căutare, API REST (finalizată)</li>
+                <li><b>Etapa 3:</b> Recomandare inteligentă, RSS statistică, admin, testare (finalizată)</li>
+                <li><b>Bonus:</b> Extensie browser cu feed recomandări (implementat)</li>
+            </ul>
+        </div>
+    </section>
+</main>
+
+<footer class="academic-footer">
+    <p>
+        © 2025 ElectroRecommender Project - System Requirements Specification<br>
+        Document conform IEEE 830-1998<br>
+        <em>Acest document aparține platformei ElectroRecommender</em>
+    </p>
+</footer>
+
+<script>
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('ro-RO');
+    function showDiagram(diagramId) {
+        const diagrams = document.querySelectorAll('.diagram');
+        diagrams.forEach(d => d.classList.remove('active'));
+        const buttons = document.querySelectorAll('.tab-button');
+        buttons.forEach(b => b.classList.remove('active'));
+        document.getElementById(diagramId).classList.add('active');
+        event.target.classList.add('active');
+    }
+</script>
+</body>
+</html>
