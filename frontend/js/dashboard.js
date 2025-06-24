@@ -477,7 +477,6 @@ async function loadRecentActivity() {
     }
 }
 
-
 async function loadProducts(page = 1) {
     productsCurrentPage = page;
 
@@ -487,10 +486,11 @@ async function loadProducts(page = 1) {
         const searchEl = document.getElementById('product-search');
         const category = categoryEl ? categoryEl.value : '';
         const sortValue = sortEl ? sortEl.value : '';
-        const searchQuery = searchEl ? searchEl.value : '';
+        const searchQuery = searchEl ? searchEl.value.trim() : '';
 
         let query = `?limit=${productsPerPage}&page=${page}`;
-        if (category) query += `&category=${category}`;
+        if (category) query += `&category=${encodeURIComponent(category)}`;
+        if (searchQuery.length > 0) query += `&search=${encodeURIComponent(searchQuery)}`;
         if (sortValue === 'price-asc') query += '&sort=price:asc';
         else if (sortValue === 'price-desc') query += '&sort=price:desc';
         else if (sortValue === 'name-asc') query += '&sort=name:asc';
@@ -505,7 +505,6 @@ async function loadProducts(page = 1) {
             tableBody.innerHTML = '';
 
             data.products.forEach(product => {
-                if (searchQuery && !product.name.toLowerCase().includes(searchQuery.toLowerCase())) return;
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${product._id.substring(0, 8)}...</td>
@@ -1097,19 +1096,20 @@ function logout() {
 
 function attachFilters() {
     const productCategoryFilter = document.getElementById('product-category-filter');
-    if (productCategoryFilter) productCategoryFilter.addEventListener('change', loadProducts);
+    if (productCategoryFilter) productCategoryFilter.addEventListener('change', () => loadProducts(1));
     const productSort = document.getElementById('product-sort');
-    if (productSort) productSort.addEventListener('change', loadProducts);
+    if (productSort) productSort.addEventListener('change', () => loadProducts(1));
     const productSearch = document.getElementById('product-search');
-    if (productSearch) productSearch.addEventListener('input', debounce(loadProducts, 300));
+    if (productSearch) productSearch.addEventListener('input', debounce(() => loadProducts(1), 300));
 
     const sourceTypeFilter = document.getElementById('source-type-filter');
-    if (sourceTypeFilter) sourceTypeFilter.addEventListener('change', loadSources);
+    if (sourceTypeFilter) sourceTypeFilter.addEventListener('change', () => loadSources(1));
     const sourceStatusFilter = document.getElementById('source-status-filter');
-    if (sourceStatusFilter) sourceStatusFilter.addEventListener('change', loadSources);
+    if (sourceStatusFilter) sourceStatusFilter.addEventListener('change', () => loadSources(1));
     const sourceSearch = document.getElementById('source-search');
-    if (sourceSearch) sourceSearch.addEventListener('input', debounce(loadSources, 300));
+    if (sourceSearch) sourceSearch.addEventListener('input', debounce(() => loadSources(1), 300));
 }
+
 
 function decodeHTMLEntities(text) {
     const textarea = document.createElement('textarea');
