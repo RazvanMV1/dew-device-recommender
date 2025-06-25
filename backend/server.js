@@ -133,6 +133,58 @@ const server = http.createServer(async (req, res) => {
                 } else if (pathName === '/register-admin' || pathName === '/register-admin.html') {
                     serveStaticFile(req, res, path.join(__dirname, '../frontend/register-admin.html'), 'text/html');
                 }
+                else if (pathName === '/api/products/export') {
+                    const urlParams = new URLSearchParams(parsedUrl.query);
+                    const format = urlParams.get('format');
+
+                    if (format === 'csv') {
+                        try {
+                            const products = await Product.find({});
+
+                            const headers = [
+                                'ID', 'Nume', 'Brand', 'Model', 'Preț', 'Monedă', 'Culoare', 'Autonomie', 'Categorie',
+                                'URL', 'Imagine', 'Descriere', 'Stele', 'Număr review-uri', 'Stoc', 'Dată adăugare', 'Dată modificare'
+                            ];
+                            let csv = headers.join(',') + '\n';
+
+                            products.forEach(p => {
+                                csv += [
+                                    p._id,
+                                    `"${(p.name || '').replace(/"/g, '""')}"`,
+                                    `"${(p.brand || '').replace(/"/g, '""')}"`,
+                                    `"${(p.model || '').replace(/"/g, '""')}"`,
+                                    p.price !== undefined ? p.price : '',
+                                    `"${(p.currency || '').replace(/"/g, '""')}"`,
+                                    `"${(p.color || '').replace(/"/g, '""')}"`,
+                                    `"${(p.autonomy || '').replace(/"/g, '""')}"`,
+                                    `"${(p.category || '').replace(/"/g, '""')}"`,
+                                    `"${(p.url || '').replace(/"/g, '""')}"`,
+                                    `"${(p.image || '').replace(/"/g, '""')}"`,
+                                    `"${(p.description || '').replace(/"/g, '""')}"`,
+                                    p.stars !== undefined ? p.stars : '',
+                                    p.reviewsCount !== undefined ? p.reviewsCount : '',
+                                    p.inStock !== undefined ? (p.inStock ? 'DA' : 'NU') : '',
+                                    p.createdAt ? new Date(p.createdAt).toISOString() : '',
+                                    p.updatedAt ? new Date(p.updatedAt).toISOString() : ''
+                                ].join(',') + '\n';
+                            });
+
+                            res.writeHead(200, {
+                                'Content-Type': 'text/csv; charset=utf-8',
+                                'Content-Disposition': 'attachment; filename="products.csv"'
+                            });
+                            res.end(csv);
+
+                        } catch (err) {
+                            console.error('Eroare la export CSV:', err);
+                            res.writeHead(500, { 'Content-Type': 'text/plain' });
+                            res.end('Eroare internă la exportul CSV');
+                        }
+                    } else {
+                        res.writeHead(400, { 'Content-Type': 'text/plain' });
+                        res.end('Format necunoscut. Folosiți ?format=csv');
+                    }
+                }
                 else if (pathName === '/rss/popular-products.xml') {
                     try {
                         const topProducts = await Product.find({})
