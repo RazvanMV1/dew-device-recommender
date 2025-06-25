@@ -30,7 +30,7 @@ const initScheduledJobs = () => {
         }
     });
 
-    scheduledJobs.cleanOldNews = cron.schedule('0 3 * * *', async () => {
+    scheduledJobs.cleanOldNews = cron.schedule('*/10 * * * *', async () => {
         console.log('[Scheduled Job] Curățare știri vechi...');
         try {
             const cutoffDate = new Date();
